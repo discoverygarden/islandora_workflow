@@ -1,1 +1,1 @@
-This is a drupal module to implement a generic workflow around fedora objects.
+This is a drupal module to implement a generic workflow around Fedora objects.

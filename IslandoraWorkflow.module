@@ -1,6 +1,6 @@
 <?php
 /**
- * @author: William Panting, minimal changes from islandora_bookviewer
+ * @author: William Panting
  * @date: 17/05/2011
  */
 function IslandoraWorkflow_admin() {
@@ -12,7 +12,7 @@ function IslandoraWorkflow_admin_settings_submit($form, $form_values) {
 }
 
 /**
- * drupal hook
+ * drupal menu hook
  */
 function IslandoraWorkflow_menu() {
  return "";
@@ -24,8 +24,8 @@ function IslandoraWorkflow_menu() {
 function IslandoraWorkflow_help($path, $arg) {
   switch ($path) {
     case 'admin/modules#description' :
-      return t('Grabs a list of items from a collection in Drupal that are presented on the home page.');
+      return t('A generic workflow module for Fedora objects.');
     case 'node/add#fedora_repository' :
-      return t('Use this page to grab a list of items from a Fedora collection.');
+      return t('');
   }
 }
