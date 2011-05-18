@@ -1,0 +1,31 @@
+<?php
+/**
+ * @author: William Panting, minimal changes from islandora_bookviewer
+ * @date: 17/05/2011
+ */
+function IslandoraWorkflow_admin() {
+  return "";
+}
+
+function IslandoraWorkflow_admin_settings_submit($form, $form_values) {
+  
+}
+
+/**
+ * drupal hook
+ */
+function IslandoraWorkflow_menu() {
+ return "";
+}
+
+/**
+ * drupal hook to show help
+ */
+function IslandoraWorkflow_help($path, $arg) {
+  switch ($path) {
+    case 'admin/modules#description' :
+      return t('Grabs a list of items from a collection in Drupal that are presented on the home page.');
+    case 'node/add#fedora_repository' :
+      return t('Use this page to grab a list of items from a Fedora collection.');
+  }
+}
