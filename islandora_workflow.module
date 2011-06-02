@@ -6,12 +6,25 @@
  * @date: 17/05/2011
  * This module is intended to implement a generic Islandora workflow around the creation and publication of objects.
  */
+
 /**
- * 
- * Enter description here ...
+ * This generates the main workflow page
+ * @return $page: The html of the page to return
  */
-function islandora_workflow_all() {
-  return "<p>HelloWorld</p>";
+function islandora_workflow_work() {
+  $page='';
+  $page=$page."<p>HelloWorld1</p>";
+  return $page;
+}
+
+/**
+ * This generates the main workflow page
+ * @return $page: The html of the page to return
+ */
+function islandora_workflow_collection_permissions() {
+  $page='';
+  $page=$page."<p>HelloWorld2</p>";
+  return $page;
 }
 
 /**
@@ -29,11 +42,20 @@ function islandora_workflow_menu() {
     'access arguments' => array('islandora_workflow_Administrator'),
     'type' => MENU_NORMAL_ITEM
   );
+    //settings associated with islandora_workflow and collection permissions
+  $menuEntries['admin/settings/islandora_workflow']=array(
+    'title' => t('islandora_workflow Settings'),
+    'description' => t('Here you can assign permissions to roles on a collection by collection level.'),
+    'page callback' => 'islandora_workflow_collection_permissions',
+    'access callback' => 'islandora_wokflow_check_permissions',
+    'access arguments' => array('islandora_workflow_Administrator', 'islandora_workflow_Manager'),
+    'type' => MENU_NORMAL_ITEM
+  );
   //main working page for islandora_workflow
   $menuEntries['islandora_workflow']=array(
     'title' => t('islandora_workflow'),
     'description' => t('This is the main access point to islandora_workflow'),
-    'page callback' => 'islandora_workflow_all',
+    'page callback' => 'islandora_workflow_work',
     'access callback' => 'islandora_wokflow_check_permissions',
     'access arguments' => array('islandora_workflow_Administrator', 'islandora_workflow_Editor', 'islandora_workflow_Manager', 'islandora_workflow_Submitter'),
     'type' => MENU_NORMAL_ITEM

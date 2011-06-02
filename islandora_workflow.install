@@ -9,6 +9,7 @@
 
 /**
  * This function handles setting up the islandora_workflow module's database schema
+ * @return $workflow_schema: the associative array containing the database table(s) for islandora_workflow
  */
 function islandora_workflow_schema() {
   $workflow_schema=array();
@@ -22,7 +23,7 @@ function islandora_workflow_schema() {
         'unsigned' => TRUE, 
         'not null' => TRUE,
         ), 
-        'user' => array(
+        'role' => array(
           'description' => 'The drupal user associated with the permission instance.', 
           'type' => 'varchar', 
           'length' => 100,
