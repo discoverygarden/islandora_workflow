@@ -34,8 +34,8 @@ function islandora_workflow_collection_permissions() {
 function islandora_workflow_menu() {
   $menuEntries= array();
   //settings associated with islandora_workflow
-  $menuEntries['admin/settings/islandora_workflow']=array(
-    'title' => t('Islandora Workflow Settings'),
+  $menuEntries['admin/settings/islandora_workflow_opts']=array(
+    'title' => t('Islandora workflow settings'),
     'description' => t('Here you can change various settings for the islandora_workflow module.'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('islandora_workflow_admin'),
@@ -43,8 +43,8 @@ function islandora_workflow_menu() {
     'type' => MENU_NORMAL_ITEM
   );
     //settings associated with islandora_workflow and collection permissions
-  $menuEntries['admin/settings/islandora_workflow']=array(
-    'title' => t('Islandora Workflow Collection Permissions'),
+  $menuEntries['admin/settings/islandora_workflow_perms']=array(
+    'title' => t('Islandora workflow permissions'),
     'description' => t('Here you can assign permissions to roles on a collection by collection level.'),
     'page callback' => 'islandora_workflow_collection_permissions',
     'access callback' => 'islandora_wokflow_check_permissions',
@@ -53,7 +53,7 @@ function islandora_workflow_menu() {
   );
   //main working page for islandora_workflow
   $menuEntries['islandora_workflow']=array(
-    'title' => t('islandora_workflow'),
+    'title' => t('My Islandora work'),
     'description' => t('This is the main access point to islandora_workflow'),
     'page callback' => 'islandora_workflow_work',
     'access callback' => 'islandora_wokflow_check_permissions',
