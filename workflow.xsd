@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema xmlns="http://www.islandora.ca" xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.islandora.ca">
+  <xsd:annotation>
+    <xsd:documentation xml:lang="en">
+      Islandora Workflow XSD
+    </xsd:documentation>
+  </xsd:annotation>
+  <xsd:element name="workflow">
+  	<xsd:complexType>
+  		<xsd:sequence>
+  			<xsd:element name="notes">
+  				<xsd:complexType>
+  					<xsd:sequence>
+  						<xsd:element name="note" >
+  							<xsd:complexType mixed="true">
+  								<xsd:sequence>
+  									<xsd:element name="subject" type="xsd:string"/>
+  									<xsd:element name="body" type="xsd:string"/>
+  								</xsd:sequence>
+  								<xsd:attribute name="from" type="xsd:string"/>
+  								<xsd:attribute name="timestamp" type="xsd:dateTime"/>
+  							</xsd:complexType>
+  						</xsd:element>
+        				</xsd:sequence>
+      			</xsd:complexType>
+      		</xsd:element>
+    			<xsd:element name="state_name" >
+					<xsd:simpleType>
+						<xsd:restriction base='xsd:string' >
+						   <xsd:enumeration value='created' />
+						   <xsd:enumeration value='rejected' />
+						   <xsd:enumeration value='submitted' />
+						   <xsd:enumeration value='approved' />
+						   <xsd:enumeration value='published' />
+						</xsd:restriction>
+					</xsd:simpleType>
+    			</xsd:element>
+    			<xsd:element name="assignee" type='xsd:string'/>
+    			<xsd:element name="last_modified_by" type='xsd:string'/>
+    			<xsd:element name="when_last_modified" type='xsd:dateTime'/>
+    		</xsd:sequence>
+  </xsd:complexType>
+</xsd:element>
+</xsd:schema>

@@ -1,4 +1,4 @@
-name = IslandoraWorkflow
+name = islandora_workflow
 description = A generic workflow module for Fedora objects.
 package = Fedora Repository
 dependencies[] = fedora_repository

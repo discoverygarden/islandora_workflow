@@ -1,0 +1,103 @@
+<?php
+// $Id: islandora_workflow.module, v 1 $
+/**
+ * @file
+ * @author: William Panting
+ * @date: 17/05/2011
+ * This module is intended to implement a generic Islandora workflow around the creation and publication of objects.
+ */
+/**
+ * 
+ * Enter description here ...
+ */
+function islandora_workflow_all() {
+  return "<p>HelloWorld</p>";
+}
+
+/**
+ * drupal menu hook
+ * @return $menuEntries: An arrray of the items to be added to the drupal menu
+ */
+function islandora_workflow_menu() {
+  $menuEntries= array();
+  //settings associated with islandora_workflow
+  $menuEntries['admin/settings/islandora_workflow']=array(
+    'title' => t('islandora_workflow Settings'),
+    'description' => t('Here you can change various settings for the islandora_workflow module.'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('islandora_workflow_admin'),
+    'access arguments' => array('islandora_workflow_Administrator'),
+    'type' => MENU_NORMAL_ITEM
+  );
+  //main working page for islandora_workflow
+  $menuEntries['islandora_workflow']=array(
+    'title' => t('islandora_workflow'),
+    'description' => t('This is the main access point to islandora_workflow'),
+    'page callback' => 'islandora_workflow_all',
+    'access callback' => 'islandora_wokflow_check_permissions',
+    'access arguments' => array('islandora_workflow_Administrator', 'islandora_workflow_Editor', 'islandora_workflow_Manager', 'islandora_workflow_Submitter'),
+    'type' => MENU_NORMAL_ITEM
+   );
+ return $menuEntries;
+}
+
+/**
+ * This function is the access callback used for access to the workflow section of this module
+ * @param $permission_array: those user roles to allow access
+ * @return $bool: wheather or not to permit access
+ */
+function islandora_wokflow_check_permissions($permission_array) {  
+  //loop through permissions allowed
+  for ($i=0; $i<sizeof($permission_array);$i++) {
+    //return true if the user has an allowed permission
+    if (user_access($arr_perms[$i])) {
+      return TRUE;
+    }
+  }
+  //if no permission matched then return false
+  return FALSE;
+}
+
+/**
+ * This function returns the form that will let an administrator modify the module's settings
+ * @return $adminForm: the form for edditing islandora_workflow settings.
+ */
+function islandora_workflow_admin() {
+  $adminForm=array();
+  //security setting ie. xacml enforced on/off
+  $adminForm['Force Secure']= array(
+    '#type' => 'textfield',
+    '#title' => t('Enforce Security'),
+    '#default_value' => variable_get('onthisdate_maxdisp', 3),
+    '#size' => 2,
+    '#maxlength' => 2,
+    '#description' => t("Wheather or not to use XACML to enforce workflow."),
+    '#required' => TRUE
+  ); 
+  return system_settings_form($adminForm); 
+}
+
+/**
+ * drupal permission hook
+ * The list of avaialble permissions for this module.
+ * @return array: The list of permissions.
+ */
+function islandora_workflow_perm() {
+  return array('islandora_workflow_Administrator', 'islandora_workflow_Editor', 'islandora_workflow_Manager', 'islandora_workflow_Submitter');
+}
+
+/**
+ * drupal hook to show help
+ * @param $path: The path that the help is being accessed from.
+ * @return $help: The help string that will be returned to the user.
+ */
+function islandora_workflow_help($path, $arg) {
+  $help='';//default
+  
+  switch ($path) {
+    case 'admin/modules#description' :
+    $help= t('A generic workflow module for Fedora objects.');
+  }
+  
+  return $help;
+}
