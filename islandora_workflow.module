@@ -1,5 +1,4 @@
 <?php
-// $Id: islandora_workflow.module, v 1 $
 /**
  * @file
  * @author: William Panting
@@ -18,12 +17,14 @@ function islandora_workflow_work() {
 }
 
 /**
- * This generates the main workflow page
+ * This generates the page for editing collection level permissions
  * @return $page: The html of the page to return
  */
 function islandora_workflow_collection_permissions() {
+  module_load_include('inc','islandora_workflow','islandora_workflow');
   $page='';
   $page=$page ."<p>HelloWorld2</p>";
+  $page= $page .implode(get_all_collections());
   return $page;
 }
 

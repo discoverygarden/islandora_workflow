@@ -1,5 +1,4 @@
 <?php
-// $Id: islandora_workflow.install, v 1 $
 /**
  * @file
  * @author: William Panting
@@ -65,11 +64,13 @@ function islandora_workflow_install() {
  * database schema and variables
  */
 function islandora_workflow_uninstall() {
-   drupal_uninstall_schema('islandora_workflow');
+  drupal_uninstall_schema('islandora_workflow');
+
+  //remove all variables prefixed with the module's name
   global $conf;
   foreach (array_keys($conf) as $key) {
-  if (strpos($key, 'islandora_workflow_') === 0) {
-  variable_del($key);
-}
-}
+    if (strpos($key, 'islandora_workflow_') === 0) {
+      variable_del($key);
+    }
+  }
 }
