@@ -16,8 +16,8 @@ function get_all_collections() {
   
   //read in the itql query for getting collections
   $query_file_name='collection_query.txt';
-  $query_file_handle=fopen($query_file_name,'r');
-  $query_string=fread($query_file_handle,filesize($query_file_name));
+  $query_file_handle=fopen($query_file_name, 'r');
+  $query_string=fread($query_file_handle, filesize($query_file_name));
   fclose($query_file_handle);
   
   return $collection_list;  

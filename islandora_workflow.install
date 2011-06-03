@@ -52,15 +52,24 @@ function islandora_workflow_schema() {
 
 /**
 * This function handles the installation of islandora_workflow
-* [just adds the schema]
+* [just adds the schema and variables]
  */
 function islandora_workflow_install() {
    drupal_install_schema('islandora_workflow');
+   
+   variable_set('islandora_workflow_enforce_security', 0);
 }
 
 /**
- * This function handles removing the islandora_workflow module's database schema
+ * This function handles removing the islandora_workflow module's 
+ * database schema and variables
  */
 function islandora_workflow_uninstall() {
    drupal_uninstall_schema('islandora_workflow');
+  global $conf;
+  foreach (array_keys($conf) as $key) {
+  if (strpos($key, 'islandora_workflow_') === 0) {
+  variable_del($key);
+}
+}
 }
