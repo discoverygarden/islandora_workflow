@@ -19,7 +19,6 @@ function get_all_collections() {
   $query_file_handle=fopen($query_file_name, "r");
   $query_string=fread($query_file_handle, filesize($query_file_name));
   fclose($query_file_handle);
-  
   $collection_list=islandora_workflow_get_related_objects($query_string);
   return $collection_list;
 }
