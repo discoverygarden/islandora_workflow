@@ -14,12 +14,14 @@ function get_all_collections() {
   $collection_list=array();
   
   //read in the itql query for getting collections
-  $query_file_name='collection_query.txt';
-  $query_file_handle=fopen($query_file_name, 'r');
+  //$query_file_name='/var/www/drupal-6.20/sites/all/modules/islandora_workflow/collection_query.txt';
+  $query_file_name=drupal_get_path('module', 'islandora_workflow') . '/collection_query.txt';
+  $query_file_handle=fopen($query_file_name, "r");
   $query_string=fread($query_file_handle, filesize($query_file_name));
   fclose($query_file_handle);
   
-  return $collection_list;  
+  $collection_list=islandora_workflow_get_related_objects($query_string);
+  return $collection_list;
 }
 
 /**
