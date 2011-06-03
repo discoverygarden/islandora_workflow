@@ -24,7 +24,11 @@ function islandora_workflow_collection_permissions() {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
   $page='';
   $page=$page ."<p>HelloWorld2</p>";
-  $page= $page .implode(get_all_collections());
+  //$page= $page . implode(get_all_collections());
+  
+  $collections=get_all_collections();
+  foreach ($collections as $collection_pid=>$collection_label)
+    $page=$page . $collection_pid . $collection_label;
   return $page;
 }
 
