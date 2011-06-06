@@ -33,7 +33,7 @@ function islandora_workflow_collection_permissions() {
 }
 
 /**
- * drupal menu hook
+ * The menu entries for this module.
  * @return $menuEntries: An arrray of the items to be added to the drupal menu
  */
 function islandora_workflow_menu() {
@@ -124,4 +124,28 @@ function islandora_workflow_help($path, $arg) {
   }
   
   return $help;
+}
+
+/**
+*This function registers themeing functions with Drupal.
+*@return $theme_functions: the array of theme functions
+*/
+ function islandora_workflow_theme() {
+   $theme_functions=array();
+   
+    $theme_functions['islandora_workflow_collection_permissions_themeing'] = array(
+       'arguments' => array(
+       	'form' => NULL));
+    
+   return $theme_functions;
+ }
+ 
+ /**
+  * This function provides the necessary themeing for the collection permission page
+  * @return $output: The rendered table/form
+  */
+function islandora_workflow_collection_permissions_themeing() {
+  $output='';
+  
+  return $output;
 }
