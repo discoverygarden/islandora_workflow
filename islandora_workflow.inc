@@ -6,22 +6,7 @@
  * This is a collection of helper functions and such for the islandora_workflow module.
  */
 
-/**
- * This function is used to get a list containing all of the islandora collections in a Fedora repo
- * @return $collection_list: an associated array of collection pids and names
- */
-function get_all_collections() {
-  $collection_list=array();
-  
-  //read in the itql query for getting collections
-  //$query_file_name='/var/www/drupal-6.20/sites/all/modules/islandora_workflow/collection_query.txt';
-  $query_file_name=drupal_get_path('module', 'islandora_workflow') . '/collection_query.txt';
-  $query_file_handle=fopen($query_file_name, "r");
-  $query_string=fread($query_file_handle, filesize($query_file_name));
-  fclose($query_file_handle);
-  $collection_list=islandora_workflow_get_related_objects($query_string);
-  return $collection_list;
-}
+
 
 /**
  * This function uses the get_all_collections() function and in the case of a manager
@@ -29,22 +14,39 @@ function get_all_collections() {
  * collections that the user has manager level and above permissions to
  * @return $collection_list: an associated array of collection pids and names
  */
- function get_all_my_manager_collections() {
+ function get_all_current_users_collections() {
   $collection_list=array();
   
-  /*
+  
    if (user_access('islandora_workflow_Administrator'))//admin show all
    	$collection_list=get_all_collections();
    elseif(user_access('islandora_workflow_Manager'))//manager show permitted
    	$collection_list=get_all_collections();
-   	$permitted_collections=do a querry on table
+   	$permitted_collections='';//do a querry on table
    	foreach ($collection_list as $collection_pid=> $collection_name)
    		if (!in_array($collection_name,$permitted_collections))
    			unset($collection_list[$collection_pid]);
-   */
+   
   
   return $collection_list; 
  }
+
+ /**
+ * This function is used to get a list containing all of the islandora collections in a Fedora repo
+ * @return $collection_list: an associated array of collection pids and names
+ */
+function get_all_collections() {
+  
+  $collection_list=array();
+  
+  //read in the itql query for getting collections
+  $query_file_name=drupal_get_path('module', 'islandora_workflow') . '/collection_query.txt';
+  $query_file_handle=fopen($query_file_name, "r");
+  $query_string=fread($query_file_handle, filesize($query_file_name));
+  fclose($query_file_handle);
+  $collection_list=islandora_workflow_get_related_objects($query_string);
+  return $collection_list;
+}
  
  /**
  *
