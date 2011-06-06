@@ -7,7 +7,6 @@
  */
 
 
-
 /**
  * This function uses the get_all_collections() function and in the case of a manager
  * the drupal database table 'islandora_workflow_permissions' to compile a list of 
@@ -49,9 +48,9 @@ function get_all_collections() {
 }
  
  /**
- *
- * @param string $itql_query
- * @return <type>
+ *This function executes a query on Fedora's resource index
+ * @param string $itql_query:
+ * @return array $list_of_objects:
  */
 function islandora_workflow_get_related_objects($itql_query) {
   module_load_include('inc', 'fedora_repository', 'CollectionClass');
@@ -62,9 +61,9 @@ function islandora_workflow_get_related_objects($itql_query) {
 }
 
 /**
- *
- * @param <array> $query_results
- * @return string
+ *This function turns an itql result into a usefull array
+ * @param string $query_results: 
+ * @return array $list_of_objects: 
  */
 function islandora_workflow_itql_to_array($query_results) {
   try {
@@ -83,3 +82,13 @@ function islandora_workflow_itql_to_array($query_results) {
   }
   return $list_of_objects;
 }
+
+/**
+ * This function will return a list of all roles that have islandora_workflow permissions
+ * @return array 4privledged_roles: The list of roles
+ */
+ function islandora_workflow_get_roles_with_module_permissions() {
+   $privledged_roles=array();
+   
+   return $privledged_roles;
+ }
