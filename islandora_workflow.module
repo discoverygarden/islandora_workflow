@@ -128,9 +128,9 @@ function islandora_workflow_help($path, $arg) {
 }
 
 /**
-*This function registers themeing functions with Drupal.
-*@return $theme_functions: the array of theme functions
-*/
+ * This function registers themeing functions with Drupal.
+ * @return array $theme_functions: the array of theme functions
+ */
  function islandora_workflow_theme() {
    $theme_functions=array();
    

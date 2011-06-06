@@ -85,10 +85,33 @@ function islandora_workflow_itql_to_array($query_results) {
 
 /**
  * This function will return a list of all roles that have islandora_workflow permissions
- * @return array 4privledged_roles: The list of roles
+ * @return array $privledged_roles: The list of roles
  */
  function islandora_workflow_get_roles_with_module_permissions() {
    $privledged_roles=array();
+   
+   //use user_roles for each permission individualy
+   $admin_roles=user_rolse($membersonly=FALSE,'islandora_workflow_Administrator');
+   $manager_roles=user_roles($membersonly=FALSE,'islandora_workflow_Manager');
+   $editor_roles=user_roles($membersonly=FALSE,'islandora_workflow_Editor');
+   $submitter_roles=user_roles($membersonly=FALSE,'islandora_workflow_Submitter');
+   
+   //modify the returned arrays to include the permission name, and merge into one array
+   foreach($admin_roles as $role_pid=>$role_name) {
+     $privledged_roles[$role_pid][$role_name][]='islandora_workflow_Administrator';
+   }
+   
+   foreach($manager_roles as $role_pid=>$role_name) {
+     $privledged_roles[$role_pid][$role_name][]='islandora_workflow_Manager';
+   }
+   
+   foreach($editor_roles as $role_pid=>$role_name) {
+     $privledged_roles[$role_pid][$role_name][]='islandora_workflow_Editor';
+   }
+   
+   foreach($submitter_roles as $role_pid=>$role_name) {
+     $privledged_roles[$role_pid][$role_name][]='islandora_workflow_Submitter';
+   }
    
    return $privledged_roles;
  }
