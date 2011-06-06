@@ -13,22 +13,24 @@
  * collections that the user has manager level and above permissions to
  * @return $collection_list: an associated array of collection pids and names
  */
- function get_all_current_users_collections() {
+function get_all_current_users_collections() {
   $collection_list=array();
   
   
-   if (user_access('islandora_workflow_Administrator'))//admin show all
-   	$collection_list=get_all_collections();
-   elseif(user_access('islandora_workflow_Manager'))//manager show permitted
-   	$collection_list=get_all_collections();
-   	$permitted_collections='';//do a querry on table
-   	foreach ($collection_list as $collection_pid=> $collection_name)
-   		if (!in_array($collection_name,$permitted_collections))
-   			unset($collection_list[$collection_pid]);
-   
-  
+  if (user_access('islandora_workflow_Administrator')) {//admin show all
+    $collection_list=get_all_collections();
+  }
+  elseif (user_access('islandora_workflow_Manager')) {//manager show permitted
+    $collection_list=get_all_collections();
+    $permitted_collections='';//do a querry on table
+    foreach ($collection_list as $collection_pid => $collection_name) {
+      if (!in_array($collection_name, $permitted_collections)) {
+        unset($collection_list[$collection_pid]);
+      }
+    }
+  }
   return $collection_list; 
- }
+}
 
  /**
  * This function is used to get a list containing all of the islandora collections in a Fedora repo
@@ -87,31 +89,31 @@ function islandora_workflow_itql_to_array($query_results) {
  * This function will return a list of all roles that have islandora_workflow permissions
  * @return array $privledged_roles: The list of roles
  */
- function islandora_workflow_get_roles_with_module_permissions() {
+function islandora_workflow_get_roles_with_module_permissions() {
    $privledged_roles=array();
    
    //use user_roles for each permission individualy
-   $admin_roles=user_rolse($membersonly=FALSE,'islandora_workflow_Administrator');
-   $manager_roles=user_roles($membersonly=FALSE,'islandora_workflow_Manager');
-   $editor_roles=user_roles($membersonly=FALSE,'islandora_workflow_Editor');
-   $submitter_roles=user_roles($membersonly=FALSE,'islandora_workflow_Submitter');
+   $admin_roles=user_rolse($membersonly=FALSE, 'islandora_workflow_Administrator');
+   $manager_roles=user_roles($membersonly=FALSE, 'islandora_workflow_Manager');
+   $editor_roles=user_roles($membersonly=FALSE, 'islandora_workflow_Editor');
+   $submitter_roles=user_roles($membersonly=FALSE, 'islandora_workflow_Submitter');
    
    //modify the returned arrays to include the permission name, and merge into one array
-   foreach($admin_roles as $role_pid=>$role_name) {
+   foreach ($admin_roles as $role_pid => $role_name) {
      $privledged_roles[$role_pid][$role_name][]='islandora_workflow_Administrator';
    }
    
-   foreach($manager_roles as $role_pid=>$role_name) {
+   foreach ($manager_roles as $role_pid => $role_name) {
      $privledged_roles[$role_pid][$role_name][]='islandora_workflow_Manager';
    }
    
-   foreach($editor_roles as $role_pid=>$role_name) {
+   foreach ($editor_roles as $role_pid => $role_name) {
      $privledged_roles[$role_pid][$role_name][]='islandora_workflow_Editor';
    }
    
-   foreach($submitter_roles as $role_pid=>$role_name) {
+   foreach ($submitter_roles as $role_pid => $role_name) {
      $privledged_roles[$role_pid][$role_name][]='islandora_workflow_Submitter';
    }
    
    return $privledged_roles;
- }
+}
