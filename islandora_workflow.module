@@ -26,10 +26,13 @@ function islandora_workflow_collection_permissions() {
   
   $page='';  
   $collections=get_all_collections();
-  foreach ($collections as $collection_pid => $collection_label)
+  foreach ($collections as $collection_pid => $collection_label) {
     $page=$page . $collection_pid . $collection_label;
-    
-    
+  }
+  $page=$page.'<br/>';
+  dsm($collections);
+  dsm(islandora_workflow_get_roles_with_module_permissions());
+  
   return $page;
 }
 
