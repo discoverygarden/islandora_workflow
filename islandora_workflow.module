@@ -139,7 +139,7 @@ function islandora_workflow_theme() {
    
     $theme_functions['islandora_workflow_collection_permissions_themeing'] = array(
        'arguments' => array(
-       'form' => NULL));
+       	'form' => NULL));
     
    return $theme_functions;
  }

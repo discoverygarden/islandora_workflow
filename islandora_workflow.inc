@@ -98,7 +98,7 @@ function islandora_workflow_get_roles_with_module_permissions() {
    $editor_roles=user_roles($membersonly=FALSE, 'islandora_workflow_Editor');
    $submitter_roles=user_roles($membersonly=FALSE, 'islandora_workflow_Submitter');
    
-   //modify the returned arrays to include the permission name, and merge into one array
+   //modify the returned arrays to include the permission name, and merge into one array [role_pid][role_name][0...4]permission
    foreach ($admin_roles as $role_pid => $role_name) {
      $privledged_roles[$role_pid][$role_name][]='islandora_workflow_Administrator';
    }
