@@ -17,26 +17,6 @@ function islandora_workflow_work() {
 }
 
 /**
- * This generates the page for editing collection level permissions
- * @return $page: The html of the page to return
- */
-function islandora_workflow_collection_permissions() {
-  module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
-  
-  
-  $page='';  
-  $collections=get_all_collections();
-  foreach ($collections as $collection_pid => $collection_label) {
-    $page=$page . $collection_pid . $collection_label;
-  }
-  $page=$page.'<br/>';
-  dsm($collections);
-  dsm(islandora_workflow_get_roles_with_module_permissions());
-  
-  return $page;
-}
-
-/**
  * The menu entries for this module.
  * @return $menuEntries: An arrray of the items to be added to the drupal menu
  */
@@ -145,10 +125,39 @@ function islandora_workflow_theme() {
  }
  
  /**
+ * This generates the page for editing collection level permissions
+ * @return $page: The html of the page to return
+ */
+function islandora_workflow_collection_permissions() {
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
+  
+  
+  $page='';  
+  $collections=get_all_collections();
+  foreach ($collections as $collection_pid => $collection_label) {
+    $page=$page . $collection_pid . $collection_label;
+  }
+  $page=$page.'<br/>';
+  dsm($collections);
+  dsm(islandora_workflow_get_roles_with_module_permissions());
+  
+  return $page;
+}
+ 
+ /**
   * This function provides the necessary themeing for the collection permission page
   * @return $output: The rendered table/form
   */
 function islandora_workflow_collection_permissions_themeing() {
+  $output='';
+  
+  return $output;
+}
+
+ /**
+  * This function processes the form submitted from the collection permission page
+  */
+function islandora_workflow_collection_permissions_processing() {
   $output='';
   
   return $output;
