@@ -11,6 +11,7 @@
  * This function uses the get_all_collections() function and in the case of a manager
  * the drupal database table 'islandora_workflow_permissions' to compile a list of 
  * collections that the user has manager level and above permissions to
+ * TODO: build the drupal db query and test on manager level user
  * @return $collection_list: an associated array of collection pids and names
  */
 function get_all_current_users_collections() {
