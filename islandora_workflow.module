@@ -154,19 +154,21 @@ function islandora_workflow_collection_permissions() {
     '#collapsible' => FALSE,
     '#collapsed' => FALSE,
     '#tree' => TRUE, // this attribute is important to return the submitted values in a deeper nested arrays in $form_state['values'] . See http://drupal.org/node/751826
-    '#description' => t('Assign collection level permissions to roles.'), // doesn't work with table render.
+    '#description' => t('Assign collection level permissions to roles.'),
   );
   //theme
   $collection_permissions_form['islandora_workflow_collection_permissions_table']['permissions_table']=array(
   '#theme' => 'permissions_table'  
   );
   
-  foreach ($current_collection_permissions as $role_pid => $role_name) {
-    foreach ($my_collections as $collection_pid => $collection_name) {
+  foreach ($current_collection_permissions as $role_pid => $role_name) {//roles
+    //add none to the possible options
+    $current_collection_permissions[$role_pid][key($role_name)][]=' ';
+    foreach ($my_collections as $collection_pid => $collection_name) {//collections
       $collection_permissions_form['islandora_workflow_collection_permissions_table']['permissions_table'][$role_pid][$collection_pid] = array(
-      	'#type' => 'select',
-      	'#default_value' => $current_collection_permissions[$role_pid][key($role_name)][0],//make this into whatever the current setting is
-       '#options' => $current_collection_permissions[$role_pid][key($role_name)],
+      '#type' => 'select',
+      '#default_value' => $current_collection_permissions[$role_pid][key($role_name)][0],//make this into whatever the current setting is for that collection/role
+      '#options' => $current_collection_permissions[$role_pid][key($role_name)],//what are available to the current role
       );
     }
   }
