@@ -113,17 +113,26 @@ function islandora_workflow_help($path, $arg) {
 
 /**
  * This function registers themeing functions with Drupal.
- * @return array $theme_functions: the array of theme functions
+ * @return array $themes: the array of available themes
  */
 function islandora_workflow_theme() {
-   $theme_functions=array();
-   
-    $theme_functions['islandora_workflow_collection_permissions'] = array(
-       'arguments' => array(
-       	'collection_permissions_form' => NULL));
-    
-   return $theme_functions;
+   $themes=array();
+   $themes['permissions_table']=array(
+   'arguments' => array('list' => NULL, 'form' => NULL),
+   'template' => 'permissions_table'
+    );
+   return $themes;
  }
+ 
+ /**
+  * This function handles making variables available to the theme template for 
+  * the islandora_workflow_collection_permissions page
+  * @param array ref $vars: the list of variables (including the form) to send to the template
+  * @return array $vars: the modified list of variables to send to the template
+  */
+function islandora_workflow_preprocess_permissions_table(&$vars) {
+  $vars['table_elems']=drupal_render($vars['list'][3]['Awill:257']);
+}
  
  /**
  * This generates the page for editing collection level permissions
@@ -141,66 +150,34 @@ function islandora_workflow_collection_permissions() {
   
   $collection_permissions_form['islandora_workflow_collection_permissions_table'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Field settings'), // doesn't work with table render.
-    '#collapsible' => FALSE, // doesn't work with table render.
+    '#title' => t('Collecion Permissions'),
+    '#collapsible' => FALSE,
     '#collapsed' => FALSE,
     '#tree' => TRUE, // this attribute is important to return the submitted values in a deeper nested arrays in $form_state['values'] . See http://drupal.org/node/751826
-    '#description' => t('description'), // doesn't work with table render.
+    '#description' => t('Assign collection level permissions to roles.'), // doesn't work with table render.
+  );
+  //theme
+  $collection_permissions_form['islandora_workflow_collection_permissions_table']['permissions_table']=array(
+  '#theme' => 'permissions_table'  
   );
   
   foreach ($current_collection_permissions as $role_pid => $role_name) {
-    foreach($my_collections as $collection_pid => $collection_name) {
-      $collection_permissions_form['islandora_workflow_collection_permissions_table'][$role_pid][$collection_pid] = array(
+    foreach ($my_collections as $collection_pid => $collection_name) {
+      $collection_permissions_form['islandora_workflow_collection_permissions_table']['permissions_table'][$role_pid][$collection_pid] = array(
       	'#type' => 'select',
-      	'#default_value' =>$current_collection_permissions[$role_pid][key($role_name)][0],//make this into whatever the current setting is
+      	'#default_value' => $current_collection_permissions[$role_pid][key($role_name)][0],//make this into whatever the current setting is
        '#options' => $current_collection_permissions[$role_pid][key($role_name)],
       );
     }
   }
   
   $collection_permissions_form['#submit'][] = 'islandora_workflow_collection_permissions_processing';
-  $collection_permissions_form['#theme'] = 'islandora_workflow_collection_permissions';
+  //$collection_permissions_form['#theme'] = 'islandora_workflow_collection_permissions';
   
   dsm($collection_permissions_form);
   return $collection_permissions_form;
 }
  
- /**
-  * This function provides the necessary themeing for the collection permission page; it turns the form into a table
-  * @return $output: The rendered table/form
-  */
-function theme_islandora_workflow_collection_permissions($collection_permissions_form) {
-  $output='';
-  dsm($collection_permissions_form);
-	$rows = array();
-	foreach ($collection_permissions_form['islandora_workflow_collection_permissions_table'] as $role_pid) {
-	  // check if $key is really the array we need(something we set). we shouldn't select the #parent array for example.
-		if (isset($role_pid['Awill:257']['#type'])) {
-    	  $row = array();
-    	  $row=array('data' =>$role_pid['Awill:257']);
-    	  /*foreach($role_pid as $collection_pid) {
-    	    dsm($collection_pid);
-    		  $row[] = array('data' => $collection_pid);	
-    	  }*/
-    		$rows[] = $row;
-		}
-	}
-  //unset($form['islandora_solr_custom_table']);
-  $collection_permissions_form['islandora_workflow_collection_permissions_table']['#access'] = FALSE; // don't unset $form['anything'] , use $form['anything']['#access'] = FALSE; instead!
- 
-	// Individual table headers.
-	$header = array();
-	$header[] = t('h1');
-	$header[] = t('h2');
-  
-  //$output = drupal_render($form['style']);  // render the dropdown before the table. Not sure if I want to keep this.
-	$output .= theme('table', $header, $rows);
-	$output .= drupal_render($collection_permissions_form);
-  
-  dsm($output);
-  return $output;
-}
-
  /**
   * This function processes the form submitted from the collection permission page
   */
