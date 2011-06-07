@@ -136,6 +136,8 @@ function islandora_workflow_preprocess_permissions_table(&$vars) {
  
  /**
  * This generates the page for editing collection level permissions
+ * TODO:modify collection list to be get my collections
+ * TODO:modify #default-value to reflect the current state
  * @return $collection_permissions_form: The form for changing collection permissions granted to roles
  */
 function islandora_workflow_collection_permissions() {
@@ -148,19 +150,22 @@ function islandora_workflow_collection_permissions() {
   $my_collections=get_all_collections();//change this to get users perms when that func is done
   $current_collection_permissions=islandora_workflow_get_roles_with_module_permissions();
   
+  //setup the form
   $collection_permissions_form['islandora_workflow_collection_permissions_table'] = array(
     '#type' => 'fieldset',
     '#title' => t('Collecion Permissions'),
     '#collapsible' => FALSE,
     '#collapsed' => FALSE,
-    '#tree' => TRUE, // this attribute is important to return the submitted values in a deeper nested arrays in $form_state['values'] . See http://drupal.org/node/751826
+    '#tree' => TRUE, //See http://drupal.org/node/751826
     '#description' => t('Assign collection level permissions to roles.'),
   );
+  $collection_permissions_form['#submit'][] = 'islandora_workflow_collection_permissions_processing';
   //theme
   $collection_permissions_form['islandora_workflow_collection_permissions_table']['permissions_table']=array(
   '#theme' => 'permissions_table'  
   );
   
+  //populate the form
   foreach ($current_collection_permissions as $role_pid => $role_name) {//roles
     //add none to the possible options
     $current_collection_permissions[$role_pid][key($role_name)][]=' ';
@@ -172,11 +177,6 @@ function islandora_workflow_collection_permissions() {
       );
     }
   }
-  
-  $collection_permissions_form['#submit'][] = 'islandora_workflow_collection_permissions_processing';
-  //$collection_permissions_form['#theme'] = 'islandora_workflow_collection_permissions';
-  
-  dsm($collection_permissions_form);
   return $collection_permissions_form;
 }
  
