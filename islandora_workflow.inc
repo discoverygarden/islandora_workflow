@@ -14,15 +14,14 @@
  * TODO: build the drupal db query and test on manager level user
  * @return $collection_list: an associated array of collection pids and names
  */
-function get_current_users_collections() {
+function islandora_workflow_get_current_users_collections() {
   $collection_list=array();
   
-  
   if (user_access('islandora_workflow_Administrator')) {//admin show all
-    $collection_list=get_all_collections();
+    $collection_list=islandora_workflow_get_all_collections();
   }
   elseif (user_access('islandora_workflow_Manager')) {//manager show permitted
-    $collection_list=get_all_collections();
+    $collection_list=islandora_workflow_get_all_collections();
     $permitted_collections='';//do a querry on table
     foreach ($collection_list as $collection_pid => $collection_name) {
       if (!in_array($collection_name, $permitted_collections)) {
@@ -33,11 +32,20 @@ function get_current_users_collections() {
   return $collection_list; 
 }
 
+/**
+ * This function returns the islandora_workflow permissions that the indicated role/user 
+ * has with the indicated collection
+ * @param string $collection_id:
+ * @return array $perm_list: list of permissions the current user has with the indicated  
+ */
+function islandora_workflow_get_collection_permissions_by_role() {
+  
+}
  /**
  * This function is used to get a list containing all of the islandora collections in a Fedora repo
  * @return $collection_list: an associated array of collection pids and names
  */
-function get_all_collections() {
+function islandora_workflow_get_all_collections() {
   
   $collection_list=array();
   

@@ -127,19 +127,18 @@ function islandora_workflow_theme() {
  /**
   * This function handles making variables available to the theme template for 
   * the islandora_workflow_collection_permissions page
-  * TODO: change roles to get all roles not just module ones
   * @param array ref $vars: the list of variables (including the form) to send to the template
   * @return array $vars: the modified list of variables to send to the template
   */
 function islandora_workflow_preprocess_permissions_table(&$vars) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
   
-  $vars['collections']=get_current_users_collections();
+  $vars['collections']=islandora_workflow_get_current_users_collections();
   $vars['roles']=islandora_workflow_get_roles_with_module_permissions();
   
   //render each form element
-  foreach($vars['roles'] as $role_id => $role_name) {
-    foreach($vars['collections'] as $collection_id) {
+  foreach ($vars['roles'] as $role_id => $role_name) {
+    foreach ($vars['collections'] as $collection_id) {
       $vars['list'][$role_id][key($vars['collections'])]=drupal_render($vars['list'][$role_id][key($vars['collections'])]);
     }
   }
@@ -157,7 +156,7 @@ function islandora_workflow_collection_permissions() {
   $current_collection_permissions=array();
   
   //collect current state data
-  $my_collections=get_current_users_collections();
+  $my_collections=islandora_workflow_get_current_users_collections();
   $current_collection_permissions=islandora_workflow_get_roles_with_module_permissions();
   
   //setup the form
