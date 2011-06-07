@@ -29,6 +29,9 @@ function islandora_workflow_get_current_users_collections() {
       }
     }
   }
+  else {
+    return FALSE;
+  }
   return $collection_list; 
 }
 
@@ -39,6 +42,12 @@ function islandora_workflow_get_current_users_collections() {
  * @return array $perm_list: list of permissions the current user has with the indicated  
  */
 function islandora_workflow_get_collection_permissions_by_role() {
+  
+}
+/**
+ * 
+ */
+function islandora_workflow_get_users(){
   
 }
  /**
