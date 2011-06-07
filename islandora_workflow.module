@@ -132,9 +132,17 @@ function islandora_workflow_theme() {
   * @return array $vars: the modified list of variables to send to the template
   */
 function islandora_workflow_preprocess_permissions_table(&$vars) {
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
+  
   $vars['collections']=get_current_users_collections();
   $vars['roles']=islandora_workflow_get_roles_with_module_permissions();
-  $vars['table_elems']=drupal_render($vars['list'][3]['Awill:257']);
+  
+  //render each form element
+  foreach($vars['roles'] as $role_id => $role_name) {
+    foreach($vars['collections'] as $collection_id) {
+      $vars['list'][$role_id][key($vars['collections'])]=drupal_render($vars['list'][$role_id][key($vars['collections'])]);
+    }
+  }
 }
  
  /**
@@ -170,7 +178,8 @@ function islandora_workflow_collection_permissions() {
   //populate the form
   foreach ($current_collection_permissions as $role_pid => $role_name) {//roles
     //add none to the possible options
-    $current_collection_permissions[$role_pid][key($role_name)][]=' ';
+    $current_collection_permissions[$role_pid][key($role_name)][]='';
+    
     foreach ($my_collections as $collection_pid => $collection_name) {//collections
       $collection_permissions_form['islandora_workflow_collection_permissions_table']['permissions_table'][$role_pid][$collection_pid] = array(
       '#type' => 'select',

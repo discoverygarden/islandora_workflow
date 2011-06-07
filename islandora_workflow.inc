@@ -14,7 +14,7 @@
  * TODO: build the drupal db query and test on manager level user
  * @return $collection_list: an associated array of collection pids and names
  */
-function get_all_current_users_collections() {
+function get_current_users_collections() {
   $collection_list=array();
   
   
