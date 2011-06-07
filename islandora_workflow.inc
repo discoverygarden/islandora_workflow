@@ -12,11 +12,13 @@
  * the drupal database table 'islandora_workflow_permissions' to compile a list of 
  * collections that the user has manager level and above permissions to
  * TODO: build the drupal db query and test on manager level user
- * @return $collection_list: an associated array of collection pids and names
+ * TODO: don't forget to uncomment the check for drupal admin
+ * @return $collection_list: an associated array of collection pids and names, 
+ * @return boolean: a false boolean if they don't have manger or higher perms
  */
 function islandora_workflow_get_current_users_collections() {
   $collection_list=array();
-  
+  //if (user_access('islandora_workflow_Administrator') || user_access('administer')) {//admin show all
   if (user_access('islandora_workflow_Administrator')) {//admin show all
     $collection_list=islandora_workflow_get_all_collections();
   }
@@ -36,20 +38,56 @@ function islandora_workflow_get_current_users_collections() {
 }
 
 /**
- * This function returns the islandora_workflow permissions that the indicated role/user 
- * has with the indicated collection
- * @param string $collection_id:
- * @return array $perm_list: list of permissions the current user has with the indicated  
+ * This function query's drupal's DB for all the collection permission entries
+ * Used when displaying the current state for the permission page
+ * @return array $perm_list: list of permissions the current user has with the indicated $perm_list[$role_id][$collection_id][1...4]=perms
  */
-function islandora_workflow_get_collection_permissions_by_role() {
-  
+function islandora_workflow_get_all_collection_permissions() {
+  $perm_list=array();
+  //build query
+  $query='SELECT role,permission,collection FROM islandora_workflow_permissions';
+  $results=db_query($query);
+  //debug
+  dsm($query);
+  dsm($results);
+  //build return array
+  return $perm_list;
 }
+
 /**
- * 
+ * This function query's drupal's DB for all the collection permission entries related to the current user
+ * Most usefull for building the work portal, and also used for determining visible 
+ * @return array $perm_list: list of permissions the current user has with the indicated $perm_list[$role_id][$collection_id][1...4]=perms
  */
-function islandora_workflow_get_users(){
+function islandora_workflow_get_current_users_collection_permissions(){
+  //do islandora_workflow_get_all_collection_permissions with restrictions on the roles to the list of roles the current user has
+  $perm_list=array();
+  global $user;//use $user->roles to get an array $roles[$role_id][$role_name]  $role_id is int
+  
+  //build query
+  $query='SELECT role,permission,collection FROM islandora_workflow_permissions';
+  $user_roles=$user->roles;
+  
+  $loop_count=0;
+  foreach ($user_roles as $role_pid => $role_name) {
+    if ($loop_count==0) {//if on the first role user the where clause
+      $page=$page.' WHERE role="'.$role_pid.'"';
+    }
+    else {
+      $query=$query.' OR role="'.$role_pid.'"';
+    }
+    $loop_count++;
+  }
+  $results=db_query($query);
+  //debug
+  dsm($query);
+  dsm($results);
+  //build return array
+  return $perm_list;
   
 }
+
+
  /**
  * This function is used to get a list containing all of the islandora collections in a Fedora repo
  * @return $collection_list: an associated array of collection pids and names
