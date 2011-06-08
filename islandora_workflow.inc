@@ -42,36 +42,40 @@ function islandora_workflow_get_current_users_collections() {
  * Used when displaying the current state for the permission page
  * @return array $perm_list: list of permissions the current user has with the indicated $perm_list[$role_id][$collection_id][1...4]=perms
  */
-function islandora_workflow_get_all_collection_permissions() {
+function islandora_workflow_get_all_permissions() {
   $perm_list=array();
+  
   //build query
-  $query='SELECT role,permission,collection FROM {islandora_workflow_permissions}';
+  $query='SELECT role,collection,permission FROM {islandora_workflow_permissions}';
   $results=db_query($query);
-  //debug
-  dsm($query);
-  dsm($results);
+  
   //build return array
+  while ($row=db_fetch_array($results)) {
+    $perm_list[]=$row;
+  }
+
   return $perm_list;
 }
 
 /**
  * This function query's drupal's DB for all the collection permission entries related to the current user
- * Most usefull for building the work portal, and also used for determining visible 
+ * Most usefull for building the work portal, and also used for getting user's owned collections
+ * TODO: test, remove debugs
  * @return array $perm_list: list of permissions the current user has with the indicated $perm_list[$role_id][$collection_id][1...4]=perms
  */
-function islandora_workflow_get_current_users_collection_permissions() {
-  //do islandora_workflow_get_all_collection_permissions with restrictions on the roles to the list of roles the current user has
+function islandora_workflow_get_current_users_permissions() {
+  //do islandora_workflow_get_all_permissions with restrictions on the roles to the list of roles the current user has
   $perm_list=array();
   global $user;//use $user->roles to get an array $roles[$role_id][$role_name]  $role_id is int
   
   //build query
-  $query='SELECT role,permission,collection FROM {islandora_workflow_permissions}';
+  $query='SELECT role,collection,permission FROM {islandora_workflow_permissions}';
   $user_roles=$user->roles;
   
   $loop_count=0;
   foreach ($user_roles as $role_pid => $role_name) {
     if ($loop_count==0) {//if on the first role user the where clause
-      $page=$page . ' WHERE role="' . $role_pid . '"';
+      $query=$query . ' WHERE role="' . $role_pid . '"';
     }
     else {
       $query=$query . ' OR role="' . $role_pid . '"';
@@ -82,6 +86,10 @@ function islandora_workflow_get_current_users_collection_permissions() {
   //debug
   dsm($query);
   dsm($results);
+  while ($row=db_fetch_array($results)) {
+    dsm($row);
+    $perm_list[]=$row;
+  }
   //build return array
   return $perm_list;
   
