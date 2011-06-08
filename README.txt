@@ -9,3 +9,6 @@ Human level workflow will be handled through this drupal module.
 Acceptable state values: created, in_processing(for machine workflow), submitted, approved, published, rejected
 
 Workflow can be enforced through the use of XACML. There is a settings toggle for this.
+
+There are concurency issues, more info pending.
+What happens when a Drupal admin revokes a permission that someone currently has with a collection?

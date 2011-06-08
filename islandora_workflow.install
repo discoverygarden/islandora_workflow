@@ -75,30 +75,3 @@ function islandora_workflow_uninstall() {
   }
 }
 
-/**
- *This function is here for testing perposes
- *TODO: remove this function when it is no longer of immediate use 
- *TODO: Move this somehere and give it a button, it can't work from hook install 'cause the schema isn't loaded yet
- */
-function islandora_workflow_insert_test_data() {
-  $obj=array(
-  'role' => '1',
-  'collection' => 'Awill:257',
-  'permission' => 'islandora_workflow_Administrator'
-  );
-  drupal_write_record('islandora_workflow_permissions',$obj);
-  
-  $obj=array(
-  'role' => '2',
-  'collection' => 'Awill:257',
-  'permission' => 'islandora_workflow_Submitter'
-  );
-  drupal_write_record('islandora_workflow_permissions',$obj);
-  
-  $obj=array(
-  'role' => '3',
-  'collection' => 'Awill:257',
-  'permission' => 'islandora_workflow_Manager'
-  );
-  drupal_write_record('islandora_workflow_permissions',$obj);
-}

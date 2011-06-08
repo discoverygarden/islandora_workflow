@@ -72,6 +72,7 @@ function islandora_wokflow_check_permissions($permission_array) {
 
 /**
  * This function returns the form that will let an administrator modify the module's settings
+ * TODO: REMOVE REFERENCE TO ISLANDORA_WORKFLOW.INC AND THE CALL TO THE ISLANDORA-WORKFLOW_INSERT_TEST_DATA FUNC
  * @return $adminForm: the form for edditing islandora_workflow settings.
  */
 function islandora_workflow_admin() {
@@ -82,7 +83,9 @@ function islandora_workflow_admin() {
     '#title' => t('Enforce Security'),
     '#default_value' => variable_get('islandora_workflow_enforce_security', 0),
     '#description' => t("Wheather or not to use XACML to enforce workflow."),
-  ); 
+  );
+  //module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
+  //islandora_workflow_insert_test_data();
   return system_settings_form($adminForm); 
 }
 
