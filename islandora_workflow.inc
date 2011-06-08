@@ -60,7 +60,6 @@ function islandora_workflow_get_all_permissions() {
 /**
  * This function query's drupal's DB for all the collection permission entries related to the current user
  * Most usefull for building the work portal, and also used for getting user's owned collections
- * TODO: test, remove debugs
  * @return array $perm_list: list of permissions the current user has with the indicated $perm_list[$role_id][$collection_id][1...4]=perms
  */
 function islandora_workflow_get_current_users_permissions() {
@@ -83,18 +82,14 @@ function islandora_workflow_get_current_users_permissions() {
     $loop_count++;
   }
   $results=db_query($query);
-  //debug
-  dsm($query);
-  dsm($results);
+  
+  //build return array
   while ($row=db_fetch_array($results)) {
-    dsm($row);
     $perm_list[]=$row;
   }
-  //build return array
-  return $perm_list;
   
+  return $perm_list;  
 }
-
 
  /**
  * This function is used to get a list containing all of the islandora collections in a Fedora repo
@@ -180,8 +175,9 @@ function islandora_workflow_get_roles_with_module_permissions() {
    }
    
    return $privledged_roles;
-}/**
+}
 
+/**
  *This function is here for testing perposes
  *TODO: remove this function when it is no longer of immediate use 
  *TODO: Move this somehere and give it a button, it can't work from hook install 'cause the schema isn't loaded yet
