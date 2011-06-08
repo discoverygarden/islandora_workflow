@@ -45,7 +45,7 @@ function islandora_workflow_get_current_users_collections() {
 function islandora_workflow_get_all_collection_permissions() {
   $perm_list=array();
   //build query
-  $query='SELECT role,permission,collection FROM islandora_workflow_permissions';
+  $query='SELECT {role},{permission},{collection} FROM islandora_workflow_permissions';
   $results=db_query($query);
   //debug
   dsm($query);
@@ -65,16 +65,16 @@ function islandora_workflow_get_current_users_collection_permissions(){
   global $user;//use $user->roles to get an array $roles[$role_id][$role_name]  $role_id is int
   
   //build query
-  $query='SELECT role,permission,collection FROM islandora_workflow_permissions';
+  $query='SELECT {role},{permission},{collection} FROM islandora_workflow_permissions';
   $user_roles=$user->roles;
   
   $loop_count=0;
   foreach ($user_roles as $role_pid => $role_name) {
     if ($loop_count==0) {//if on the first role user the where clause
-      $page=$page.' WHERE role="'.$role_pid.'"';
+      $page=$page .' WHERE role="'. $role_pid.'"';
     }
     else {
-      $query=$query.' OR role="'.$role_pid.'"';
+      $query=$query .' OR role="'. $role_pid.'"';
     }
     $loop_count++;
   }
@@ -184,19 +184,19 @@ function islandora_workflow_insert_test_data() {
   'collection' => 'Awill:257',
   'permission' => 'islandora_workflow_Administrator'
   );
-  drupal_write_record('islandora_workflow_permissions',$obj);
+  drupal_write_record('islandora_workflow_permissions', $obj);
   
   $obj=array(
   'role' => '2',
   'collection' => 'Awill:257',
   'permission' => 'islandora_workflow_Submitter'
   );
-  drupal_write_record('islandora_workflow_permissions',$obj);
+  drupal_write_record('islandora_workflow_permissions', $obj);
   
   $obj=array(
   'role' => '3',
   'collection' => 'Awill:257',
   'permission' => 'islandora_workflow_Manager'
   );
-  drupal_write_record('islandora_workflow_permissions',$obj);
+  drupal_write_record('islandora_workflow_permissions', $obj);
 }
