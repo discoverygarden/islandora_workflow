@@ -156,11 +156,12 @@ function islandora_workflow_collection_permissions() {
   //init
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow'); 
   $collection_permissions_form=array();
-  $current_collection_permissions=array();
+  $current_module_permissions=array();
   
   //collect current state data
   $my_collections=islandora_workflow_get_current_users_collections();
-  $current_collection_permissions=islandora_workflow_get_roles_with_module_permissions();
+  $current_module_permissions=islandora_workflow_get_roles_with_module_permissions();
+  $current_collection_permissions=islandora_workflow_get_all_collection_permissions();
   
   //setup the form
   $collection_permissions_form['islandora_workflow_collection_permissions_table'] = array(
@@ -178,15 +179,15 @@ function islandora_workflow_collection_permissions() {
   );
   
   //populate the form
-  foreach ($current_collection_permissions as $role_pid => $role_name) {//roles
+  foreach ($current_module_permissions as $role_pid => $role_name) {//roles
     //add none to the possible options
-    $current_collection_permissions[$role_pid][key($role_name)][]='';
+    $current_module_permissions[$role_pid][key($role_name)][]='';
     
     foreach ($my_collections as $collection_pid => $collection_name) {//collections
       $collection_permissions_form['islandora_workflow_collection_permissions_table']['permissions_table'][$role_pid][$collection_pid] = array(
       '#type' => 'select',
-      '#default_value' => $current_collection_permissions[$role_pid][key($role_name)][0],//make this into whatever the current setting is for that collection/role
-      '#options' => $current_collection_permissions[$role_pid][key($role_name)],//what are available to the current role
+      '#default_value' => $current_module_permissions[$role_pid][key($role_name)][0],//make this into whatever the current setting is for that collection/role
+      '#options' => $current_module_permissions[$role_pid][key($role_name)],//what are available to the current role
       );
     }
   }

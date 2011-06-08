@@ -45,7 +45,7 @@ function islandora_workflow_get_current_users_collections() {
 function islandora_workflow_get_all_collection_permissions() {
   $perm_list=array();
   //build query
-  $query='SELECT {role},{permission},{collection} FROM islandora_workflow_permissions';
+  $query='SELECT role,permission,collection FROM {islandora_workflow_permissions}';
   $results=db_query($query);
   //debug
   dsm($query);
@@ -59,22 +59,22 @@ function islandora_workflow_get_all_collection_permissions() {
  * Most usefull for building the work portal, and also used for determining visible 
  * @return array $perm_list: list of permissions the current user has with the indicated $perm_list[$role_id][$collection_id][1...4]=perms
  */
-function islandora_workflow_get_current_users_collection_permissions(){
+function islandora_workflow_get_current_users_collection_permissions() {
   //do islandora_workflow_get_all_collection_permissions with restrictions on the roles to the list of roles the current user has
   $perm_list=array();
   global $user;//use $user->roles to get an array $roles[$role_id][$role_name]  $role_id is int
   
   //build query
-  $query='SELECT {role},{permission},{collection} FROM islandora_workflow_permissions';
+  $query='SELECT role,permission,collection FROM {islandora_workflow_permissions}';
   $user_roles=$user->roles;
   
   $loop_count=0;
   foreach ($user_roles as $role_pid => $role_name) {
     if ($loop_count==0) {//if on the first role user the where clause
-      $page=$page .' WHERE role="'. $role_pid.'"';
+      $page=$page . ' WHERE role="' . $role_pid . '"';
     }
     else {
-      $query=$query .' OR role="'. $role_pid.'"';
+      $query=$query . ' OR role="' . $role_pid . '"';
     }
     $loop_count++;
   }
