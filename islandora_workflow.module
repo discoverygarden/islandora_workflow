@@ -141,8 +141,8 @@ function islandora_workflow_preprocess_permissions_table(&$vars) {
   
   //render each form element
   foreach ($vars['roles'] as $role_id => $role_name) {
-    foreach ($vars['collections'] as $collection_id) {
-      $vars['list'][$role_id][key($vars['collections'])]=drupal_render($vars['list'][$role_id][key($vars['collections'])]);
+    foreach ($vars['collections'] as $collection_id => $collection_name) {
+      $vars['list'][$role_id][$collection_id]=drupal_render($vars['list'][$role_id][$collection_id]);
     }
   }
 }
@@ -159,6 +159,7 @@ function islandora_workflow_collection_permissions() {
   
   //collect current state data
   $my_collections=islandora_workflow_get_current_users_collections();//used to get list of collections to display
+  dsm($my_collections);
   $current_module_permissions=islandora_workflow_get_roles_with_module_permissions();//used to get what roles to display and avaialbe options for selects
   $current_collection_permissions=islandora_workflow_get_all_permissions();//used to find the default options for slects
   
@@ -192,6 +193,7 @@ function islandora_workflow_collection_permissions() {
     $current_module_permissions[$role_pid][key($role_name)][]='';
     
     foreach ($my_collections as $collection_pid => $collection_name) {//collections
+      dsm(array_search($current_collection_permissions[$role_pid][$collection_pid], $current_module_permissions[$role_pid][key($role_name)]));
       //drupal made me do it...
       $collection_permissions_form['islandora_workflow_collection_permissions_table']['permissions_table'][$role_pid][$collection_pid] = array(
       '#type' => 'select',
@@ -208,9 +210,10 @@ function islandora_workflow_collection_permissions() {
   * This function processes the form submitted from the collection permission page
   */
 function islandora_workflow_collection_permissions_submit($collection_permissions_form, &$collection_permissions_form_state) {
-  
+  //debugs
   dsm($collection_permissions_form);
   dsm($collection_permissions_form_state);
+  
   $clicked_button = $collection_permissions_form_state['clicked_button']['#value'];
   
   if ($clicked_button=='Update') {//handle updating the page
