@@ -162,7 +162,8 @@ function islandora_workflow_collection_permissions() {
   $my_collections=islandora_workflow_get_current_users_collections();//used to get list of collections to display
   $current_module_permissions=islandora_workflow_get_roles_with_module_permissions();//used to get what roles to display and avaialbe options for selects
   $current_collection_permissions=islandora_workflow_get_all_permissions();//used to find the default options for slects
-
+  dsm($current_collection_permissions);
+  
   //setup the form
   $collection_permissions_form['islandora_workflow_collection_permissions_table'] = array(
     '#type' => 'fieldset',
@@ -186,7 +187,7 @@ function islandora_workflow_collection_permissions() {
     foreach ($my_collections as $collection_pid => $collection_name) {//collections
       $collection_permissions_form['islandora_workflow_collection_permissions_table']['permissions_table'][$role_pid][$collection_pid] = array(
       '#type' => 'select',
-      '#default_value' => $current_module_permissions[$role_pid][key($role_name)][0],//make this into whatever the current setting is for that collection/role
+      '#default_value' => $current_collection_permissions[$role_pid][$collection_pid],//make this into whatever the current setting is for that collection/role
       '#options' => $current_module_permissions[$role_pid][key($role_name)],//what are available to the current role
       );
     }

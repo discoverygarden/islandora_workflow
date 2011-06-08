@@ -51,7 +51,8 @@ function islandora_workflow_get_all_permissions() {
   
   //build return array
   while ($row=db_fetch_array($results)) {
-    $perm_list[]=$row;
+    $perm_list[$row['role']]=array($row['collection'] => $row['permission']
+    );
   }
 
   return $perm_list;
@@ -85,7 +86,8 @@ function islandora_workflow_get_current_users_permissions() {
   
   //build return array
   while ($row=db_fetch_array($results)) {
-    $perm_list[]=$row;
+    $perm_list[$row['role']]=array($row['collection'] => $row['permission']
+    );
   }
   
   return $perm_list;  
