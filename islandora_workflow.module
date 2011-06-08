@@ -149,7 +149,6 @@ function islandora_workflow_preprocess_permissions_table(&$vars) {
  
  /**
  * This generates the page for editing collection level permissions
- * TODO:modify #default-value to reflect the current state
  * @return $collection_permissions_form: The form for changing collection permissions granted to roles
  */
 function islandora_workflow_collection_permissions() {
@@ -173,9 +172,9 @@ function islandora_workflow_collection_permissions() {
     '#description' => t('Assign collection level permissions to roles.'),
   );
   //submit button
-  $collection_permissions_form['submit']= array(
-  		'#type' => 'submit',
-  		'#value' => t('Update')
+  $collection_permissions_form['update']= array(
+  	'#type' => 'submit',
+  	'#value' => t('Update')
   );
   //restore button
   $collection_permissions_form['restore']= array(
@@ -208,9 +207,18 @@ function islandora_workflow_collection_permissions() {
  /**
   * This function processes the form submitted from the collection permission page
   */
-function islandora_workflow_collection_permissions_submit() {
-  $output='';
-  $tmp="blah blah blah submitted";
-  dsm($tmp);
+function islandora_workflow_collection_permissions_submit($collection_permissions_form, &$collection_permissions_form_state) {
+  
+  dsm($collection_permissions_form);
+  dsm($collection_permissions_form_state);
+  $clicked_button = $collection_permissions_form_state['clicked_button']['#value'];
+  
+  if ($clicked_button=='Update') {//handle updating the page
+    drupal_set_message('Changes to permissions were processed.');
+  }
+  elseif ($clicked_button=='Restore') {//handle reset
+    drupal_set_message('Permissions restored to previous state.');
+  }
+  
   return $output;
 }
