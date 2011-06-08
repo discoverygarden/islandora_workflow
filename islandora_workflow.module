@@ -172,7 +172,16 @@ function islandora_workflow_collection_permissions() {
     '#tree' => TRUE, //See http://drupal.org/node/751826
     '#description' => t('Assign collection level permissions to roles.'),
   );
-  $collection_permissions_form['#submit'][] = 'islandora_workflow_collection_permissions_processing';
+  //submit button
+  $collection_permissions_form['submit']= array(
+  		'#type' => 'submit',
+  		'#value' => t('Update')
+  );
+  //restore button
+  $collection_permissions_form['restore']= array(
+  		'#type' => 'submit',
+  		'#value' => t('Restore')
+  );  
   //theme
   $collection_permissions_form['islandora_workflow_collection_permissions_table']['permissions_table']=array(
   '#theme' => 'permissions_table'  
@@ -188,7 +197,7 @@ function islandora_workflow_collection_permissions() {
       $collection_permissions_form['islandora_workflow_collection_permissions_table']['permissions_table'][$role_pid][$collection_pid] = array(
       '#type' => 'select',
       //default value works, but if you hit refresh on the page the values do not go back to the default... navigating away does reset the value
-      '#default_value' => array_search($current_collection_permissions[$role_pid][$collection_pid],$current_module_permissions[$role_pid][key($role_name)]),//make this into whatever the current setting is for that collection/role
+      '#default_value' => array_search($current_collection_permissions[$role_pid][$collection_pid], $current_module_permissions[$role_pid][key($role_name)]),//make this into whatever the current setting is for that collection/role
       '#options' => $current_module_permissions[$role_pid][key($role_name)],//what are available to the current role
       );
     }
@@ -199,8 +208,9 @@ function islandora_workflow_collection_permissions() {
  /**
   * This function processes the form submitted from the collection permission page
   */
-function islandora_workflow_collection_permissions_processing() {
+function islandora_workflow_collection_permissions_submit() {
   $output='';
-  
+  $tmp="blah blah blah submitted";
+  dsm($tmp);
   return $output;
 }
