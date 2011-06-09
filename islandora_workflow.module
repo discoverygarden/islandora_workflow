@@ -246,10 +246,6 @@ function islandora_workflow_collection_permissions_submit($collection_permission
         else {//if there is NOT a DB rule
           
           if ($select_element_value!='') {//if the form's rule is NOT empty
-            dsm($role_id);
-            dsm($collection_id);
-            dsm($current_permissions);
-            dsm($current_permissions[$role_id][$collection_id]);
             //add the form rule to the DB queue for adding a permission
             $new_permissions[$role_id]=array($collection_id => $select_element_value);
           }//if it is empty do nothing          
@@ -260,7 +256,7 @@ function islandora_workflow_collection_permissions_submit($collection_permission
     dsm($changed_permissions);
     dsm($removed_permissions);
     dsm($new_permissions);
-    /*
+    
     //send changes to DB
     foreach ($changed_permissions as $role_id => $collection) {
       foreach ($collection as $collecion_id => $permission) {
@@ -290,7 +286,7 @@ function islandora_workflow_collection_permissions_submit($collection_permission
         db_delete('islandora_workflow_permissions',$where);
       }
     }
-    */
+    
     //print out to user
     drupal_set_message('Changes to permissions were processed.');
   }
