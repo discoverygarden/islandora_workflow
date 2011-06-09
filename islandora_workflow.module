@@ -62,7 +62,7 @@ function islandora_wokflow_check_permissions($permission_array) {
   //loop through permissions allowed
   for ($i=0; $i<sizeof($permission_array);$i++) {
     //return true if the user has an allowed permission
-    if (user_access($arr_perms[$i])) {
+    if (user_access($permission_array[$i])) {
       return TRUE;
     }
   }
@@ -174,14 +174,12 @@ function islandora_workflow_collection_permissions() {
   );
   //submit button
   $collection_permissions_form['update']= array(
-  	'#type' => 'submit',
-  	'#value' => t('Update')
-  );
+    '#type' => 'submit',
+    '#value' => t('Update'));
   //restore button
   $collection_permissions_form['restore']= array(
-  		'#type' => 'submit',
-  		'#value' => t('Restore')
-  );  
+    '#type' => 'submit',
+    '#value' => t('Restore'));  
   //theme
   $collection_permissions_form['islandora_workflow_collection_permissions_table']['permissions_table']=array(
   '#theme' => 'permissions_table'  
