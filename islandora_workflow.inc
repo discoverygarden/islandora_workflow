@@ -192,8 +192,7 @@ function islandora_workflow_get_roles_with_module_permissions() {
 /**
  *This function is here for testing perposes
  *TODO: remove this function when it is no longer of immediate use 
- *TODO: Move this somehere and give it a button, it can't work from hook install 'cause the schema isn't loaded yet
- */
+ * */
 function islandora_workflow_insert_test_data() {
   $obj=array(
   'role' => '1',
