@@ -11,7 +11,7 @@
  * This function uses the get_all_collections() function and in the case of a manager
  * the drupal database table 'islandora_workflow_permissions' to compile a list of 
  * collections that the user has manager level and above permissions to
- * TODO: build the drupal db query and test on manager level user
+ * TODO: test on manager level user
  * TODO: don't forget to uncomment the check for drupal admin
  * @return $collection_list: an associated array of collection pids and names, 
  * @return boolean: a false boolean if they don't have manger or higher perms
@@ -24,9 +24,19 @@ function islandora_workflow_get_current_users_collections() {
   }
   elseif (user_access('islandora_workflow_Manager')) {//manager show permitted
     $collection_list=islandora_workflow_get_all_collections();
-    $permitted_collections='';//do a querry on table
+    
+    //figure out owned collections
+    $users_collection_permissions=islandora_workflow_get_current_users_permissions();
+    foreach ($users_collection_permissions as $role_id => $collections) {
+      foreach ($collections as $collection_id => $permission) {
+        if ($permission=='islandora_workflow_Manager') {
+          $permitted_collections[]=$collection_id;//do a querry on table
+        }
+      }
+    }
+    //only send back owned collection pids and names
     foreach ($collection_list as $collection_pid => $collection_name) {
-      if (!in_array($collection_name, $permitted_collections)) {
+      if (!in_array($collection_pid, $permitted_collections)) {
         unset($collection_list[$collection_pid]);
       }
     }
