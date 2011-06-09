@@ -225,26 +225,20 @@ function islandora_workflow_collection_permissions_submit($collection_permission
         
         $select_element_index=$possible_permission[$role_id][$collection_id];
         $select_element_value=$collection_permissions_form['islandora_workflow_collection_permissions_table']['permissions_table'][$role_id][$collection_id]['#options'][$select_element_index];
-
         //compare the form values against the database and record the changes necessary
         if (isset($current_permissions[$role_id][$collection_id])) {//if there is currently a DB rule
-          
           if ($current_permissions[$role_id][$collection_id]!=$select_element_value) {//if the DB and FORM disagree
-            
             if ($select_element_value=='') {// if the form element is empty
-              
               //add the form rule to the DB queue for deleting the rule
               $removed_permissions[$role_id]=array($collection_id => $current_permissions[$role_id][$collection_id]);
             }
             else {//if the form element is populated
-              
               //add the form rule to the DB queue for rewriting the rule
               $changed_permissions[$role_id]=array($collection_id => $select_element_value);
             }
           }
         }
         else {//if there is NOT a DB rule
-          
           if ($select_element_value!='') {//if the form's rule is NOT empty
             //add the form rule to the DB queue for adding a permission
             $new_permissions[$role_id]=array($collection_id => $select_element_value);
@@ -252,41 +246,35 @@ function islandora_workflow_collection_permissions_submit($collection_permission
         }
       }
     }
-    //debug
-    dsm($changed_permissions);
-    dsm($removed_permissions);
-    dsm($new_permissions);
-    
+        
     //send changes to DB
     foreach ($changed_permissions as $role_id => $collection) {
       foreach ($collection as $collecion_id => $permission) {
-          $fields=array(
-            'permission' => $permission
-          );
-          $where=array(
-            'role' => $role_id,
-            'collection' => $collecion_id,
-            'permission' => $current_permissions[$role_id][$collecion_id]
-          );
-        db_update('islandora_workflow_permissions', $fields, $where, $where_type = 'AND');
+        $query='UPDATE islandora_workflow_permissions';
+        $query=$query . ' SET role=' . $role_id . ', collection="' . $collecion_id . '", permission="' . $permission . '"';
+        $query= $query .' WHERE role=' . $role_id . ' AND collection="' . $collection_id . '"';
+        db_query($query);
       }
     }
     //send new permissions to DB
-    foreach ($new_permissions as $permission) {
-      drupal_write_record('islandora_workflow_permissions', $permission);
+    foreach ($new_permissions as $role_id => $collection) {
+      foreach ($collection as $collecion_id => $permission) {
+        $record=array(
+          'role' => $role_id,
+          'collection' => $collection_id,
+          'permission' => $permission
+        );
+        drupal_write_record('islandora_workflow_permissions', $record);
+      }
     }
     //delete now unnecessary entries in DB
     foreach ($removed_permissions as $role_id => $collection) {
       foreach ($collection as $collecion_id => $permission) {
-        $where=array(
-          'role' => $role_id,
-          'collection' => $collecion_id,
-          'permission' => $permission
-        );
-        db_delete('islandora_workflow_permissions',$where);
+        $query='DELETE FROM islandora_workflow_permissions';
+        $query= $query .' WHERE role=' . $role_id . ' AND collection="' . $collection_id . '"';
+        db_query($query);
       }
     }
-    
     //print out to user
     drupal_set_message('Changes to permissions were processed.');
   }
