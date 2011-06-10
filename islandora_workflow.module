@@ -72,7 +72,8 @@ function islandora_workflow_menu() {
   $menuEntries['islandora_workflow']=array(
     'title' => t('My Islandora work'),
     'description' => t('This is the main access point to islandora_workflow'),
-    'page callback' => 'islandora_workflow_work',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('islandora_workflow_work'),
     'access callback' => 'islandora_wokflow_check_permissions',
     'access arguments' => array(array('islandora_workflow_Administrator', 'islandora_workflow_Editor', 'islandora_workflow_Manager', 'islandora_workflow_Submitter')),
     'type' => MENU_NORMAL_ITEM
