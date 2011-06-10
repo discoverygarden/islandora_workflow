@@ -28,7 +28,7 @@ function islandora_workflow_work() {
         '#content' => $objects_tab,
         '#weight' => '1'
       );
-  if (user_access('islandora_workflow_Editor') || user_access('islandora_workflow_Editor')) {
+  if (user_access('islandora_workflow_Editor') || user_access('islandora_workflow_Manager')) {
     $page_tabs['Collections'] = array(// available to whom?
           '#type' => 'tabpage',
           '#title' => t('My Collections'),
