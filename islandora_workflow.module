@@ -17,7 +17,6 @@ function islandora_workflow_work() {
   );
   $create_object_tab='<P>New Object</P>';//available to all
   $objects_tab='<P>My Objects</P>';//available to all
-  $collections_tab='<P>My Collections</P>';//available to ?
   $create_collections_tab='<P>New Collection</P>';//available to ?
   
   //create and send out top level tabs based on the user's available permissions
@@ -27,21 +26,13 @@ function islandora_workflow_work() {
         '#content' => $objects_tab,
         '#weight' => '1'
       );
-  if (user_access('islandora_workflow_Editor') || user_access('islandora_workflow_Manager') || user_access('administer')) {
-    $page_tabs['Collections'] = array(// available to whom?
-          '#type' => 'tabpage',
-          '#title' => t('My Collections'),
-          '#content' => $collections_tab,
-          '#weight' => '2'
-        );
-  }  
   $page_tabs['New Object'] = array(
         '#type' => 'tabpage',
         '#title' => t('New Object'),
         '#content' => $create_object_tab,
         '#weight' => '3'
       );
-  if (user_access('islandora_workflow_Administrator') || user_access('administer')) {
+  if (user_access('islandora_workflow_Administrator') || user_access('islandora_workflow_Manager') || user_access('administer')) {
     $page_tabs['New Collection'] = array(// available to admins
           '#type' => 'tabpage',
           '#title' => t('New Collection'),
