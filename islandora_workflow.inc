@@ -57,13 +57,12 @@ function islandora_workflow_get_all_permissions() {
   $perm_list=array();
   
   //build query
-  $query='SELECT role,collection,permission FROM {islandora_workflow_permissions}';
+  $query='SELECT role, collection, permission FROM {islandora_workflow_permissions}';
   $results=db_query($query);
   
   //build return array
   while ($row=db_fetch_array($results)) {
-    $perm_list[$row['role']]=array($row['collection'] => $row['permission']
-    );
+    $perm_list[$row['role']][$row['collection']]=$row['permission'];
   }
 
   return $perm_list;

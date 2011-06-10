@@ -189,7 +189,6 @@ function islandora_workflow_collection_permissions() {
 
   $current_module_permissions=islandora_workflow_get_roles_with_module_permissions();//used to get what roles to display and avaialbe options for selects
   $current_collection_permissions=islandora_workflow_get_all_permissions();//used to find the default options for slects
-  
   //setup the form
   $collection_permissions_form['islandora_workflow_collection_permissions_table'] = array(
     '#type' => 'fieldset',
@@ -213,19 +212,18 @@ function islandora_workflow_collection_permissions() {
   );
   
   //populate the form
-  foreach ($current_module_permissions as $role_pid => $role_name) {//roles
-    //add none to the possible options
-    $current_module_permissions[$role_pid][key($role_name)][]='';
-    
-    foreach ($my_collections as $collection_pid => $collection_name) {//collections
-      //drupal made me do it...
-      $collection_permissions_form['islandora_workflow_collection_permissions_table']['permissions_table'][$role_pid][$collection_pid] = array(
-      '#type' => 'select',
-      //default value works, but if you hit refresh on the page the values do not go back to the default... navigating away does reset the value
-      '#default_value' => array_search($current_collection_permissions[$role_pid][$collection_pid], $current_module_permissions[$role_pid][key($role_name)]),//make this into whatever the current setting is for that collection/role
-      '#options' => $current_module_permissions[$role_pid][key($role_name)],//what are available to the current role
-      );
-    }
+  foreach ($current_module_permissions as $role_id => $role_name) {//roles
+      //add none to the possible options
+      $current_module_permissions[$role_id][key($role_name)][]='';
+      foreach ($my_collections as $collection_id => $collection_name) {//collections
+        //drupal made me do it...
+        $collection_permissions_form['islandora_workflow_collection_permissions_table']['permissions_table'][$role_id][$collection_id] = array(
+        '#type' => 'select',
+        //default value works, but if you hit refresh on the page the values do not go back to the default... navigating away does reset the value
+        '#default_value' => array_search($current_collection_permissions[$role_id][$collection_id], $current_module_permissions[$role_id][key($role_name)]),//make this into whatever the current setting is for that collection/role
+        '#options' => $current_module_permissions[$role_id][key($role_name)],//what are available to the current role
+        );
+      }
   }
   return $collection_permissions_form;
 }
