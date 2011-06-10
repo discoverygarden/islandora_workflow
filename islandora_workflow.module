@@ -255,23 +255,22 @@ function islandora_workflow_collection_permissions_submit($collection_permission
           if ($current_permissions[$role_id][$collection_id]!=$select_element_value) {//if the DB and FORM disagree
             if ($select_element_value=='') {// if the form element is empty
               //add the form rule to the DB queue for deleting the rule
-              $removed_permissions[$role_id]=array($collection_id => $current_permissions[$role_id][$collection_id]);
+              $removed_permissions[$role_id][$collection_id] = $current_permissions[$role_id][$collection_id];
             }
             else {//if the form element is populated
               //add the form rule to the DB queue for rewriting the rule
-              $changed_permissions[$role_id]=array($collection_id => $select_element_value);
+              $changed_permissions[$role_id][$collection_id] = $select_element_value;
             }
           }
         }
         else {//if there is NOT a DB rule
           if ($select_element_value!='') {//if the form's rule is NOT empty
             //add the form rule to the DB queue for adding a permission
-            $new_permissions[$role_id]=array($collection_id => $select_element_value);
+            $new_permissions[$role_id][$collection_id]=$select_element_value;
           }//if it is empty do nothing          
         }
       }
     }
-        
     //send changes to DB
     foreach ($changed_permissions as $role_id => $collection) {
       foreach ($collection as $collection_id => $permission) {
