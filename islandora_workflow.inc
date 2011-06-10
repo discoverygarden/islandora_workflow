@@ -17,6 +17,8 @@
  * @return boolean: a false boolean if they don't have manger or higher perms
  */
 function islandora_workflow_get_current_users_collections() {
+  //init
+  $permitted_collections=array();
   $collection_list=array();
   //if (user_access('islandora_workflow_Administrator') || user_access('administer')) {//admin show all
   if (user_access('islandora_workflow_Administrator')) {//admin show all

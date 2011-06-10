@@ -8,12 +8,49 @@
 
 /**
  * This generates the main workflow page
+ * @TODO: make everything avaialble to site admins
  * @return $page: The html of the page to return
  */
 function islandora_workflow_work() {
-  $page='';
-  $page=$page ."<p>HelloWorld1</p>";
-  return $page;
+  //init
+  $page_tabs=array(
+    '#type' => 'tabset',
+  );
+  $create_object_tab='<P>New Object</P>';//available to all
+  $objects_tab='<P>My Objects</P>';//available to all
+  $collections_tab='<P>My Collections</P>';//available to ?
+  $create_collections_tab='<P>New Collection</P>';//available to ?
+  
+  //create and send out top level tabs based on the user's available permissions
+  $page_tabs['Objects'] = array(
+        '#type' => 'tabpage',
+        '#title' => t('My Objects'),
+        '#content' => $objects_tab,
+        '#weight' => '1'
+      );
+  if (user_access('islandora_workflow_Editor') || user_access('islandora_workflow_Editor')) {
+    $page_tabs['Collections'] = array(// available to whom?
+          '#type' => 'tabpage',
+          '#title' => t('My Collections'),
+          '#content' => $collections_tab,
+          '#weight' => '2'
+        );
+  }  
+  $page_tabs['New Object'] = array(
+        '#type' => 'tabpage',
+        '#title' => t('New Object'),
+        '#content' => $create_object_tab,
+        '#weight' => '3'
+      );
+  if (user_access('islandora_workflow_Administrator')) {
+    $page_tabs['New Collection'] = array(// available to admins
+          '#type' => 'tabpage',
+          '#title' => t('New Collection'),
+          '#content' => $create_collections_tab,
+          '#weight' => '4'
+        );
+  }    
+  return tabs_render($page_tabs);
 }
 
 /**
