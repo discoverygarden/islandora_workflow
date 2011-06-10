@@ -8,7 +8,6 @@
 
 /**
  * This generates the main workflow page
- * @TODO: make everything avaialble to site admins
  * @return $page: The html of the page to return
  */
 function islandora_workflow_work() {
@@ -28,7 +27,7 @@ function islandora_workflow_work() {
         '#content' => $objects_tab,
         '#weight' => '1'
       );
-  if (user_access('islandora_workflow_Editor') || user_access('islandora_workflow_Manager')) {
+  if (user_access('islandora_workflow_Editor') || user_access('islandora_workflow_Manager') || user_access('administer')) {
     $page_tabs['Collections'] = array(// available to whom?
           '#type' => 'tabpage',
           '#title' => t('My Collections'),
@@ -42,7 +41,7 @@ function islandora_workflow_work() {
         '#content' => $create_object_tab,
         '#weight' => '3'
       );
-  if (user_access('islandora_workflow_Administrator')) {
+  if (user_access('islandora_workflow_Administrator') || user_access('administer')) {
     $page_tabs['New Collection'] = array(// available to admins
           '#type' => 'tabpage',
           '#title' => t('New Collection'),
