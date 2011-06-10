@@ -24,7 +24,8 @@ function islandora_workflow_work() {
         '#type' => 'tabpage',
         '#title' => t('My Objects'),
         '#content' => $objects_tab,
-        '#weight' => '1'
+        '#weight' => '1',
+        '#theme' => 'workflow_table'
       );
   $page_tabs['New Object'] = array(
         '#type' => 'tabpage',
@@ -152,6 +153,10 @@ function islandora_workflow_theme() {
    'arguments' => array('list' => NULL, 'form' => NULL),
    'template' => 'permissions_table'
     );
+   $themes['workflow_table']=array(
+   'arguments' => array('list' => NULL, 'form' => NULL),
+   'template' => 'workflow_table'
+    );
    return $themes;
  }
  
@@ -173,6 +178,15 @@ function islandora_workflow_preprocess_permissions_table(&$vars) {
       $vars['list'][$role_id][$collection_id]=drupal_render($vars['list'][$role_id][$collection_id]);
     }
   }
+}
+
+ /**
+  * This function handles making variables available to the theme template for 
+  * the workflows tab of the 'work' page
+  * @param array ref $vars: the list of variables (including the form) to send to the template
+  * @return array $vars: the modified list of variables to send to the template
+  */
+function islandora_workflow_preprocess_workflow_table(&$vars) {
 }
  
  /**
