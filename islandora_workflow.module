@@ -276,16 +276,16 @@ function islandora_workflow_collection_permissions_submit($collection_permission
         
     //send changes to DB
     foreach ($changed_permissions as $role_id => $collection) {
-      foreach ($collection as $collecion_id => $permission) {
+      foreach ($collection as $collection_id => $permission) {
         $query='UPDATE {islandora_workflow_permissions}';
-        $query=$query . ' SET role=' . $role_id . ', collection="' . $collecion_id . '", permission="' . $permission . '"';
+        $query=$query . ' SET role=' . $role_id . ', collection="' . $collection_id . '", permission="' . $permission . '"';
         $query= $query .' WHERE role=' . $role_id . ' AND collection="' . $collection_id . '"';
         db_query($query);
       }
     }
     //send new permissions to DB
     foreach ($new_permissions as $role_id => $collection) {
-      foreach ($collection as $collecion_id => $permission) {
+      foreach ($collection as $collection_id => $permission) {
         $record=array(
           'role' => $role_id,
           'collection' => $collection_id,
@@ -296,7 +296,7 @@ function islandora_workflow_collection_permissions_submit($collection_permission
     }
     //delete now unnecessary entries in DB
     foreach ($removed_permissions as $role_id => $collection) {
-      foreach ($collection as $collecion_id => $permission) {
+      foreach ($collection as $collection_id => $permission) {
         $query='DELETE FROM {islandora_workflow_permissions}';
         $query= $query .' WHERE role=' . $role_id . ' AND collection="' . $collection_id . '"';
         db_query($query);
