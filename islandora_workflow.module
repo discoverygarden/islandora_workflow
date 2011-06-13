@@ -12,32 +12,77 @@
  */
 function islandora_workflow_work() {
   //init
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow'); 
   $page_tabs=array(
     '#type' => 'tabset',
   );
-  $create_object_tab='<P>New Object</P>';//available to all
-  $objects_tab='<P>My Objects</P>';//available to all
-  $create_collections_tab='<P>New Collection</P>';//available to ?
+  $users_collections=islandora_workflow_get_current_users_collections();
+  $users_permissions=islandora_workflow_get_all_permissions();
+  $create_collections_tab_form=array();
+  $create_object_tab_form=array();
+  $objects_tab_form['objects_form']=array(    
+    '#type' => 'fieldset',
+    '#title' => t('Workflow'),
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,
+    '#tree' => TRUE,
+    '#description' => t('Perform work on objects you have access to.'),
+  );
+  //@todo: make only allowed buttons appear, verify order of buttons
+  //delete button
+  $objects_tab_form['Delete']= array(
+    '#type' => 'submit',
+        '#weight' => '1',
+    '#value' => t('Delete'));
+  //submit button
+  $objects_tab_form['Submit']= array(
+    '#type' => 'submit',
+    '#weight' => '2',
+    '#value' => t('Submit'));
+    //approve button
+  $objects_tab_form['Approve']= array(
+    '#type' => 'submit',
+    '#weight' => '3',
+    '#value' => t('Approve'));
+  //reject button
+  $objects_tab_form['Reject']= array(
+    '#type' => 'submit',
+    '#weight' => '4',
+    '#value' => t('Reject'));
+    //publish button
+  $objects_tab_form['Publish']= array(
+    '#type' => 'submit',
+    '#weight' => '5',
+    '#value' => t('Publish'));  
+  
+  $objects_tab_form['objects_form']['objects_form_elems']=array('#theme' => 'workflow_table');
+  //populate tab for viewing objects
+  foreach ($users_collections as $collection_id => $collection_name) {
+    
+  }
+  
+  //populate tab for creating an object
+  
+  //populate tab for creating a collection
   
   //create and send out top level tabs based on the user's available permissions
   $page_tabs['Objects'] = array(
         '#type' => 'tabpage',
         '#title' => t('My Objects'),
-        '#content' => $objects_tab,
+        '#content' => drupal_render($objects_tab_form),
         '#weight' => '1',
-        '#theme' => 'workflow_table'
       );
   $page_tabs['New Object'] = array(
         '#type' => 'tabpage',
         '#title' => t('New Object'),
-        '#content' => $create_object_tab,
+        '#content' => 'asdt',//drupal_render($create_object_tab_form),
         '#weight' => '3'
       );
   if (user_access('islandora_workflow_Administrator') || user_access('islandora_workflow_Manager') || user_access('administer')) {
     $page_tabs['New Collection'] = array(// available to admins
           '#type' => 'tabpage',
           '#title' => t('New Collection'),
-          '#content' => $create_collections_tab,
+          '#content' => 'asdf',//drupal_render($create_collections_tab_form),
           '#weight' => '4'
         );
   }    
@@ -245,6 +290,8 @@ function islandora_workflow_collection_permissions() {
  
  /**
   * This function processes the form submitted from the collection permission page
+  * @param $collection_permissions_form: Holds all the data on the state  of the form submitted
+  * @param $collection_permissions_form_state: An easier to use version of $collection_permissions_form
   */
 function islandora_workflow_collection_permissions_submit($collection_permissions_form, &$collection_permissions_form_state) {
   $clicked_button = $collection_permissions_form_state['clicked_button']['#value'];
@@ -320,4 +367,13 @@ function islandora_workflow_collection_permissions_submit($collection_permission
   elseif ($clicked_button=='Restore') {//handle reset
     drupal_set_message('Permissions have not been changed.');
   }
+}
+
+/**
+ * This function handles all of the possible submits from the main workflow page
+  * @param $work_form_form: Holds all the data on the state  of the form submitted
+  * @param $work_form_state_form_state: An easier to use version of $work_form_form
+ */
+function islandora_workflow_work_submit($work_form, &$work_form_state) {
+  
 }
