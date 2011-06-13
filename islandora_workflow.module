@@ -12,13 +12,18 @@
  */
 function islandora_workflow_work() {
   //init
-  module_load_include('inc', 'islandora_workflow', 'islandora_workflow'); 
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow'); //for getting workflow info
+  module_load_include('inc', 'fedora_repository', 'fedora_collection'); //for getting members of collections etc.
   $page_tabs=array(
     '#type' => 'tabset',
   );
   $users_manager_collections=islandora_workflow_get_current_users_collections();
   $users_editor_collections=islandora_workflow_get_current_users_collections('islandora_workflow_Editor');
   $users_submitter_collections=islandora_workflow_get_current_users_collections('islandora_workflow_Submitter');
+  $users_manager_objects=array();
+  $users_editor_objects=array();
+  $users_submitter_objects=array();
+  
   //$users_permissions=islandora_workflow_get_all_permissions();
   $create_collections_tab_form=array();
   $create_object_tab_form=array();
@@ -71,23 +76,36 @@ function islandora_workflow_work() {
   //get all members of the collections the user has manager/admin access to
   if ($users_manager_collections) {
     foreach ($users_manager_collections as $collection_id => $collection_name) {
+      $collection_members=get_related_items_as_array($collection_id, $active_objects_only = FALSE);
+      $users_manager_objects[$collection_id][]=$collection_members;
     }
   }
   //get all members of the collections the user has editor level for, excluding those that the user has 
   if ($users_editor_collections) {
     foreach ($users_editor_collections as $collection_id => $collection_name) {
+      if (!isset($users_manager_collections[$collection_id])) {//exclude higher level permissions in the same collection
+        //build form entries
+        $collection_members=get_related_items_as_array($collection_id, $active_objects_only = FALSE);
+        $users_editer_objects[$collection_id][]=$collection_members;
+      }
     }
   }
   //get all members of the collections the user has submitter level for, excluding those that the user has manager/editor level 
   if ($users_submitter_collections) {
     foreach ($users_submitter_collections as $collection_id => $collection_name) {
+      if (!isset($users_manager_collections[$collection_id]) && !isset($users_editor_collections[$collection_id])) {//exclude higher level permissions in the same collection
+        //get all objects the user is assigned or is the creator of in those collections they are submitters (only) in 
+      //build form entries
+        $collection_members=get_related_items_as_array($collection_id, $active_objects_only = FALSE);
+        $users_submitter_objects[$collection_id][]=$collection_members;
+     }
     }
   }
-  //get all objects the user is assigned or is the creator of in those collections they are submitters (only) in 
-  
-  
-  
-  
+
+  //debugs
+  dsm($users_manager_objects);
+  dsm($users_editor_objects);
+  dsm($users_submitter_objects);
   
   
   //populate tab for creating an object
