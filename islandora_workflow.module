@@ -290,9 +290,13 @@ function islandora_workflow_help($path, $arg) {
  */
 function islandora_workflow_theme() {
    $themes=array();
-   $themes['permissions_table']=array(
+   $themes['permissions_role_table']=array(
    'arguments' => array('list' => NULL, 'form' => NULL),
-   'template' => 'permissions_table'
+   'template' => 'permissions_role_table'
+    );
+   $themes['permissions_user_table']=array(
+   'arguments' => array('list' => NULL, 'form' => NULL),
+   'template' => 'permissions_user_table'
     );
    $themes['workflow_table']=array(
    'arguments' => array('list' => NULL, 'form' => NULL),
@@ -301,13 +305,23 @@ function islandora_workflow_theme() {
    return $themes;
  }
  
- /**
+  /**
   * This function handles making variables available to the theme template for 
-  * the islandora_workflow_collection_permissions page
+  * the islandora_workflow_collection_permissions page (user tab)
   * @param array ref $vars: the list of variables (including the form) to send to the template
   * @return array $vars: the modified list of variables to send to the template
   */
-function islandora_workflow_preprocess_permissions_table(&$vars) {
+function islandora_workflow_preprocess_permissions_user_table(&$vars) {
+  
+}
+ 
+ /**
+  * This function handles making variables available to the theme template for 
+  * the islandora_workflow_collection_permissions page (role tab)
+  * @param array ref $vars: the list of variables (including the form) to send to the template
+  * @return array $vars: the modified list of variables to send to the template
+  */
+function islandora_workflow_preprocess_permissions_role_table(&$vars) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
   
   $vars['collections']=islandora_workflow_get_current_users_collections();
@@ -374,7 +388,7 @@ function islandora_workflow_collection_permissions() {
     '#value' => t('Restore'));  
   //theme
   $collection_permissions_form['islandora_workflow_collection_permissions_table']['permissions_table']=array(
-  '#theme' => 'permissions_table'  
+  '#theme' => 'permissions_role_table'  
   );
   
   //populate the form
