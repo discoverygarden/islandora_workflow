@@ -326,6 +326,16 @@ function islandora_workflow_collection_permissions() {
       if (in_array('islandora_workflow_Administrator', $current_module_permissions[$role_id][key($role_name)])) {
         unset($current_module_permissions[$role_id][key($role_name)][array_search('islandora_workflow_Administrator', $current_module_permissions[$role_id][key($role_name)])]);
       }
+      //change the left over permission strings to be more user friendly
+      if (in_array('islandora_workflow_Manager', $current_module_permissions[$role_id][key($role_name)])) {
+        $current_module_permissions[$role_id][key($role_name)][array_search('Manager', $current_module_permissions[$role_id][key($role_name)])]='';
+      }
+      if (in_array('islandora_workflow_Editor', $current_module_permissions[$role_id][key($role_name)])) {
+        $current_module_permissions[$role_id][key($role_name)][array_search('Editor', $current_module_permissions[$role_id][key($role_name)])]='';
+      }
+      if (in_array('islandora_workflow_Submitter', $current_module_permissions[$role_id][key($role_name)])) {
+        $current_module_permissions[$role_id][key($role_name)][array_search('Submitter', $current_module_permissions[$role_id][key($role_name)])]='';
+      }
       
       foreach ($my_collections as $collection_id => $collection_name) {//collections
         //drupal made me do it...
