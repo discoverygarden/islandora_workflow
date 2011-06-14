@@ -76,7 +76,7 @@ function islandora_workflow_work() {
   //get all members of the collections the user has manager/admin access to
   if ($users_manager_collections) {
     foreach ($users_manager_collections as $collection_id => $collection_name) {
-      $collection_members=get_related_items_as_array($collection_id, $active_objects_only = FALSE);
+      $collection_members=get_related_items_as_array($collection_id, 'isMemberOf',10000 , 0, FALSE);
       $users_manager_objects[$collection_id][]=$collection_members;
     }
   }
@@ -85,7 +85,7 @@ function islandora_workflow_work() {
     foreach ($users_editor_collections as $collection_id => $collection_name) {
       if (!isset($users_manager_collections[$collection_id])) {//exclude higher level permissions in the same collection
         //build form entries
-        $collection_members=get_related_items_as_array($collection_id, $active_objects_only = FALSE);
+        $collection_members=get_related_items_as_array($collection_id, 'isMemberOf',10000 , 0, FALSE);
         $users_editer_objects[$collection_id][]=$collection_members;
       }
     }
@@ -93,10 +93,10 @@ function islandora_workflow_work() {
   //get all members of the collections the user has submitter level for, excluding those that the user has manager/editor level 
   if ($users_submitter_collections) {
     foreach ($users_submitter_collections as $collection_id => $collection_name) {
-      if (!isset($users_manager_collections[$collection_id]) && !isset($users_editor_collections[$collection_id])) {//exclude higher level permissions in the same collection
+      if ((!isset($users_manager_collections[$collection_id])) && (!isset($users_editor_collections[$collection_id]))) {//exclude higher level permissions in the same collection
         //get all objects the user is assigned or is the creator of in those collections they are submitters (only) in 
       //build form entries
-        $collection_members=get_related_items_as_array($collection_id, $active_objects_only = FALSE);
+        $collection_members=get_related_items_as_array($collection_id, 'isMemberOf',10000 , 0, FALSE);
         $users_submitter_objects[$collection_id][]=$collection_members;
      }
     }
@@ -282,6 +282,7 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
  
  /**
  * This generates the page for editing collection level permissions
+ * @todo: remove the islandora_workflow_permissions from the options in the slects... it should not be grantable on the collection level
  * @return $collection_permissions_form: The form for changing collection permissions granted to roles
  */
 function islandora_workflow_collection_permissions() {
@@ -321,6 +322,11 @@ function islandora_workflow_collection_permissions() {
   foreach ($current_module_permissions as $role_id => $role_name) {//roles
       //add none to the possible options
       $current_module_permissions[$role_id][key($role_name)][]='';
+      //remove the islandora_workflow_Administrator permission
+      if (in_array('islandora_workflow_Administrator', $current_module_permissions[$role_id][key($role_name)])) {
+        unset($current_module_permissions[$role_id][key($role_name)][array_search('islandora_workflow_Administrator', $current_module_permissions[$role_id][key($role_name)])]);
+      }
+      
       foreach ($my_collections as $collection_id => $collection_name) {//collections
         //drupal made me do it...
         $collection_permissions_form['islandora_workflow_collection_permissions_table']['permissions_table'][$role_id][$collection_id] = array(
