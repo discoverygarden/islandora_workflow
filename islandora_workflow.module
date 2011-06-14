@@ -76,6 +76,7 @@ function islandora_workflow_work() {
   //get all members of the collections the user has manager/admin access to
   if ($users_manager_collections) {
     foreach ($users_manager_collections as $collection_id => $collection_name) {
+      //get all objects in collection
       $collection_members=get_related_items_as_array($collection_id, 'isMemberOf',10000 , 0, FALSE);
       $users_manager_objects[$collection_id][]=$collection_members;
     }
@@ -84,7 +85,7 @@ function islandora_workflow_work() {
   if ($users_editor_collections) {
     foreach ($users_editor_collections as $collection_id => $collection_name) {
       if (!isset($users_manager_collections[$collection_id])) {//exclude higher level permissions in the same collection
-        //build form entries
+        //get all objects in collection
         $collection_members=get_related_items_as_array($collection_id, 'isMemberOf',10000 , 0, FALSE);
         $users_editer_objects[$collection_id][]=$collection_members;
       }
@@ -94,13 +95,13 @@ function islandora_workflow_work() {
   if ($users_submitter_collections) {
     foreach ($users_submitter_collections as $collection_id => $collection_name) {
       if ((!isset($users_manager_collections[$collection_id])) && (!isset($users_editor_collections[$collection_id]))) {//exclude higher level permissions in the same collection
-        //get all objects the user is assigned or is the creator of in those collections they are submitters (only) in 
-      //build form entries
+        //get all objects the user is assigned or is the creator of in those collections they are submitters (only) in collection
         $collection_members=get_related_items_as_array($collection_id, 'isMemberOf',10000 , 0, FALSE);
         $users_submitter_objects[$collection_id][]=$collection_members;
      }
     }
   }
+  //build object form elements
 
   //debugs
   dsm($users_manager_objects);
@@ -374,7 +375,7 @@ function islandora_workflow_collection_permissions_submit($collection_permission
         
         $select_element_index=$possible_permission[$role_id][$collection_id];
         $select_element_value=$collection_permissions_form['islandora_workflow_collection_permissions_table']['permissions_table'][$role_id][$collection_id]['#options'][$select_element_index];
-        //remap user friendly element values to permission names
+        //remap user friendly element option values to permission names
         if ($select_element_value=='Manager') {
           $select_element_value='islandora_workflow_Manager';
         }
