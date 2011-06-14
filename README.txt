@@ -14,3 +14,6 @@ Workflow can [not implemented yet] be enforced through the use of XACML. There i
 There are concurency issues, more info pending.
 What happens when a Drupal admin revokes a permission that someone currently has with a collection?
 How do we recover if Drupal side modifications occured when Fedora was inactive?
+
+To be able to set user specific roles without restriction you need to set authenticated user permissions to include islandora_workflow_Submitter, islandora_workflow_Editor and islandora_workflow_Manager permissions.
+Do not set the islandora_workflow_Administrator permission for the authenticated user role.

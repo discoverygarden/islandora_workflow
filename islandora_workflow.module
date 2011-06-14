@@ -23,7 +23,15 @@ function islandora_workflow_work() {
   
   $create_collections_tab_form=array();
   $create_object_tab_form=array();
-  $objects_tab_form['objects_form']=array(    
+  $workflow_tab_form['objects_form']=array(    
+    '#type' => 'fieldset',
+    '#title' => t('Workflow'),
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,
+    '#tree' => TRUE,
+    '#description' => t('Perform work on objects you have access to.'),
+  );
+  $overview_tab_form['objects_form']=array(    
     '#type' => 'fieldset',
     '#title' => t('Workflow'),
     '#collapsible' => FALSE,
@@ -34,37 +42,37 @@ function islandora_workflow_work() {
   //@todo: As allowing the submitters to see the delete button violates the wireframes, we should check this with the client.  It makes sense
   // for the submitters to be able to delete objects and start over.
   //delete button
-  $objects_tab_form['Delete']= array(
+  $overview_tab_form['Delete']= array(
     '#type' => 'submit',
     '#weight' => '1',
     '#value' => t('Delete'));
   //submit button
-  $objects_tab_form['Submit']= array(
+  $overview_tab_form['Submit']= array(
     '#type' => 'submit',
     '#weight' => '2',
     '#value' => t('Submit'));
     //approve button
   if (user_access('islandora_workflow_Administrator') || user_access('islandora_workflow_Manager') || user_access('islandora_workflow_Editor') || user_access('administer')) {
-    $objects_tab_form['Approve']= array(
+    $overview_tab_form['Approve']= array(
       '#type' => 'submit',
       '#weight' => '3',
       '#value' => t('Approve'));
  }
   //reject button
   if (user_access('islandora_workflow_Administrator') || user_access('islandora_workflow_Manager') || user_access('islandora_workflow_Editor') || user_access('administer')) {
-    $objects_tab_form['Reject']= array(
+    $overview_tab_form['Reject']= array(
       '#type' => 'submit',
       '#weight' => '4',
       '#value' => t('Reject'));
   }
     //publish button
   if (user_access('islandora_workflow_Administrator') || user_access('islandora_workflow_Manager') || user_access('administer')) {
-    $objects_tab_form['Publish']= array(
+    $overview_tab_form['Publish']= array(
       '#type' => 'submit',
       '#weight' => '5',
       '#value' => t('Publish'));  
   }
-  $objects_tab_form['objects_form']['objects_form_elems']=array('#theme' => 'workflow_table');
+  $overview_tab_form['objects_form']['objects_form_elems']=array('#theme' => 'workflow_table');
   
   
   //populate tab for viewing objects
@@ -75,17 +83,17 @@ function islandora_workflow_work() {
       //get all objects in collection
       $collection_members=get_related_items_as_array($collection_id, 'isMemberOf', 10000 , 0, FALSE);
       foreach ($collection_members as $member) {
-        $objects_tab_form['objects_form']['objects_form_elems'][$collection_id][$member]['Edit']=array(
+        $overview_tab_form['objects_form']['objects_form_elems'][$collection_id][$member]['Edit']=array(
         '#type' => 'submit',
         '#value' => t('Edit'),
         //'object_pid' => $member
         );
-        $objects_tab_form['objects_form']['objects_form_elems'][$collection_id][$member]['Manage']=array(
+        $overview_tab_form['objects_form']['objects_form_elems'][$collection_id][$member]['Manage']=array(
         '#type' => 'submit',
         '#value' => t('Manage'),
         //'object_pid' => $member
         );
-        $objects_tab_form['objects_form']['objects_form_elems'][$collection_id][$member]['Reject']=array(
+        $overview_tab_form['objects_form']['objects_form_elems'][$collection_id][$member]['Reject']=array(
         '#type' => 'submit',
         '#value' => t('Reject'),
         //'object_pid' => $member
@@ -100,17 +108,17 @@ function islandora_workflow_work() {
         //get all objects in collection
         $collection_members=get_related_items_as_array($collection_id, 'isMemberOf', 10000 , 0, FALSE);
         foreach ($collection_members as $member) {
-          $objects_tab_form['objects_form']['objects_form_elems'][$collection_id][$member]['Edit']=array(
+          $overview_tab_form['objects_form']['objects_form_elems'][$collection_id][$member]['Edit']=array(
           '#type' => 'submit',
           '#value' => t('Edit'),
           //'object_pid' => $member
           );
-          $objects_tab_form['objects_form']['objects_form_elems'][$collection_id][$member]['Manage']=array(
+          $overview_tab_form['objects_form']['objects_form_elems'][$collection_id][$member]['Manage']=array(
           '#type' => 'submit',
           '#value' => t('Manage'),
           //'object_pid' => $member
           );
-          $objects_tab_form['objects_form']['objects_form_elems'][$collection_id][$member]['Reject']=array(
+          $overview_tab_form['objects_form']['objects_form_elems'][$collection_id][$member]['Reject']=array(
           '#type' => 'submit',
           '#value' => t('Reject'),
           //'object_pid' => $member
@@ -124,15 +132,14 @@ function islandora_workflow_work() {
     foreach ($users_submitter_collections as $collection_id => $collection_name) {
       if ((!isset($users_manager_collections[$collection_id])) && (!isset($users_editor_collections[$collection_id]))) {//exclude higher level permissions in the same collection
         //get all objects the user is assigned or is the creator of in those collections they are submitters (only) in collection
-        
         $collection_members=get_related_items_as_array($collection_id, 'isMemberOf', 10000 , 0, FALSE);
         foreach ($collection_members as $member) {
-          $objects_tab_form['objects_form']['objects_form_elems'][$collection_id][$member]['Edit']=array(
+          $overview_tab_form['objects_form']['objects_form_elems'][$collection_id][$member]['Edit']=array(
           '#type' => 'submit',
           '#value' => t('Edit'),
           //'object_pid' => $member
           );
-          $objects_tab_form['objects_form']['objects_form_elems'][$collection_id][$member]['Manage']=array(
+          $overview_tab_form['objects_form']['objects_form_elems'][$collection_id][$member]['Manage']=array(
           '#type' => 'submit',
           '#value' => t('Manage'),
           //'object_pid' => $member
@@ -142,7 +149,7 @@ function islandora_workflow_work() {
     }
   }
   //debugs
-  dsm($objects_tab_form);
+  dsm($overview_tab_form);
   
   
   //populate tab for creating an object
@@ -150,11 +157,19 @@ function islandora_workflow_work() {
   //populate tab for creating a collection
   
   //create and send out top level tabs based on the user's available permissions
-  $page_tabs['Objects'] = array(
+
+      //@todo: change the content of this tab
+  $page_tabs['Workflow'] = array(
         '#type' => 'tabpage',
-        '#title' => t('My Objects'),
-        '#content' => drupal_render($objects_tab_form),
+        '#title' => t('Workflow'),
+        '#content' => 'kgcufcuftcucf',//drupal_render($overview_tab_form),
         '#weight' => '1',
+      );
+  $page_tabs['Overview'] = array(
+        '#type' => 'tabpage',
+        '#title' => t('Overview'),
+        '#content' => drupal_render($overview_tab_form),
+        '#weight' => '2',
       );
   $page_tabs['New Object'] = array(
         '#type' => 'tabpage',
@@ -241,8 +256,6 @@ function islandora_workflow_admin() {
     '#default_value' => variable_get('islandora_workflow_enforce_security', 0),
     '#description' => t("Wheather or not to use XACML to enforce workflow."),
   );
-  //module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
-  //islandora_workflow_insert_test_data();
   return system_settings_form($adminForm); 
 }
 
@@ -315,6 +328,15 @@ function islandora_workflow_preprocess_permissions_table(&$vars) {
   * @return array $vars: the modified list of variables to send to the template
  */
 function islandora_workflow_preprocess_workflow_table(&$vars) {
+  dsm($vars);
+  foreach ($vars['list'] as $list_key => $list_element) {
+    if (is_array($list_element)) {
+      foreach ($list_element as $collection_id => $collection_buttons)
+        foreach ($collection_buttons as $button_key => $button) {
+         $vars['list'][$list_key][$collection_id][$button_key]=drupal_render($button); 
+        }
+    }
+  }
 }
  
  /**

@@ -56,7 +56,7 @@ function islandora_workflow_get_all_permissions() {
   $perm_list=array();
   
   //build query
-  $query='SELECT role, collection, permission FROM {islandora_workflow_permissions}';
+  $query='SELECT role, collection, permission FROM {islandora_workflow_role_permissions}';
   $results=db_query($query);
   
   //build return array
@@ -78,7 +78,7 @@ function islandora_workflow_get_current_users_permissions() {
   global $user;//use $user->roles to get an array $roles[$role_id][$role_name]  $role_id is int
   
   //build query
-  $query='SELECT role, collection, permission FROM {islandora_workflow_permissions}';
+  $query='SELECT role, collection, permission FROM {islandora_workflow_role_permissions}';
   $user_roles=$user->roles;
   
   $loop_count=0;
