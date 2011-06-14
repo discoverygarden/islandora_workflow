@@ -25,7 +25,6 @@ function islandora_workflow_get_current_users_collections($permission_level='isl
   }
   elseif (user_access($permission_level)) {//manager show permitted
     $collection_list=islandora_workflow_get_all_collections();
-    
     //figure out owned collections
     $users_collection_permissions=islandora_workflow_get_current_users_permissions();
     foreach ($users_collection_permissions as $role_id => $collections) {
@@ -79,7 +78,7 @@ function islandora_workflow_get_current_users_permissions() {
   global $user;//use $user->roles to get an array $roles[$role_id][$role_name]  $role_id is int
   
   //build query
-  $query='SELECT role,collection,permission FROM {islandora_workflow_permissions}';
+  $query='SELECT role, collection, permission FROM {islandora_workflow_permissions}';
   $user_roles=$user->roles;
   
   $loop_count=0;
@@ -96,10 +95,8 @@ function islandora_workflow_get_current_users_permissions() {
   
   //build return array
   while ($row=db_fetch_array($results)) {
-    $perm_list[$row['role']]=array($row['collection'] => $row['permission']
-    );
+    $perm_list[$row['role']][$row['collection']] = $row['permission'];
   }
-  
   return $perm_list;  
 }
 
@@ -127,8 +124,8 @@ function islandora_workflow_get_all_collections() {
  */
 function islandora_workflow_get_related_objects($itql_query) {
   module_load_include('inc', 'fedora_repository', 'CollectionClass');
-  $collectionClass = new CollectionClass();
-  $query_results = $collectionClass->getRelatedItems(NULL, $itql_query);
+  $collection_class = new CollectionClass();
+  $query_results = $collection_class->getRelatedItems(NULL, $itql_query);
   $list_of_objects = islandora_workflow_itql_to_array($query_results);
   return $list_of_objects;
 }

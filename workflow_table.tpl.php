@@ -1,4 +1,3 @@
-<p>We're themeing</p>
 <TABLE>
 
   <THEAD>
