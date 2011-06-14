@@ -328,13 +328,13 @@ function islandora_workflow_collection_permissions() {
       }
       //change the left over permission strings to be more user friendly
       if (in_array('islandora_workflow_Manager', $current_module_permissions[$role_id][key($role_name)])) {
-        $current_module_permissions[$role_id][key($role_name)][array_search('Manager', $current_module_permissions[$role_id][key($role_name)])]='';
+        $current_module_permissions[$role_id][key($role_name)][array_search('islandora_workflow_Manager', $current_module_permissions[$role_id][key($role_name)])]='Manager';
       }
       if (in_array('islandora_workflow_Editor', $current_module_permissions[$role_id][key($role_name)])) {
-        $current_module_permissions[$role_id][key($role_name)][array_search('Editor', $current_module_permissions[$role_id][key($role_name)])]='';
+        $current_module_permissions[$role_id][key($role_name)][array_search('islandora_workflow_Editor', $current_module_permissions[$role_id][key($role_name)])]='Editor';
       }
       if (in_array('islandora_workflow_Submitter', $current_module_permissions[$role_id][key($role_name)])) {
-        $current_module_permissions[$role_id][key($role_name)][array_search('Submitter', $current_module_permissions[$role_id][key($role_name)])]='';
+        $current_module_permissions[$role_id][key($role_name)][array_search('islandora_workflow_Submitter', $current_module_permissions[$role_id][key($role_name)])]='Submitter';
       }
       
       foreach ($my_collections as $collection_id => $collection_name) {//collections
@@ -374,6 +374,17 @@ function islandora_workflow_collection_permissions_submit($collection_permission
         
         $select_element_index=$possible_permission[$role_id][$collection_id];
         $select_element_value=$collection_permissions_form['islandora_workflow_collection_permissions_table']['permissions_table'][$role_id][$collection_id]['#options'][$select_element_index];
+        //remap user friendly element values to permission names
+        if ($select_element_value=='Manager') {
+          $select_element_value='islandora_workflow_Manager';
+        }
+        elseif ($select_element_value=='Editor') {
+          $select_element_value='islandora_workflow_Editor';
+        }
+        elseif ($select_element_value=='Submitter') {
+          $select_element_value='islandora_workflow_Submitter';
+        }
+        
         //compare the form values against the database and record the changes necessary
         if (isset($current_permissions[$role_id][$collection_id])) {//if there is currently a DB rule
           if ($current_permissions[$role_id][$collection_id]!=$select_element_value) {//if the DB and FORM disagree
