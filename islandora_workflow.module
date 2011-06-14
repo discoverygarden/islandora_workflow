@@ -101,12 +101,27 @@ function islandora_workflow_work() {
      }
     }
   }
-  //build object form elements
 
   //debugs
   dsm($users_manager_objects);
   dsm($users_editor_objects);
   dsm($users_submitter_objects);
+  //build object form elements
+  foreach ($users_manager_objects as $collection_id => $collection_members) {
+    foreach ($collection_members as $member) {
+      
+    }
+  }
+  foreach ($users_editor_objects as $collection_id => $collection_members) {
+    foreach ($collection_members as $member) {
+      
+    }
+  }
+  foreach ($users_submitter_objects as $collection_id => $collection_members) {
+    foreach ($collection_members as $member) {
+      
+    }
+  }
   
   
   //populate tab for creating an object
