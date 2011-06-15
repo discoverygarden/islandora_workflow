@@ -23,7 +23,7 @@
 	</TFOOT>
 	
 	<TBODY>
-	<?php 
+	<?php /*
     foreach ($list as $collection_id => $list_element) {
       if(is_array($list_element)) {
         foreach ($list_element as $object_id => $objects) {
@@ -35,7 +35,7 @@
           print('</TD></TR>');
         }
       }
-    }
+    }*/
 ?>
 	</TBODY>
 	

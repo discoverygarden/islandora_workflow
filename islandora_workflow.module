@@ -19,7 +19,7 @@ function islandora_workflow_work() {
   $page_tabs['Workflow'] = array(
         '#type' => 'tabpage',
         '#title' => t('Workflow'),
-        '#content' => drupal_get_form('islandora_workflow_work_form','workflow'),
+        '#content' => 'jklhbvuuygvkuvp;',//drupal_get_form('islandora_workflow_work_form','workflow'),
         '#weight' => '1',
       );
   $page_tabs['Overview'] = array(
@@ -59,17 +59,6 @@ function islandora_workflow_work_form ($tab) {
   $users_editor_collections=islandora_workflow_get_current_users_collections('islandora_workflow_Editor');
   $users_submitter_collections=islandora_workflow_get_current_users_collections('islandora_workflow_Submitter');
   //tab forms
-  $create_collections_tab_form=array();
-  $create_object_tab_form=array();
-  $workflow_tab_form['objects_form']=array(    
-    '#type' => 'fieldset',
-    '#title' => t('Workflow'),
-    '#collapsible' => FALSE,
-    '#collapsed' => FALSE,
-    '#tree' => TRUE,
-    '#description' => t('Perform work on objects you have access to.'),
-  );
-  $workflow_tab_form['objects_form']['objects_form_elems']=array('#theme' => 'workflow_table');
   $overview_tab_form['objects_form']=array(    
     '#type' => 'fieldset',
     '#title' => t('Workflow'),
@@ -178,13 +167,7 @@ function islandora_workflow_work_form ($tab) {
      }
     }
   }
-  
-  
-  //populate tab for creating an object
-  
-  //populate tab for creating a collection
-  
-  //create and send out top level tabs based on the user's available permissions
+  return $overview_tab_form;
 }
 
 /**
@@ -330,7 +313,6 @@ function islandora_workflow_preprocess_permissions_user_table(&$vars) {
   */
 function islandora_workflow_preprocess_permissions_role_table(&$vars) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
-  dsm($vars);
   $vars['collections']=islandora_workflow_get_current_users_collections();
   $vars['roles']=islandora_workflow_get_roles_with_module_permissions();
   
@@ -350,82 +332,91 @@ function islandora_workflow_preprocess_permissions_role_table(&$vars) {
  */
 function islandora_workflow_preprocess_workflow_table(&$vars) {
   dsm($vars);
+  //function needs to be re-written to match how the new results for list
+  /*
   foreach ($vars['list'] as $list_key => $list_element) {
     if (is_array($list_element)) {
-      foreach ($list_element as $collection_id => $collection_buttons)
+      foreach ($list_element as $collection_id => $collection_buttons) {
         foreach ($collection_buttons as $button_key => $button) {
-         $vars['list'][$list_key][$collection_id][$button_key]=drupal_render($button); 
-        }
+         //$vars['list'][$list_key][$collection_id][$button_key]=drupal_render($button);
+        } 
+      }
     }
-  }
+  }*/
 }
  
  /**
  * This generates the page for editing collection level permissions
  * @todo: remove the islandora_workflow_permissions from the options in the slects... it should not be grantable on the collection level
- * @return $collection_role_permissions_form: The form for changing collection permissions granted to roles
+ * @return $collection_permissions_form: The form for changing collection permissions granted to roles
  */
 function islandora_workflow_collection_permissions() {
   $page_tabs=array(
     '#type' => 'tabset',
   );
   
-  
   $page_tabs['Users'] = array(
         '#type' => 'tabpage',
         '#title' => t('Users'),
-        '#content' => 'put user role form here',//drupal_render($overview_tab_form),
+        '#content' => drupal_get_form('islandora_workflow_permissions_form','user'),
         '#weight' => '1',
       );
  $page_tabs['Roles'] = array(
         '#type' => 'tabpage',
         '#title' => t('Roles'),
-        '#content' => drupal_get_form('islandora_workflow_role_permissions_form_builder'),
+        '#content' => drupal_get_form('islandora_workflow_permissions_form','role'),
         '#weight' => '2',
       );
-      
       
   return tabs_render($page_tabs);
 }
  
 /**
  * This function builds the form that allows users to modify role based permissions for individual collections
- * @return array $collection_role_permissions_form: the array containing the form.
+ * @return array $collection_permissions_form: the array containing the form.
  */
-function islandora_workflow_role_permissions_form () {
+function islandora_workflow_permissions_form ($form_state, $tab) {
+  dsm($tab);
 //init
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow'); 
-  $collection_role_permissions_form=array();
+  $collection_permissions_form=array();
   $current_module_permissions=array();
   
   //collect current state data
   $my_collections=islandora_workflow_get_current_users_collections();//used to get list of collections to display
 
   $current_module_permissions=islandora_workflow_get_roles_with_module_permissions();//used to get what roles to display and avaialbe options for selects
-  $current_collection_permissions=islandora_workflow_get_all_permissions();//used to find the default options for slects
+  $current_collection_permissions=islandora_workflow_get_all_permissions();//used to find the default options for selects
   //setup the form
-  $collection_role_permissions_form['islandora_workflow_collection_permissions_table'] = array(
+  $collection_permissions_form['islandora_workflow_collection_permissions_table'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Collecion Permissions'),
     '#collapsible' => FALSE,
     '#collapsed' => FALSE,
     '#tree' => TRUE, //See http://drupal.org/node/751826
-    '#description' => t('Assign collection level permissions to roles.'),
   );
   //theme
-  $collection_role_permissions_form['islandora_workflow_collection_permissions_table']['permissions_table']=array(
+  $collection_permissions_form['islandora_workflow_collection_permissions_table']['permissions_table']=array(
   '#theme' => 'permissions_role_table'  
   );
   //submit button
-  $collection_role_permissions_form['update']= array(
+  $collection_permissions_form['update']= array(
     '#type' => 'submit',
     '#value' => t('Update'),
     '#weight' => '1',);
   //restore button
-  $collection_role_permissions_form['restore']= array(
+  $collection_permissions_form['restore']= array(
     '#type' => 'submit',
     '#value' => t('Restore'),
     '#weight' => '2',); 
+  
+  if ($tab=='role') {
+    $collection_permissions_form['islandora_workflow_collection_permissions_table']['#title']=t('Collection Permissions by role');
+    $collection_permissions_form['islandora_workflow_collection_permissions_table']['#description']=t('Assign collection level permissions to roless.');
+  }
+  elseif ($tab=='user') {
+    $collection_permissions_form['islandora_workflow_collection_permissions_table']['#title']=t('Collection Permissions by user');
+    $collection_permissions_form['islandora_workflow_collection_permissions_table']['#description']=t('Assign collection level permissions to users.');
+  }
   
   //populate the form
   foreach ($current_module_permissions as $role_id => $role_name) {//roles
@@ -457,7 +448,7 @@ function islandora_workflow_role_permissions_form () {
           $current_collection_permissions[$role_id][$collection_id]='Submitter';
         }
         //drupal made me do it...
-        $collection_role_permissions_form['islandora_workflow_collection_permissions_table']['permissions_table'][$role_id][$collection_id] = array(
+        $collection_permissions_form['islandora_workflow_collection_permissions_table']['permissions_table'][$role_id][$collection_id] = array(
         '#type' => 'select',
         //default value works, but if you hit refresh on the page the values do not go back to the default... navigating away does reset the value
         '#default_value' => array_search($current_collection_permissions[$role_id][$collection_id], $current_module_permissions[$role_id][key($role_name)]),//make this into whatever the current setting is for that collection/role
@@ -465,16 +456,16 @@ function islandora_workflow_role_permissions_form () {
         );
       }
   }
-  return $collection_role_permissions_form;
+  return $collection_permissions_form;
 }
 
  /**
   * This function processes the form submitted from the collection permission page
-  * @param $collection_role_permissions_form: Holds all the data on the state  of the form submitted
-  * @param $collection_role_permissions_form_state: An easier to use version of $collection_role_permissions_form
+  * @param $collection_permissions_form: Holds all the data on the state  of the form submitted
+  * @param $collection_permissions_form_state: An easier to use version of $collection_permissions_form
   */
-function islandora_workflow_role_permissions_form_submit($collection_role_permissions_form, &$collection_role_permissions_form_state) {
-  $clicked_button = $collection_role_permissions_form_state['clicked_button']['#value'];
+function islandora_workflow_permissions_form_submit($collection_permissions_form, &$collection_permissions_form_state) {
+  $clicked_button = $collection_permissions_form_state['clicked_button']['#value'];
   if ($clicked_button=='Update') {//handle updating the page
     //init
     $current_permissions=islandora_workflow_get_all_permissions();
@@ -484,13 +475,11 @@ function islandora_workflow_role_permissions_form_submit($collection_role_permis
     $removed_permissions=array();
     
     //get the values returned by the form
-    $possible_permission=$collection_role_permissions_form_state['values']['islandora_workflow_collection_permissions_table']['permissions_table'];
+    $possible_permission=$collection_permissions_form_state['values']['islandora_workflow_collection_permissions_table']['permissions_table'];
     foreach ($possible_permission as $role_id => $collection) {
-      
       foreach ($collection as $collection_id => $select_element) {
-        
         $select_element_index=$possible_permission[$role_id][$collection_id];
-        $select_element_value=$collection_role_permissions_form['islandora_workflow_collection_permissions_table']['permissions_table'][$role_id][$collection_id]['#options'][$select_element_index];
+        $select_element_value=$collection_permissions_form['islandora_workflow_collection_permissions_table']['permissions_table'][$role_id][$collection_id]['#options'][$select_element_index];
         //remap user friendly element option values to permission names
         if ($select_element_value=='Manager') {
           $select_element_value='islandora_workflow_Manager';
@@ -557,86 +546,6 @@ function islandora_workflow_role_permissions_form_submit($collection_role_permis
   elseif ($clicked_button=='Restore') {//handle reset
     drupal_set_message('Permissions have not been changed.');
   }
-}
-
-/**
- * This function builds the form that allows users to modify user based permissions for individual collections
- * @return array $collection_user_permissions_form: the array containing the form.
- */
-function islandora_workflow_user_permissions_form () {
-//init
-  module_load_include('inc', 'islandora_workflow', 'islandora_workflow'); 
-  $collection_user_permissions_form=array();
-  $current_module_permissions=array();
-  
-  //collect current state data
-  $my_collections=islandora_workflow_get_current_users_collections();//used to get list of collections to display
-
-  $current_module_permissions=islandora_workflow_get_users_with_module_permissions();//used to get what users to display and avaialbe options for selects
-  $current_collection_permissions=islandora_workflow_get_all_permissions();//used to find the default options for slects
-  //setup the form
-  $collection_user_permissions_form['islandora_workflow_collection_permissions_table'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Collecion Permissions'),
-    '#collapsible' => FALSE,
-    '#collapsed' => FALSE,
-    '#tree' => TRUE, //See http://drupal.org/node/751826
-    '#description' => t('Assign collection level permissions to users.'),
-  );
-  //theme
-  $collection_user_permissions_form['islandora_workflow_collection_permissions_table']['permissions_table']=array(
-  '#theme' => 'permissions_user_table'  
-  );
-  //submit button
-  $collection_user_permissions_form['update']= array(
-    '#type' => 'submit',
-    '#value' => t('Update'),
-    '#weight' => '1',);
-  //restore button
-  $collection_user_permissions_form['restore']= array(
-    '#type' => 'submit',
-    '#value' => t('Restore'),
-    '#weight' => '2',); 
-  
-  //populate the form
-  foreach ($current_module_permissions as $user_id => $user_name) {//users
-      //add none to the possible options
-      $current_module_permissions[$user_id][key($user_name)][]='';
-      //remove the islandora_workflow_Administrator permission
-      if (in_array('islandora_workflow_Administrator', $current_module_permissions[$user_id][key($user_name)])) {
-        unset($current_module_permissions[$user_id][key($user_name)][array_search('islandora_workflow_Administrator', $current_module_permissions[$user_id][key($user_name)])]);
-      }
-      //change the left over permission strings to be more user friendly
-      if (in_array('islandora_workflow_Manager', $current_module_permissions[$user_id][key($user_name)])) {
-        $current_module_permissions[$user_id][key($user_name)][array_search('islandora_workflow_Manager', $current_module_permissions[$user_id][key($user_name)])]='Manager';
-      }
-      if (in_array('islandora_workflow_Editor', $current_module_permissions[$user_id][key($user_name)])) {
-        $current_module_permissions[$user_id][key($user_name)][array_search('islandora_workflow_Editor', $current_module_permissions[$user_id][key($user_name)])]='Editor';
-      }
-      if (in_array('islandora_workflow_Submitter', $current_module_permissions[$user_id][key($user_name)])) {
-        $current_module_permissions[$user_id][key($user_name)][array_search('islandora_workflow_Submitter', $current_module_permissions[$user_id][key($user_name)])]='Submitter';
-      }
-      foreach ($my_collections as $collection_id => $collection_name) {//collections
-        //change the default permission string to be inline with the user friendly strings
-        if ($current_collection_permissions[$user_id][$collection_id]=='islandora_workflow_Manager') {
-          $current_collection_permissions[$user_id][$collection_id]='Manager';
-        }
-        if ($current_collection_permissions[$user_id][$collection_id]=='islandora_workflow_Editor') {
-          $current_collection_permissions[$user_id][$collection_id]='Editor';
-        }
-        if ($current_collection_permissions[$user_id][$collection_id]=='islandora_workflow_Submitter') {
-          $current_collection_permissions[$user_id][$collection_id]='Submitter';
-        }
-        //drupal made me do it...
-        $collection_user_permissions_form['islandora_workflow_collection_permissions_table']['permissions_table'][$user_id][$collection_id] = array(
-        '#type' => 'select',
-        //default value works, but if you hit refresh on the page the values do not go back to the default... navigating away does reset the value
-        '#default_value' => array_search($current_collection_permissions[$user_id][$collection_id], $current_module_permissions[$user_id][key($user_name)]),//make this into whatever the current setting is for that collection/user
-        '#options' => $current_module_permissions[$user_id][key($user_name)],//what are available to the current user
-        );
-      }
-  }
-  return $collection_user_permissions_form;
 }
 
  /**
