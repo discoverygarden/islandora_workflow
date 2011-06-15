@@ -3,7 +3,7 @@
   <THEAD>
     <TR>
       <TH>
-      		Roles
+      		User
       </TH>
       <!-- Display a header for each collection -->
       <?php 
@@ -20,10 +20,10 @@
 	<TBODY>
 	<!-- Display Table cells for each collection/role intersection -->
 		<?php 
-		  foreach($roles as $role_id => $role_name) {
-		    print('<TR><TD>'.key($role_name).'</TD>');
+		  foreach($user as $user_id => $user_name) {
+		    print('<TR><TD>'.key($user_name).'</TD>');
 		    foreach($collections as $collection_id =>$collection_name) {
-		      print('<TD>'.$list[$role_id][$collection_id].'</TD>');
+		      print('<TD>'.$list[$user_id][$collection_id].'</TD>');
 		    }
 		    print('</TR>');
 		  }
