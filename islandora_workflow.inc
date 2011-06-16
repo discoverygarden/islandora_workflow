@@ -292,3 +292,54 @@ function islandora_workflow_get_users_with_module_permissions() {
    
    return $privledged_users;
 }
+
+/**
+ * 
+ * @param string $object_pid:
+ * @return bool: true if adding datastream was successful, false if it failed
+ */
+function islandora_workflow_init_object_workflow_datastream($object_pid) {
+  
+}
+
+/**
+ * 
+ */
+function islandora_workflow_reject_object($object_pid) {
+  
+}
+
+/**
+ * 
+ */
+function islandora_workflow_approve_object($object_pid) {
+  
+} 
+
+/**
+ * 
+ */
+function islandora_workflow_publish_object($object_pid) {
+  
+}
+
+/**
+ * 
+ */
+function islandora_workflow_submit_object($object_pid) {
+  
+}
+
+/**
+ * 
+ */
+function islandora_workflow_claim_object($object_pid) {
+  
+}
+
+/**
+ * 
+ */
+function islandora_workflow_assign_object($object_pid, $user_id) {
+  
+}
