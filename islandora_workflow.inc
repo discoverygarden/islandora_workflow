@@ -15,7 +15,6 @@
  * @param string $permission_level: the permission level we are looking for
  * @return $collection_list: an associated array of collection pids and names, 
  * @return boolean: a false boolean if they don't have manger or higher perms
- * @todo: make this function search through the user perm table too
  */
 function islandora_workflow_get_current_users_collections($permission_level='islandora_workflow_Manager') {
   //init

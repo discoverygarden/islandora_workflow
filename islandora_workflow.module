@@ -20,8 +20,6 @@ function islandora_workflow_work() {
   $page_tabs=array(
     '#type' => 'tabset',
   );
-
-      //@todo: change the content of this tab
   $page_tabs['Workflow'] = array(
         '#type' => 'tabpage',
         '#title' => t('Workflow'),
@@ -117,6 +115,10 @@ function islandora_workflow_work_form($tab) {
     foreach ($users_manager_collections as $collection_id => $collection_name) {
       //get all objects in collection
       $collection_members=get_related_items_as_array($collection_id, 'isMemberOf', 10000 , 0, FALSE);
+      //filter collection items if in workflow tab @todo: implement
+      if ($tab=='workflow') {
+        
+      }
       foreach ($collection_members as $member) {
         $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Edit']=array(
         '#type' => 'submit',
@@ -139,6 +141,10 @@ function islandora_workflow_work_form($tab) {
       if (!isset($users_manager_collections[$collection_id])) {//exclude higher level permissions in the same collection
         //get all objects in collection
         $collection_members=get_related_items_as_array($collection_id, 'isMemberOf', 10000 , 0, FALSE);
+        //filter collection items if in workflow tab @todo: implement
+        if ($tab=='workflow') {
+          
+        }
         foreach ($collection_members as $member) {
           $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Edit']=array(
           '#type' => 'submit',
@@ -162,6 +168,10 @@ function islandora_workflow_work_form($tab) {
       if ((!isset($users_manager_collections[$collection_id])) && (!isset($users_editor_collections[$collection_id]))) {//exclude higher level permissions in the same collection
         //get all objects the user is assigned or is the creator of in those collections they are submitters (only) in collection
         $collection_members=get_related_items_as_array($collection_id, 'isMemberOf', 10000 , 0, FALSE);
+        //filter collection items if in workflow tab @todo: implement
+        if ($tab=='workflow') {
+          
+        }
         foreach ($collection_members as $member) {
           $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Edit']=array(
           '#type' => 'submit',
@@ -233,7 +243,6 @@ function islandora_wokflow_check_permissions($permission_array) {
 
 /**
  * This function returns the form that will let an administrator modify the module's settings
- * TODO: REMOVE REFERENCE TO ISLANDORA_WORKFLOW.INC AND THE CALL TO THE ISLANDORA-WORKFLOW_INSERT_TEST_DATA FUNC
  * @return $adminForm: the form for edditing islandora_workflow settings.
  */
 function islandora_workflow_admin() {
@@ -352,7 +361,6 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
  
 /**
  * This generates the page for editing collection level permissions
- * @todo: remove the islandora_workflow_permissions from the options in the slects... it should not be grantable on the collection level
  * @return $collection_role_permissions_form: The form for changing collection permissions granted to roles
  */
 function islandora_workflow_collection_permissions() {
