@@ -15,6 +15,7 @@
  * @param string $permission_level: the permission level we are looking for
  * @return $collection_list: an associated array of collection pids and names, 
  * @return boolean: a false boolean if they don't have manger or higher perms
+ * @todo: make this function search through the user perm table too
  */
 function islandora_workflow_get_current_users_collections($permission_level='islandora_workflow_Manager') {
   //init
@@ -26,8 +27,18 @@ function islandora_workflow_get_current_users_collections($permission_level='isl
   elseif (user_access($permission_level)) {//manager show permitted
     $collection_list=islandora_workflow_get_all_collections();
     //figure out owned collections
-    $users_collection_permissions=islandora_workflow_get_current_users_role_permissions();
-    foreach ($users_collection_permissions as $role_id => $collections) {
+    //role perms
+    $users_role_collection_permissions=islandora_workflow_get_current_users_role_permissions();
+    foreach ($users_role_collection_permissions as $role_id => $collections) {
+      foreach ($collections as $collection_id => $permission) {
+        if ($permission==$permission_level) {
+          $permitted_collections[]=$collection_id;
+        }
+      }
+    }
+    //user perms
+    $users_user_collection_permissions=islandora_workflow_get_current_users_user_permissions();
+    foreach ($users_user_collection_permissions as $role_id => $collections) {
       foreach ($collections as $collection_id => $permission) {
         if ($permission==$permission_level) {
           $permitted_collections[]=$collection_id;

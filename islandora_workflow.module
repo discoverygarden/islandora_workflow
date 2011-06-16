@@ -25,7 +25,7 @@ function islandora_workflow_work() {
   $page_tabs['Workflow'] = array(
         '#type' => 'tabpage',
         '#title' => t('Workflow'),
-        '#content' => 'jklhbvuuygvkuvp;',//drupal_get_form('islandora_workflow_work_form','workflow'),
+        '#content' => drupal_get_form('islandora_workflow_work_form','workflow'),
         '#weight' => '1',
       );
   $page_tabs['Overview'] = array(
@@ -65,7 +65,7 @@ function islandora_workflow_work_form($tab) {
   $users_editor_collections=islandora_workflow_get_current_users_collections('islandora_workflow_Editor');
   $users_submitter_collections=islandora_workflow_get_current_users_collections('islandora_workflow_Submitter');
   //tab forms
-  $overview_tab_form['objects_form']=array(    
+  $workflow_tabs_form['objects_form']=array(    
     '#type' => 'fieldset',
     '#title' => t('Workflow'),
     '#collapsible' => FALSE,
@@ -73,35 +73,35 @@ function islandora_workflow_work_form($tab) {
     '#tree' => TRUE,
     '#description' => t('Perform work on objects you have access to.'),
   );
-  $overview_tab_form['objects_form']['objects_form_elems']=array('#theme' => 'workflow_table');
+  $workflow_tabs_form['objects_form']['objects_form_elems']=array('#theme' => 'workflow_table');
   
   //delete button
-  $overview_tab_form['Delete']= array(
+  $workflow_tabs_form['Delete']= array(
     '#type' => 'submit',
     '#weight' => '1',
     '#value' => t('Delete'));
   //submit button
-  $overview_tab_form['Submit']= array(
+  $workflow_tabs_form['Submit']= array(
     '#type' => 'submit',
     '#weight' => '2',
     '#value' => t('Submit'));
     //approve button
   if (user_access('islandora_workflow_Administrator') || user_access('islandora_workflow_Manager') || user_access('islandora_workflow_Editor') || user_access('administer')) {
-    $overview_tab_form['Approve']= array(
+    $workflow_tabs_form['Approve']= array(
       '#type' => 'submit',
       '#weight' => '3',
       '#value' => t('Approve'));
  }
   //reject button
   if (user_access('islandora_workflow_Administrator') || user_access('islandora_workflow_Manager') || user_access('islandora_workflow_Editor') || user_access('administer')) {
-    $overview_tab_form['Reject']= array(
+    $workflow_tabs_form['Reject']= array(
       '#type' => 'submit',
       '#weight' => '4',
       '#value' => t('Reject'));
   }
     //publish button
   if (user_access('islandora_workflow_Administrator') || user_access('islandora_workflow_Manager') || user_access('administer')) {
-    $overview_tab_form['Publish']= array(
+    $workflow_tabs_form['Publish']= array(
       '#type' => 'submit',
       '#weight' => '5',
       '#value' => t('Publish'));  
@@ -116,15 +116,15 @@ function islandora_workflow_work_form($tab) {
       //get all objects in collection
       $collection_members=get_related_items_as_array($collection_id, 'isMemberOf', 10000 , 0, FALSE);
       foreach ($collection_members as $member) {
-        $overview_tab_form['objects_form']['objects_form_elems'][$collection_id][$member]['Edit']=array(
+        $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Edit']=array(
         '#type' => 'submit',
         '#value' => t('Edit'),
         );
-        $overview_tab_form['objects_form']['objects_form_elems'][$collection_id][$member]['Manage']=array(
+        $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Manage']=array(
         '#type' => 'submit',
         '#value' => t('Manage'),
         );
-        $overview_tab_form['objects_form']['objects_form_elems'][$collection_id][$member]['Reject']=array(
+        $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Reject']=array(
         '#type' => 'submit',
         '#value' => t('Reject'),
         );
@@ -138,15 +138,15 @@ function islandora_workflow_work_form($tab) {
         //get all objects in collection
         $collection_members=get_related_items_as_array($collection_id, 'isMemberOf', 10000 , 0, FALSE);
         foreach ($collection_members as $member) {
-          $overview_tab_form['objects_form']['objects_form_elems'][$collection_id][$member]['Edit']=array(
+          $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Edit']=array(
           '#type' => 'submit',
           '#value' => t('Edit'),
           );
-          $overview_tab_form['objects_form']['objects_form_elems'][$collection_id][$member]['Manage']=array(
+          $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Manage']=array(
           '#type' => 'submit',
           '#value' => t('Manage'),
           );
-          $overview_tab_form['objects_form']['objects_form_elems'][$collection_id][$member]['Reject']=array(
+          $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Reject']=array(
           '#type' => 'submit',
           '#value' => t('Reject'),
           );
@@ -161,11 +161,11 @@ function islandora_workflow_work_form($tab) {
         //get all objects the user is assigned or is the creator of in those collections they are submitters (only) in collection
         $collection_members=get_related_items_as_array($collection_id, 'isMemberOf', 10000 , 0, FALSE);
         foreach ($collection_members as $member) {
-          $overview_tab_form['objects_form']['objects_form_elems'][$collection_id][$member]['Edit']=array(
+          $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Edit']=array(
           '#type' => 'submit',
           '#value' => t('Edit'),
           );
-          $overview_tab_form['objects_form']['objects_form_elems'][$collection_id][$member]['Manage']=array(
+          $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Manage']=array(
           '#type' => 'submit',
           '#value' => t('Manage'),
           );
@@ -173,7 +173,7 @@ function islandora_workflow_work_form($tab) {
      }
     }
   }
-  return $overview_tab_form;
+  return $workflow_tabs_form;
 }
 
 /**
@@ -331,25 +331,23 @@ function islandora_workflow_preprocess_permissions_role_table(&$vars) {
 
 /**
   * This function handles making variables available to the theme template for 
-  * the workflows tab of the 'work' page
+  * the workflow tabs of the 'work' page
   * @param array ref $vars: the list of variables (including the form) to send to the template
   * @return array $vars: the modified list of variables to send to the template
  */
 function islandora_workflow_preprocess_workflow_table(&$vars) {
-  //function needs to be re-written to match how the new results for list
-  /*
-  foreach ($vars['list'] as $list_key => $list_element) {
-    if (is_array($list_element)) {
-      foreach ($list_element as $collection_id => $collection_buttons) {
-        foreach ($collection_buttons as $button_key => $button) {
-         //$vars['list'][$list_key][$collection_id][$button_key]=drupal_render($button);
-        } 
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
+  $vars['collections']=islandora_workflow_get_current_users_collections();
+  foreach($vars['collections'] as $collection_id => $collection_name) {
+  $collection_members=get_related_items_as_array($collection_id, 'isMemberOf', 10000 , 0, FALSE);
+    foreach($collection_members as $member) {
+      if (isset($vars['list'][$collection_id][$member])) { //The isset is here so that only populated items are rendered into HTML for display
+        $vars['list'][$collection_id][$member]=drupal_render($vars['list'][$collection_id][$member]);
       }
     }
-  }*/
+  }
 }
  
-
 /**
  * This generates the page for editing collection level permissions
  * @todo: remove the islandora_workflow_permissions from the options in the slects... it should not be grantable on the collection level
@@ -376,7 +374,6 @@ function islandora_workflow_collection_permissions() {
   return tabs_render($page_tabs);
 }
  
-
 /**
  * This function builds the form that allows users to modify role based permissions for individual collections
  * @return array $collection_role_permissions_form: the array containing the form.
@@ -456,7 +453,6 @@ function islandora_workflow_role_permissions_form() {
   }
   return $collection_role_permissions_form;
 }
-
 
 /**
   * This function processes the form submitted from the collection permission page
@@ -549,7 +545,6 @@ function islandora_workflow_role_permissions_form_submit($collection_role_permis
   }
 }
 
-
 /**
  * This function builds the form that allows users to modify user based permissions for individual collections
  * @return array $collection_user_permissions_form: the array containing the form.
@@ -629,7 +624,6 @@ function islandora_workflow_user_permissions_form() {
   }
   return $collection_user_permissions_form;
 }
-
 
 /**
   * This function processes the form submitted from the collection permission page
@@ -721,7 +715,6 @@ function islandora_workflow_user_permissions_form_submit($collection_user_permis
     drupal_set_message('Permissions have not been changed.');
   }
 }
-
 
 /**
  * This function handles all of the possible submits from the main workflow page
