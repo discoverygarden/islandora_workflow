@@ -31,7 +31,7 @@ function islandora_workflow_work() {
   $page_tabs['Overview'] = array(
         '#type' => 'tabpage',
         '#title' => t('Overview'),
-        '#content' => drupal_get_form('islandora_workflow_work_form','overview'),
+        '#content' => drupal_get_form('islandora_workflow_work_form', 'overview'),
         '#weight' => '2',
       );
   $page_tabs['New Object'] = array(
@@ -51,13 +51,12 @@ function islandora_workflow_work() {
   return tabs_render($page_tabs);
 }
 
-
 /**
  * This function builds the forms for the islandora_workflow_work page
  * @param string $tab: which tab is calling the form, iether 'overview' or 'workflow'
  * @return array $form: the array containing the aporpriate form
  */
-function islandora_workflow_work_form ($tab) {
+function islandora_workflow_work_form($tab) {
   
   //init
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow'); //for getting workflow info
@@ -177,7 +176,6 @@ function islandora_workflow_work_form ($tab) {
   return $overview_tab_form;
 }
 
-
 /**
  * The menu entries for this module.
  * @return $menuEntries: An arrray of the items to be added to the drupal menu
@@ -214,7 +212,6 @@ function islandora_workflow_menu() {
  return $menuEntries;
 }
 
-
 /**
  * This function is the access callback used for access to the workflow section of this module
  * @param $permission_array: those user roles to allow access
@@ -231,7 +228,6 @@ function islandora_wokflow_check_permissions($permission_array) {
   //if no permission matched then return false
   return FALSE;
 }
-
 
 /**
  * This function returns the form that will let an administrator modify the module's settings
@@ -250,7 +246,6 @@ function islandora_workflow_admin() {
   return system_settings_form($adminForm); 
 }
 
-
 /**
  * drupal permission hook
  * The list of avaialble permissions for this module.
@@ -259,7 +254,6 @@ function islandora_workflow_admin() {
 function islandora_workflow_perm() {
   return array('islandora_workflow_Administrator', 'islandora_workflow_Editor', 'islandora_workflow_Manager', 'islandora_workflow_Submitter');
 }
-
 
 /**
  * drupal hook to show help
@@ -276,7 +270,6 @@ function islandora_workflow_help($path, $arg) {
   
   return $help;
 }
-
 
 /**
  * This function registers themeing functions with Drupal.
@@ -299,7 +292,6 @@ function islandora_workflow_theme() {
    return $themes;
  }
  
-
  /**
   * This function handles making variables available to the theme template for 
   * the islandora_workflow_collection_permissions page (user tab)
@@ -309,18 +301,16 @@ function islandora_workflow_theme() {
 function islandora_workflow_preprocess_permissions_user_table(&$vars) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
   $vars['collections']=islandora_workflow_get_current_users_collections();
-  $vars['roles']=islandora_workflow_get_users_with_module_permissions();
-  
+  $vars['users']=islandora_workflow_get_users_with_module_permissions();
   //render each form element
-  foreach ($vars['roles'] as $user_id => $user_name) {
+  foreach ($vars['users'] as $user_id => $user_name) {
     foreach ($vars['collections'] as $collection_id => $collection_name) {
       $vars['list'][$user_id][$collection_id]=drupal_render($vars['list'][$user_id][$collection_id]);
     }
   }
 }
  
- 
- /**
+/**
   * This function handles making variables available to the theme template for 
   * the islandora_workflow_collection_permissions page (role tab)
   * @param array ref $vars: the list of variables (including the form) to send to the template
@@ -330,7 +320,6 @@ function islandora_workflow_preprocess_permissions_role_table(&$vars) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
   $vars['collections']=islandora_workflow_get_current_users_collections();
   $vars['roles']=islandora_workflow_get_roles_with_module_permissions();
-  
   //render each form element
   foreach ($vars['roles'] as $role_id => $role_name) {
     foreach ($vars['collections'] as $collection_id => $collection_name) {
@@ -347,7 +336,6 @@ function islandora_workflow_preprocess_permissions_role_table(&$vars) {
   * @return array $vars: the modified list of variables to send to the template
  */
 function islandora_workflow_preprocess_workflow_table(&$vars) {
-  dsm($vars);
   //function needs to be re-written to match how the new results for list
   /*
   foreach ($vars['list'] as $list_key => $list_element) {
@@ -375,7 +363,7 @@ function islandora_workflow_collection_permissions() {
   $page_tabs['Users'] = array(
         '#type' => 'tabpage',
         '#title' => t('Users'),
-        '#content' => 'put user role form here',//drupal_render($overview_tab_form),
+        '#content' => drupal_get_form('islandora_workflow_user_permissions_form'),
         '#weight' => '1',
       );
  $page_tabs['Roles'] = array(
@@ -393,7 +381,7 @@ function islandora_workflow_collection_permissions() {
  * This function builds the form that allows users to modify role based permissions for individual collections
  * @return array $collection_role_permissions_form: the array containing the form.
  */
-function islandora_workflow_role_permissions_form () {
+function islandora_workflow_role_permissions_form() {
 //init
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow'); 
   $collection_role_permissions_form=array();
@@ -403,7 +391,7 @@ function islandora_workflow_role_permissions_form () {
   $my_collections=islandora_workflow_get_current_users_collections();//used to get list of collections to display
 
   $current_module_permissions=islandora_workflow_get_roles_with_module_permissions();//used to get what roles to display and avaialbe options for selects
-  $current_collection_permissions=islandora_workflow_get_all_permissions();//used to find the default options for slects
+  $current_collection_permissions=islandora_workflow_get_all_role_permissions();//used to find the default options for slects
   //setup the form
   $collection_role_permissions_form['islandora_workflow_collection_permissions_table'] = array(
     '#type' => 'fieldset',
@@ -421,12 +409,12 @@ function islandora_workflow_role_permissions_form () {
   $collection_role_permissions_form['update']= array(
     '#type' => 'submit',
     '#value' => t('Update'),
-    '#weight' => '1',);
+    '#weight' => '1');
   //restore button
   $collection_role_permissions_form['restore']= array(
     '#type' => 'submit',
     '#value' => t('Restore'),
-    '#weight' => '2',); 
+    '#weight' => '2'); 
   
   //populate the form
   foreach ($current_module_permissions as $role_id => $role_name) {//roles
@@ -479,7 +467,7 @@ function islandora_workflow_role_permissions_form_submit($collection_role_permis
   $clicked_button = $collection_role_permissions_form_state['clicked_button']['#value'];
   if ($clicked_button=='Update') {//handle updating the page
     //init
-    $current_permissions=islandora_workflow_get_all_permissions();
+    $current_permissions=islandora_workflow_get_all_role_permissions();
     //these arrays all follow array[$role_id][$collection_id]str
     $changed_permissions=array();
     $new_permissions=array();
@@ -566,7 +554,7 @@ function islandora_workflow_role_permissions_form_submit($collection_role_permis
  * This function builds the form that allows users to modify user based permissions for individual collections
  * @return array $collection_user_permissions_form: the array containing the form.
  */
-function islandora_workflow_user_permissions_form () {
+function islandora_workflow_user_permissions_form() {
 //init
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow'); 
   $collection_user_permissions_form=array();
@@ -576,7 +564,7 @@ function islandora_workflow_user_permissions_form () {
   $my_collections=islandora_workflow_get_current_users_collections();//used to get list of collections to display
 
   $current_module_permissions=islandora_workflow_get_users_with_module_permissions();//used to get what users to display and avaialbe options for selects
-  $current_collection_permissions=islandora_workflow_get_all_permissions();//used to find the default options for slects
+  $current_collection_permissions=islandora_workflow_get_all_user_permissions();//used to find the default options for slects
   //setup the form
   $collection_user_permissions_form['islandora_workflow_collection_permissions_table'] = array(
     '#type' => 'fieldset',
@@ -594,12 +582,12 @@ function islandora_workflow_user_permissions_form () {
   $collection_user_permissions_form['update']= array(
     '#type' => 'submit',
     '#value' => t('Update'),
-    '#weight' => '1',);
+    '#weight' => '1');
   //restore button
   $collection_user_permissions_form['restore']= array(
     '#type' => 'submit',
     '#value' => t('Restore'),
-    '#weight' => '2',); 
+    '#weight' => '2'); 
   
   //populate the form
   foreach ($current_module_permissions as $user_id => $user_name) {//users
@@ -652,7 +640,7 @@ function islandora_workflow_user_permissions_form_submit($collection_user_permis
   $clicked_button = $collection_user_permissions_form_state['clicked_button']['#value'];
   if ($clicked_button=='Update') {//handle updating the page
     //init
-    $current_permissions=islandora_workflow_get_all_permissions();
+    $current_permissions=islandora_workflow_get_all_user_permissions();
     //these arrays all follow array[$user_id][$collection_id]str
     $changed_permissions=array();
     $new_permissions=array();
