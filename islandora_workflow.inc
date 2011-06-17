@@ -392,3 +392,14 @@ function islandora_workflow_claim_object($object_pid) {
 function islandora_workflow_assign_object($object_pid, $user_id) {
   
 }
+
+/**
+ * This function will get the current state of workflow for an object.
+ * @param string $object_id: the fedora pid of the object to check the status of
+ * @return string $state: The string reperesenting the state of the object in the workflow
+ */
+ function islandora_workflow_get_object_state($object_id) {
+   $state='';
+   
+   return $state;
+ }
