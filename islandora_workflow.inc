@@ -299,7 +299,44 @@ function islandora_workflow_get_users_with_module_permissions() {
  * @return bool: true if adding datastream was successful, false if it failed
  */
 function islandora_workflow_init_object_workflow_datastream($object_pid) {
+  //init
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item'); //for getting an object
+  $object= new Fedora_Item($object_pid);
+  $default_xml_file_name=drupal_get_path('module', 'islandora_workflow') . '/start_workflow.xml';
+  //$default_xml_file_handle=fopen($default_xml_file, "r");
+  //$default_workflow_datastream=fread($default_xml_file_handle, filesize($default_xml_file_name));
+  //fclose($default_xml_file_handle);
+  $workflow_parser = new DOMDocument();
+  $workflow_parser->load($default_xml_file_name);
+  global $user;
+  //get elements to populate dynamicaly
+  $assignee_array=$workflow_parser->getElementsByTagName('');
+  $last_modified_by_array=$workflow_parser->getElementsByTagName('');
+  $when_last_modified_array=$workflow_parser->getElementsByTagName('');
   
+  //populate the elements
+  foreach ($assignee_array as $assignee_element) {
+    //create text node
+    $assignee=$workflow_parser->createTextNode($user->uid);
+    //insert text node
+    $assignee_element->appendChild($assignee);
+  }
+  foreach ($last_modified_by_array as $last_modified_by_element) {
+    //create text node
+    $last_modified_by=$workflow_parser->createTextNode($user->uid);
+    //insert text node
+    $last_modified_by_element->appendChild($last_modified_by);
+  }
+  foreach ($when_last_modified_array as $when_last_modified_element) {
+    //create text node
+    $when_last_modified=$workflow_parser->createTextNode(date('c'));//date('c') is supposed to give back an xml friendly string
+    //insert text node
+    $when_last_modified_element->appendChild($when_last_modified);
+  }
+  
+  
+  $result=$object->add_datastream_from_string($workflow_parser->saveXML(), 'islandora_workflow', 'workflow', 'text/xml','X','Adding islandora_workflow datastream(workflow tracking).');
+  return $result;
 }
 
 /**

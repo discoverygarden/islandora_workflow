@@ -57,7 +57,6 @@ function islandora_workflow_work() {
  * @return array $form: the array containing the aporpriate form
  */
 function islandora_workflow_work_form($tab) {
-  
   //init
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow'); //for getting workflow info
   module_load_include('inc', 'fedora_repository', 'api/fedora_collection'); //for getting members of collections etc.
@@ -338,7 +337,6 @@ function islandora_workflow_preprocess_permissions_role_table(&$vars) {
     }
   }
 }
-
 
 /**
   * This function handles making variables available to the theme template for 

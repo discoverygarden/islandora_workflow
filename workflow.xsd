@@ -24,13 +24,14 @@
         				</xsd:sequence>
       			</xsd:complexType>
       		</xsd:element>
-    			<xsd:element name="state_name" >
+    			<xsd:element name="state" >
 					<xsd:simpleType>
 						<xsd:restriction base='xsd:string' >
 						   <xsd:enumeration value='created' />
 						   <xsd:enumeration value='rejected' />
 						   <xsd:enumeration value='submitted' />
 						   <xsd:enumeration value='approved' />
+						   <xsd:enumeration value='in_process' />
 						   <xsd:enumeration value='published' />
 						</xsd:restriction>
 					</xsd:simpleType>
