@@ -732,3 +732,14 @@ function islandora_workflow_user_permissions_form_submit($collection_user_permis
 function islandora_workflow_work_overview_form_submit($work_form, &$work_form_state) {
   
 }
+
+/**
+ * This function will get the current state of workflow for an object.
+ * @param string $object_id: the fedora pid of the object to check the status of
+ * @return string $state: The string reperesenting the state of the object in the workflow
+ */
+ function islandora_workflow_get_object_state($object_id) {
+   $state='';
+   
+   return $state;
+ }
