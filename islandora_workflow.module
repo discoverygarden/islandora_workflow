@@ -729,6 +729,7 @@ function islandora_workflow_user_permissions_form_submit($collection_user_permis
   * @param $work_form_form: Holds all the data on the state  of the form submitted
   * @param $work_form_state_form_state: An easier to use version of $work_form_form
  */
-function islandora_workflow_work_overview_form_submit($work_form, &$work_form_state) {
-  
+function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
+  dsm($work_form);
+  dsm($work_form_state);
 }

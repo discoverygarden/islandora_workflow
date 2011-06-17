@@ -296,7 +296,7 @@ function islandora_workflow_get_users_with_module_permissions() {
 /**
  * This function will add a workflow datastream to a fedora object
  * @param string $object_pid: the fedora pid of the object to modify
- * @return bool: true if adding datastream was successful, false if it failed
+ * @return string $result: the return mesage from fedora
  */
 function islandora_workflow_init_object_workflow_datastream($object_pid) {
   //init
@@ -341,7 +341,7 @@ function islandora_workflow_init_object_workflow_datastream($object_pid) {
 /**
  * This function will move a fedora object to the rejected state
  * @param string $object_pid: the fedora pid of the object to modify
- * @return bool: true if changing the workflow datastream was successful, false if it failed
+ * @return string $result: the return mesage from fedora
  */
 function islandora_workflow_reject_object($object_pid) {
   
@@ -350,7 +350,7 @@ function islandora_workflow_reject_object($object_pid) {
 /**
  * This function will move a fedora object to the approved state
  * @param string $object_pid: the fedora pid of the object to modify
- * @return bool: true if changing the workflow datastream was successful, false if it failed
+ * @return string $result: the return mesage from fedora
  */
 function islandora_workflow_approve_object($object_pid) {
   
@@ -359,7 +359,7 @@ function islandora_workflow_approve_object($object_pid) {
 /**
  * This function will move a fedora object to the published state
  * @param string $object_pid: the fedora pid of the object to modify
- * @return bool: true if changing the workflow datastream was successful, false if it failed
+ * @return string $result: the return mesage from fedora
  */
 function islandora_workflow_publish_object($object_pid) {
   
@@ -368,7 +368,7 @@ function islandora_workflow_publish_object($object_pid) {
 /**
  * This function will move a fedora object to the submitted state
  * @param string $object_pid: the fedora pid of the object to modify
- * @return bool: true if changing the workflow datastream was successful, false if it failed
+ * @return string $result: the return mesage from fedora
  */
 function islandora_workflow_submit_object($object_pid) {
   
@@ -377,7 +377,7 @@ function islandora_workflow_submit_object($object_pid) {
 /**
  * This function will assign the object to the current user state
  * @param string $object_pid: the fedora pid of the object to modify
- * @return bool: true if changing the workflow datastream was successful, false if it failed
+ * @return string $result: the return mesage from fedora
  */
 function islandora_workflow_claim_object($object_pid) {
   global $user;
@@ -387,7 +387,7 @@ function islandora_workflow_claim_object($object_pid) {
 /**
  * This function will assign the fedora object to the indicated user
  * @param string $object_pid: the fedora pid of the object to modify
- * @return bool: true if changing the workflow datastream was successful, false if it failed
+ * @return string $result: the return mesage from fedora
  */
 function islandora_workflow_assign_object($object_pid, $user_id) {
   
