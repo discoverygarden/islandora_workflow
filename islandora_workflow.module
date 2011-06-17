@@ -74,23 +74,25 @@ function islandora_workflow_work_form($tab) {
   );
   $workflow_tabs_form['objects_form']['objects_form_elems']=array('#theme' => 'workflow_table');
   
-  //delete button
-  $workflow_tabs_form['Delete']= array(
-    '#type' => 'submit',
-    '#weight' => '1',
-    '#value' => t('Delete'));
   //submit button
   $workflow_tabs_form['Submit']= array(
     '#type' => 'submit',
-    '#weight' => '2',
+    '#weight' => '1',
     '#value' => t('Submit'));
     //approve button
   if (user_access('islandora_workflow_Administrator') || user_access('islandora_workflow_Manager') || user_access('islandora_workflow_Editor') || user_access('administer')) {
     $workflow_tabs_form['Approve']= array(
       '#type' => 'submit',
-      '#weight' => '3',
+      '#weight' => '2',
       '#value' => t('Approve'));
  }
+    //publish button
+  if (user_access('islandora_workflow_Administrator') || user_access('islandora_workflow_Manager') || user_access('administer')) {
+    $workflow_tabs_form['Publish']= array(
+      '#type' => 'submit',
+      '#weight' => '3',
+      '#value' => t('Publish'));  
+  }
   //reject button
   if (user_access('islandora_workflow_Administrator') || user_access('islandora_workflow_Manager') || user_access('islandora_workflow_Editor') || user_access('administer')) {
     $workflow_tabs_form['Reject']= array(
@@ -98,13 +100,11 @@ function islandora_workflow_work_form($tab) {
       '#weight' => '4',
       '#value' => t('Reject'));
   }
-    //publish button
-  if (user_access('islandora_workflow_Administrator') || user_access('islandora_workflow_Manager') || user_access('administer')) {
-    $workflow_tabs_form['Publish']= array(
-      '#type' => 'submit',
-      '#weight' => '5',
-      '#value' => t('Publish'));  
-  }
+  //delete button
+  $workflow_tabs_form['Delete']= array(
+    '#type' => 'submit',
+    '#weight' => '5',
+    '#value' => t('Delete'));
   
   
   //populate tab for viewing objects
@@ -123,10 +123,12 @@ function islandora_workflow_work_form($tab) {
         '#type' => 'submit',
         '#value' => t('Edit'),
         );
+        /*
         $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Manage']=array(
         '#type' => 'submit',
         '#value' => t('Manage'),
         );
+        */
         $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Reject']=array(
         '#type' => 'submit',
         '#value' => t('Reject'),
@@ -149,10 +151,12 @@ function islandora_workflow_work_form($tab) {
           '#type' => 'submit',
           '#value' => t('Edit'),
           );
+          /*
           $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Manage']=array(
           '#type' => 'submit',
           '#value' => t('Manage'),
           );
+          */
           $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Reject']=array(
           '#type' => 'submit',
           '#value' => t('Reject'),
@@ -176,10 +180,12 @@ function islandora_workflow_work_form($tab) {
           '#type' => 'submit',
           '#value' => t('Edit'),
           );
+          /*
           $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Manage']=array(
           '#type' => 'submit',
           '#value' => t('Manage'),
           );
+          */
         }
      }
     }
@@ -732,4 +738,19 @@ function islandora_workflow_user_permissions_form_submit($collection_user_permis
 function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
   dsm($work_form);
   dsm($work_form_state);
+  //init
+  $clicked_button = $work_form_state['clicked_button']['#value'];
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow'); 
+  $collections=islandora_workflow_get_all_collections();
+  if ($clicked_button=='Submit') {
+    
+    //on specific object (if the grandparent is a collection)
+    if (in_array($work_form_state['clicked_button']['#parents'][search_array($clicked_button,$work_form_state['clicked_button']['#parents'])-2],$collections)) {
+      //@todo: make this call submit, currently using for testing
+      
+    }
+    
+    //bulk
+    
+  }
 }
