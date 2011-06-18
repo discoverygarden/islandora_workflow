@@ -123,15 +123,13 @@ function islandora_workflow_work_form($tab) {
         '#type' => 'submit',
         '#value' => t('Edit'),
         );
-        /*
         $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Manage']=array(
         '#type' => 'submit',
         '#value' => t('Manage'),
         );
-        */
-        $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Reject']=array(
-        '#type' => 'submit',
-        '#value' => t('Reject'),
+        $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selector']=array(
+        '#type' => 'checkbox',
+        '#title' => t(''),
         );
       }
     }
@@ -151,15 +149,14 @@ function islandora_workflow_work_form($tab) {
           '#type' => 'submit',
           '#value' => t('Edit'),
           );
-          /*
+          
           $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Manage']=array(
           '#type' => 'submit',
           '#value' => t('Manage'),
           );
-          */
-          $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Reject']=array(
-          '#type' => 'submit',
-          '#value' => t('Reject'),
+          $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selector']=array(
+          '#type' => 'checkbox',
+          '#title' => t(''),
           );
         }
       }
@@ -180,12 +177,14 @@ function islandora_workflow_work_form($tab) {
           '#type' => 'submit',
           '#value' => t('Edit'),
           );
-          /*
+          $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selector']=array(
+          '#type' => 'checkbox',
+          '#title' => t(''),
+          );
           $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Manage']=array(
           '#type' => 'submit',
           '#value' => t('Manage'),
           );
-          */
         }
      }
     }
