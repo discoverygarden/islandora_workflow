@@ -742,15 +742,31 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
   $clicked_button = $work_form_state['clicked_button']['#value'];
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow'); 
   $collections=islandora_workflow_get_all_collections();
-  if ($clicked_button=='Submit') {
-    
+  if ($clicked_button=='Edit') {
     //on specific object (if the grandparent is a collection)
     if (in_array($work_form_state['clicked_button']['#parents'][search_array($clicked_button,$work_form_state['clicked_button']['#parents'])-2],$collections)) {
-      //@todo: make this call submit, currently using for testing
-      
+      //@todo: make this bring up edit screen
     }
+  }
+  if ($clicked_button=='Manage') {
+    //on specific object (if the grandparent is a collection)
+    if (in_array($work_form_state['clicked_button']['#parents'][search_array($clicked_button,$work_form_state['clicked_button']['#parents'])-2],$collections)) {
+      //@todo: make this bring up edit screen
+    }
+  }
+  if ($clicked_button=='Submit') {
     
-    //bulk
+  }
+  if ($clicked_button=='Delete') {
+    
+  }
+  if ($clicked_button=='Reject') {
+    
+  }
+  if ($clicked_button=='Approve') {
+    
+  }
+  if ($clicked_button=='Publish') {
     
   }
 }
