@@ -127,7 +127,7 @@ function islandora_workflow_work_form($tab) {
         '#type' => 'submit',
         '#value' => t('Manage'),
         );
-        $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selector']=array(
+        $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selecter']=array(
         '#type' => 'checkbox',
         '#title' => t(''),
         );
@@ -154,7 +154,7 @@ function islandora_workflow_work_form($tab) {
           '#type' => 'submit',
           '#value' => t('Manage'),
           );
-          $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selector']=array(
+          $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selecter']=array(
           '#type' => 'checkbox',
           '#title' => t(''),
           );
@@ -177,7 +177,7 @@ function islandora_workflow_work_form($tab) {
           '#type' => 'submit',
           '#value' => t('Edit'),
           );
-          $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selector']=array(
+          $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selecter']=array(
           '#type' => 'checkbox',
           '#title' => t(''),
           );
@@ -356,7 +356,10 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
   $collection_members=get_related_items_as_array($collection_id, 'isMemberOf', 10000 , 0, FALSE);
     foreach($collection_members as $member) {
       if (isset($vars['list'][$collection_id][$member])) { //The isset is here so that only populated items are rendered into HTML for display
-        $vars['list'][$collection_id][$member]=drupal_render($vars['list'][$collection_id][$member]);
+        //render each element
+        $vars['list'][$collection_id][$member]['Edit']=drupal_render($vars['list'][$collection_id][$member]['Edit']);
+        $vars['list'][$collection_id][$member]['Manage']=drupal_render($vars['list'][$collection_id][$member]['Manage']);
+        $vars['list'][$collection_id][$member]['Selecter']=drupal_render($vars['list'][$collection_id][$member]['Selecter']);
       }
     }
   }
