@@ -55,6 +55,7 @@ function islandora_workflow_work() {
  * This function builds the forms for the islandora_workflow_work page
  * @param string $tab: which tab is calling the form, iether 'overview' or 'workflow'
  * @return array $form: the array containing the aporpriate form
+ * @todo: refactor the bottom buttons so that they only appear if the user has active permissions of the necessary levels... will need helper functions
  */
 function islandora_workflow_work_form($tab) {
   //init
@@ -348,6 +349,8 @@ function islandora_workflow_preprocess_permissions_role_table(&$vars) {
   * the workflow tabs of the 'work' page
   * @param array ref $vars: the list of variables (including the form) to send to the template
   * @return array $vars: the modified list of variables to send to the template
+  * @todo: make $vars['collections'] get all the collections that a user has ANY lvl access to this will likely need a helper function to simplify things
+  * 	but we could loop through each $vars['collection'] and search results from islandora_workflow_get_current_users_collections()
  */
 function islandora_workflow_preprocess_workflow_table(&$vars) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
