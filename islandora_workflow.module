@@ -81,21 +81,24 @@ function islandora_workflow_work_form($tab) {
     '#weight' => '1',
     '#value' => t('Submit'));
     //approve button
-  if (user_access('islandora_workflow_Administrator') || user_access('islandora_workflow_Manager') || user_access('islandora_workflow_Editor') || user_access('administer')) {
+  //if (user_access('islandora_workflow_Administrator') || user_access('islandora_workflow_Manager') || user_access('islandora_workflow_Editor') || user_access('administer')) {
+  if (user_access('islandora_workflow_Administrator') || islandora_workflow_get_current_users_collections('islandora_workflow_Manager') || islandora_workflow_get_current_users_collections('islandora_workflow_Editor') || user_access('administer')) {
     $workflow_tabs_form['Approve']= array(
       '#type' => 'submit',
       '#weight' => '2',
       '#value' => t('Approve'));
  }
     //publish button
-  if (user_access('islandora_workflow_Administrator') || user_access('islandora_workflow_Manager') || user_access('administer')) {
+  //if (user_access('islandora_workflow_Administrator') || user_access('islandora_workflow_Manager') || user_access('administer')) {
+  if (user_access('islandora_workflow_Administrator') || islandora_workflow_get_current_users_collections('islandora_workflow_Manager') || user_access('administer')) {  
     $workflow_tabs_form['Publish']= array(
       '#type' => 'submit',
       '#weight' => '3',
       '#value' => t('Publish'));  
   }
   //reject button
-  if (user_access('islandora_workflow_Administrator') || user_access('islandora_workflow_Manager') || user_access('islandora_workflow_Editor') || user_access('administer')) {
+  //if (user_access('islandora_workflow_Administrator') || user_access('islandora_workflow_Manager') || user_access('islandora_workflow_Editor') || user_access('administer')) {
+  if (user_access('islandora_workflow_Administrator') || islandora_workflow_get_current_users_collections('islandora_workflow_Manager') || islandora_workflow_get_current_users_collections('islandora_workflow_Editor') || user_access('administer')) {
     $workflow_tabs_form['Reject']= array(
       '#type' => 'submit',
       '#weight' => '4',
@@ -349,8 +352,6 @@ function islandora_workflow_preprocess_permissions_role_table(&$vars) {
   * the workflow tabs of the 'work' page
   * @param array ref $vars: the list of variables (including the form) to send to the template
   * @return array $vars: the modified list of variables to send to the template
-  * @todo: make $vars['collections'] get all the collections that a user has ANY lvl access to this will likely need a helper function to simplify things
-  * 	but we could loop through each $vars['collection'] and search results from islandora_workflow_get_current_users_collections()
  */
 function islandora_workflow_preprocess_workflow_table(&$vars) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');

@@ -14,7 +14,7 @@
  * collections that the user has the supplied permission to 
  * This is also handy to determin if the user has any permissions at that lvl:
  * if (islandora_workflow_get_current_users_collections($perm)!=FALSE) {}
- * 
+ * if (islandora_workflow_get_current_users_collections()) {}
  * @param string $permission_level: the permission level we are looking for
  * @return $collection_list: an associated array of collection pids and names, 
  * @return boolean: a false boolean if they don't have the indicated perms
