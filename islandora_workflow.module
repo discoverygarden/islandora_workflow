@@ -27,7 +27,6 @@ function islandora_workflow_work() {
         '#content' => drupal_get_form('islandora_workflow_work_form','workflow'),
         '#weight' => '1',
       );
-  //if (user_access('islandora_workflow_Administrator') || user_access('islandora_workflow_Manager') || user_access('islandora_workflow_Editor') || user_access('administer')) {
   if (user_access('islandora_workflow_Administrator') || islandora_workflow_get_current_users_collections('islandora_workflow_Manager') || islandora_workflow_get_current_users_collections('islandora_workflow_Editor') || user_access('administer')) {
     $page_tabs['Overview'] = array(
           '#type' => 'tabpage',
@@ -42,7 +41,6 @@ function islandora_workflow_work() {
         '#content' => 'asdt',//drupal_render($create_object_tab_form),
         '#weight' => '3'
       );
-  //if (user_access('islandora_workflow_Administrator') || user_access('islandora_workflow_Manager') || user_access('administer')) {
   if (user_access('islandora_workflow_Administrator') || islandora_workflow_get_current_users_collections('islandora_workflow_Manager') || user_access('administer')) {
     $page_tabs['New Collection'] = array(// available to admins
           '#type' => 'tabpage',
@@ -83,7 +81,6 @@ function islandora_workflow_work_form($tab) {
     '#weight' => '1',
     '#value' => t('Submit'));
     //approve button
-  //if (user_access('islandora_workflow_Administrator') || user_access('islandora_workflow_Manager') || user_access('islandora_workflow_Editor') || user_access('administer')) {
   if (user_access('islandora_workflow_Administrator') || islandora_workflow_get_current_users_collections('islandora_workflow_Manager') || islandora_workflow_get_current_users_collections('islandora_workflow_Editor') || user_access('administer')) {
     $workflow_tabs_form['Approve']= array(
       '#type' => 'submit',
@@ -91,7 +88,6 @@ function islandora_workflow_work_form($tab) {
       '#value' => t('Approve'));
  }
     //publish button
-  //if (user_access('islandora_workflow_Administrator') || user_access('islandora_workflow_Manager') || user_access('administer')) {
   if (user_access('islandora_workflow_Administrator') || islandora_workflow_get_current_users_collections('islandora_workflow_Manager') || user_access('administer')) {  
     $workflow_tabs_form['Publish']= array(
       '#type' => 'submit',
@@ -99,7 +95,6 @@ function islandora_workflow_work_form($tab) {
       '#value' => t('Publish'));  
   }
   //reject button
-  //if (user_access('islandora_workflow_Administrator') || user_access('islandora_workflow_Manager') || user_access('islandora_workflow_Editor') || user_access('administer')) {
   if (user_access('islandora_workflow_Administrator') || islandora_workflow_get_current_users_collections('islandora_workflow_Manager') || islandora_workflow_get_current_users_collections('islandora_workflow_Editor') || user_access('administer')) {
     $workflow_tabs_form['Reject']= array(
       '#type' => 'submit',
@@ -116,6 +111,10 @@ function islandora_workflow_work_form($tab) {
   //populate tab for viewing objects
   
   //get all members of the collections the user has manager/admin access to
+  /*setting the name as $member for edit and manage buttons is against the forms api
+  * but neccessary to get around a drupal bug that has submit buttons with the same name
+  * reporting an incorrect parent
+  */
   if ($users_manager_collections) {
     foreach ($users_manager_collections as $collection_id => $collection_name) {
       //get all objects in collection
@@ -128,10 +127,12 @@ function islandora_workflow_work_form($tab) {
         $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Edit']=array(
         '#type' => 'submit',
         '#value' => t('Edit'),
+        '#name' =>$member
         );
         $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Manage']=array(
         '#type' => 'submit',
         '#value' => t('Manage'),
+        '#name' =>$member
         );
         $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selecter']=array(
         '#type' => 'checkbox',
@@ -154,11 +155,13 @@ function islandora_workflow_work_form($tab) {
           $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Edit']=array(
           '#type' => 'submit',
           '#value' => t('Edit'),
+        '#name' =>$member
           );
           
           $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Manage']=array(
           '#type' => 'submit',
           '#value' => t('Manage'),
+        '#name' =>$member
           );
           $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selecter']=array(
           '#type' => 'checkbox',
@@ -182,6 +185,7 @@ function islandora_workflow_work_form($tab) {
           $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Edit']=array(
           '#type' => 'submit',
           '#value' => t('Edit'),
+        '#name' =>$member
           );
           $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selecter']=array(
           '#type' => 'checkbox',
@@ -190,6 +194,7 @@ function islandora_workflow_work_form($tab) {
           $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Manage']=array(
           '#type' => 'submit',
           '#value' => t('Manage'),
+        '#name' =>$member
           );
         }
      }
@@ -763,20 +768,16 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
       }
     }
   }
-  dsm($selected_object_ids);
   
   //handle buttons
+  //@todo edit and manage don't need to have those if statements, they should just get the pid
   if ($clicked_button=='Edit') {
-    //on specific object (if the grandparent is a collection)
-    if (in_array($work_form_state['clicked_button']['#parents'][search_array($clicked_button,$work_form_state['clicked_button']['#parents'])-2],$collections)) {
-      //@todo: make this bring up edit screen
-    }
+    $object_id=$work_form_state['clicked_button']['#parents'][array_search($clicked_button,$work_form_state['clicked_button']['#parents'])-1];
+    dsm($object_id);
   }
   elseif ($clicked_button=='Manage') {
-    //on specific object (if the grandparent is a collection)
-    if (in_array($work_form_state['clicked_button']['#parents'][search_array($clicked_button,$work_form_state['clicked_button']['#parents'])-2],$collections)) {
-      //@todo: make this bring up edit screen
-    }
+    $object_id=$work_form_state['clicked_button']['#parents'][array_search($clicked_button,$work_form_state['clicked_button']['#parents'])-1];
+    dsm($object_id);
   }
   elseif ($clicked_button=='Submit') {
     
