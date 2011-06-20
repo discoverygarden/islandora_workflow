@@ -17,6 +17,7 @@
  * @return $page: The html of the page to return
  */
 function islandora_workflow_work() {
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
   $page_tabs=array(
     '#type' => 'tabset',
   );
@@ -239,8 +240,9 @@ function islandora_workflow_menu() {
  * @return $bool: wheather or not to permit access
  */
 function islandora_wokflow_check_permissions($permission_array) {  
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
   //let the user into any page if they are a workflow admin
-  if (in_array('islandora_workflow_Administrator', $permission_array && user_access('islandora_workflow_Administrator'))) {
+  if (in_array('islandora_workflow_Administrator', $permission_array) && user_access('islandora_workflow_Administrator')) {
     return TRUE;
   }
   //loop through permissions allowed
