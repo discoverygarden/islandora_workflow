@@ -343,7 +343,7 @@ function islandora_workflow_create_workflow_datastream($object_pid) {
     $when_last_modified_element->appendChild($when_last_modified);
   }
   
-  $result=$object->add_datastream_from_string($workflow_parser->saveXML(), 'islandora_workflow', 'workflow', 'text/xml','X','Adding islandora_workflow datastream(workflow tracking).');
+  $result=$object->add_datastream_from_string($workflow_parser->saveXML(), 'islandora_workflow', 'workflow', 'text/xml', 'X', 'Adding islandora_workflow datastream(workflow tracking).');
   return $result;
 }
 

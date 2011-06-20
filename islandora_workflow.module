@@ -24,7 +24,7 @@ function islandora_workflow_work() {
   $page_tabs['Workflow'] = array(
         '#type' => 'tabpage',
         '#title' => t('Workflow'),
-        '#content' => drupal_get_form('islandora_workflow_work_form','workflow'),
+        '#content' => drupal_get_form('islandora_workflow_work_form', 'workflow'),
         '#weight' => '1',
       );
   if (user_access('islandora_workflow_Administrator') || islandora_workflow_get_current_users_collections('islandora_workflow_Manager') || islandora_workflow_get_current_users_collections('islandora_workflow_Editor') || user_access('administer')) {
@@ -127,12 +127,12 @@ function islandora_workflow_work_form($tab) {
         $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Edit']=array(
         '#type' => 'submit',
         '#value' => t('Edit'),
-        '#name' =>$member
+        '#name' => $member
         );
         $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Manage']=array(
         '#type' => 'submit',
         '#value' => t('Manage'),
-        '#name' =>$member
+        '#name' => $member
         );
         $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selecter']=array(
         '#type' => 'checkbox',
@@ -155,13 +155,13 @@ function islandora_workflow_work_form($tab) {
           $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Edit']=array(
           '#type' => 'submit',
           '#value' => t('Edit'),
-        '#name' =>$member
+        '#name' => $member
           );
           
           $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Manage']=array(
           '#type' => 'submit',
           '#value' => t('Manage'),
-        '#name' =>$member
+        '#name' => $member
           );
           $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selecter']=array(
           '#type' => 'checkbox',
@@ -185,7 +185,7 @@ function islandora_workflow_work_form($tab) {
           $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Edit']=array(
           '#type' => 'submit',
           '#value' => t('Edit'),
-        '#name' =>$member
+        '#name' => $member
           );
           $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selecter']=array(
           '#type' => 'checkbox',
@@ -194,7 +194,7 @@ function islandora_workflow_work_form($tab) {
           $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Manage']=array(
           '#type' => 'submit',
           '#value' => t('Manage'),
-        '#name' =>$member
+        '#name' => $member
           );
         }
      }
@@ -211,8 +211,8 @@ function islandora_workflow_menu() {
   $menuEntries= array();
   //settings associated with islandora_workflow
   $menuEntries['admin/settings/islandora_workflow_opts']=array(
-    'title' => t('Islandora workflow settings'),
-    'description' => t('Here you can change various settings for the islandora_workflow module.'),
+    'title' => 'Islandora workflow settings',
+    'description' => 'Here you can change various settings for the islandora_workflow module.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('islandora_workflow_admin'),
     'access arguments' => array('islandora_workflow_Administrator'),
@@ -220,8 +220,8 @@ function islandora_workflow_menu() {
   );
     //settings associated with islandora_workflow and collection permissions
   $menuEntries['admin/settings/islandora_workflow_perms']=array(
-    'title' => t('Islandora workflow permissions'),
-    'description' => t('Here you can assign permissions to roles on a collection by collection level.'),
+    'title' => 'Islandora workflow permissions',
+    'description' => 'Here you can assign permissions to roles on a collection by collection level.',
     'page callback' => 'islandora_workflow_collection_permissions',
     'access callback' => 'islandora_wokflow_check_permissions',
     'access arguments' => array(array('islandora_workflow_Administrator', 'islandora_workflow_Manager')),
@@ -229,8 +229,8 @@ function islandora_workflow_menu() {
   );
   //main working page for islandora_workflow
   $menuEntries['islandora_workflow']=array(
-    'title' => t('My Islandora work'),
-    'description' => t('This is the main access point to islandora_workflow'),
+    'title' => 'My Islandora work',
+    'description' => 'This is the main access point to islandora_workflow',
     'page callback' => 'islandora_workflow_work',
     'access callback' => 'islandora_wokflow_check_permissions',
     'access arguments' => array(array('islandora_workflow_Administrator', 'islandora_workflow_Editor', 'islandora_workflow_Manager', 'islandora_workflow_Submitter')),
@@ -368,9 +368,9 @@ function islandora_workflow_preprocess_permissions_role_table(&$vars) {
 function islandora_workflow_preprocess_workflow_table(&$vars) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
   $vars['collections']=islandora_workflow_get_current_users_collections('all');
-  foreach($vars['collections'] as $collection_id => $collection_name) {
+  foreach ($vars['collections'] as $collection_id => $collection_name) {
   $collection_members=get_related_items_as_array($collection_id, 'isMemberOf', 10000 , 0, FALSE);
-    foreach($collection_members as $member) {
+    foreach ($collection_members as $member) {
       if (isset($vars['list'][$collection_id][$member])) { //The isset is here so that only populated items are rendered into HTML for display
         //render each element
         $vars['list'][$collection_id][$member]['Edit']=drupal_render($vars['list'][$collection_id][$member]['Edit']);
@@ -570,10 +570,10 @@ function islandora_workflow_role_permissions_form_submit($collection_role_permis
       }
     }
     //print out to user
-    drupal_set_message('Changes to permissions were processed.');
+    drupal_set_message(t('Changes to permissions were processed.'));
   }
   elseif ($clicked_button=='Restore') {//handle reset
-    drupal_set_message('Permissions have not been changed.');
+    drupal_set_message(t('Permissions have not been changed.'));
   }
 }
 
@@ -741,10 +741,10 @@ function islandora_workflow_user_permissions_form_submit($collection_user_permis
       }
     }
     //print out to user
-    drupal_set_message('Changes to user based permissions were processed.');
+    drupal_set_message(t('Changes to user based permissions were processed.'));
   }
   elseif ($clicked_button=='Restore') {//handle reset
-    drupal_set_message('Permissions have not been changed.');
+    drupal_set_message(t('Permissions have not been changed.'));
   }
 }
 
@@ -772,11 +772,11 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
   //handle buttons
   //@todo edit and manage don't need to have those if statements, they should just get the pid
   if ($clicked_button=='Edit') {
-    $object_id=$work_form_state['clicked_button']['#parents'][array_search($clicked_button,$work_form_state['clicked_button']['#parents'])-1];
+    $object_id=$work_form_state['clicked_button']['#parents'][array_search($clicked_button, $work_form_state['clicked_button']['#parents'])-1];
 
   }
   elseif ($clicked_button=='Manage') {
-    $object_id=$work_form_state['clicked_button']['#parents'][array_search($clicked_button,$work_form_state['clicked_button']['#parents'])-1];
+    $object_id=$work_form_state['clicked_button']['#parents'][array_search($clicked_button, $work_form_state['clicked_button']['#parents'])-1];
 
   }
   elseif ($clicked_button=='Submit') {
@@ -785,7 +785,7 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
         islandora_workflow_submit_object($object_pid);
       }
       else {
-        drupal_set_message('The object '. $object_id .' could not be created, it was not in an aporopriate workflow state.');
+        drupal_set_message(t('The object '. $object_id .' could not be created, it was not in an aporopriate workflow state.'));
       }
     }
   }
@@ -802,7 +802,7 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
         islandora_workflow_reject_object($object_pid);
       }
       else {
-        drupal_set_message('The object '. $object_id .' could not be rejected, it was not in an aporopriate workflow state.');
+        drupal_set_message(t('The object '. $object_id .' could not be rejected, it was not in an aporopriate workflow state.'));
       }
     }
     
@@ -813,7 +813,7 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
         islandora_workflow_approve_object($object_pid);
       }
       else {
-        drupal_set_message('The object '. $object_id .' could not be approved, it was not in an aporopriate workflow state.');
+        drupal_set_message(t('The object '. $object_id .' could not be approved, it was not in an aporopriate workflow state.'));
       }
     }
   }
@@ -823,7 +823,7 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
         islandora_workflow_publish_object($object_pid);
       }
       else {
-        drupal_set_message('The object '. $object_id .' could not be published, it was not in an aporopriate workflow state.');
+        drupal_set_message(t('The object '. $object_id .' could not be published, it was not in an aporopriate workflow state.'));
       }
     }
   }
