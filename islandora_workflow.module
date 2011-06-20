@@ -363,7 +363,6 @@ function islandora_workflow_preprocess_permissions_role_table(&$vars) {
 function islandora_workflow_preprocess_workflow_table(&$vars) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
   $vars['collections']=islandora_workflow_get_current_users_collections('all');
-  dsm($vars['collections']);
   foreach($vars['collections'] as $collection_id => $collection_name) {
   $collection_members=get_related_items_as_array($collection_id, 'isMemberOf', 10000 , 0, FALSE);
     foreach($collection_members as $member) {
@@ -745,7 +744,7 @@ function islandora_workflow_user_permissions_form_submit($collection_user_permis
 }
 
 /**
- * This function handles all of the possible submits from the main workflow page
+ * This function handles all of the possible submits from the workflow work form (overview and workflow)
   * @param $work_form_form: Holds all the data on the state  of the form submitted
   * @param $work_form_state_form_state: An easier to use version of $work_form_form
  */
@@ -756,31 +755,42 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
   $clicked_button = $work_form_state['clicked_button']['#value'];
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow'); 
   $collections=islandora_workflow_get_all_collections();
+  $selected_object_ids=array();
+  foreach ($work_form_state['values']['objects_form']['objects_form_elems'] as $collection) {
+    foreach ($collection as $object_id => $object_form_elements) {
+      if ($object_form_elements['Selecter']==1) {
+        $selected_object_ids[]=$object_id;
+      }
+    }
+  }
+  dsm($selected_object_ids);
+  
+  //handle buttons
   if ($clicked_button=='Edit') {
     //on specific object (if the grandparent is a collection)
     if (in_array($work_form_state['clicked_button']['#parents'][search_array($clicked_button,$work_form_state['clicked_button']['#parents'])-2],$collections)) {
       //@todo: make this bring up edit screen
     }
   }
-  if ($clicked_button=='Manage') {
+  elseif ($clicked_button=='Manage') {
     //on specific object (if the grandparent is a collection)
     if (in_array($work_form_state['clicked_button']['#parents'][search_array($clicked_button,$work_form_state['clicked_button']['#parents'])-2],$collections)) {
       //@todo: make this bring up edit screen
     }
   }
-  if ($clicked_button=='Submit') {
+  elseif ($clicked_button=='Submit') {
     
   }
-  if ($clicked_button=='Delete') {
+  elseif ($clicked_button=='Delete') {
     
   }
-  if ($clicked_button=='Reject') {
+  elseif ($clicked_button=='Reject') {
     
   }
-  if ($clicked_button=='Approve') {
+  elseif ($clicked_button=='Approve') {
     
   }
-  if ($clicked_button=='Publish') {
+  elseif ($clicked_button=='Publish') {
     
   }
 }

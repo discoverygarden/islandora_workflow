@@ -407,8 +407,8 @@ function islandora_workflow_assign_object($object_pid, $user_id) {
  * @param string $object_id: the fedora pid of the object to check the status of
  * @return string $state: The string reperesenting the state of the object in the workflow
  */
- function islandora_workflow_get_object_state($object_id) {
-   $state='';
+function islandora_workflow_get_object_state($object_id) {
+  $state='';
    
-   return $state;
- }
+  return $state;
+}
