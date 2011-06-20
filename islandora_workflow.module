@@ -26,7 +26,8 @@ function islandora_workflow_work() {
         '#content' => drupal_get_form('islandora_workflow_work_form','workflow'),
         '#weight' => '1',
       );
-  if (user_access('islandora_workflow_Administrator') || user_access('islandora_workflow_Manager') || user_access('islandora_workflow_Editor') || user_access('administer')) {
+  //if (user_access('islandora_workflow_Administrator') || user_access('islandora_workflow_Manager') || user_access('islandora_workflow_Editor') || user_access('administer')) {
+  if (user_access('islandora_workflow_Administrator') || islandora_workflow_get_current_users_collections('islandora_workflow_Manager') || islandora_workflow_get_current_users_collections('islandora_workflow_Editor') || user_access('administer')) {
     $page_tabs['Overview'] = array(
           '#type' => 'tabpage',
           '#title' => t('Overview'),
@@ -40,7 +41,8 @@ function islandora_workflow_work() {
         '#content' => 'asdt',//drupal_render($create_object_tab_form),
         '#weight' => '3'
       );
-  if (user_access('islandora_workflow_Administrator') || user_access('islandora_workflow_Manager') || user_access('administer')) {
+  //if (user_access('islandora_workflow_Administrator') || user_access('islandora_workflow_Manager') || user_access('administer')) {
+  if (user_access('islandora_workflow_Administrator') || islandora_workflow_get_current_users_collections('islandora_workflow_Manager') || user_access('administer')) {
     $page_tabs['New Collection'] = array(// available to admins
           '#type' => 'tabpage',
           '#title' => t('New Collection'),
@@ -55,7 +57,6 @@ function islandora_workflow_work() {
  * This function builds the forms for the islandora_workflow_work page
  * @param string $tab: which tab is calling the form, iether 'overview' or 'workflow'
  * @return array $form: the array containing the aporpriate form
- * @todo: refactor the bottom buttons so that they only appear if the user has active permissions of the necessary levels... will need helper functions
  */
 function islandora_workflow_work_form($tab) {
   //init
@@ -233,15 +234,19 @@ function islandora_workflow_menu() {
 }
 
 /**
- * This function is the access callback used for access to the workflow section of this module
+ * This function is the access callback used for access to the workflow/perm section of this module
  * @param $permission_array: those user roles to allow access
  * @return $bool: wheather or not to permit access
  */
 function islandora_wokflow_check_permissions($permission_array) {  
+  //let the user into any page if they are a workflow admin
+  if (in_array('islandora_workflow_Administrator', $permission_array && user_access('islandora_workflow_Administrator'))) {
+    return TRUE;
+  }
   //loop through permissions allowed
   foreach ($permission_array as $permission) {
     //return true if the user has an allowed permission
-    if (user_access($permission)) {
+    if ($permission != 'islandora_workflow_Administrator' && (user_access($permission) && islandora_workflow_get_current_users_collections($permission))) {
       return TRUE;
     }
   }
