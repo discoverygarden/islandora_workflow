@@ -785,13 +785,15 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
         islandora_workflow_submit_object($object_pid);
       }
       else {
-        drupal_set_message('The object '. $object_id .' could not be deleted, it was not in an aporopriate workflow state.');
+        drupal_set_message('The object '. $object_id .' could not be created, it was not in an aporopriate workflow state.');
       }
     }
   }
   elseif ($clicked_button=='Delete') {//this is not supposed to actualy delete anything, ??
     foreach ($selected_object_ids as $object_id) {
-      islandora_workflow_delete_object($object_pid);
+      //@todo remove the create DS line and put in the delete line
+      //islandora_workflow_delete_object($object_pid);
+      islandora_workflow_create_workflow_datastream($object_pid);
     }
   }
   elseif ($clicked_button=='Reject') {

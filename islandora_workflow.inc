@@ -307,7 +307,7 @@ function islandora_workflow_get_users_with_module_permissions() {
  * @param string $object_pid: the fedora pid of the object to modify
  * @return string $result: the return mesage from fedora
  */
-function islandora_workflow_init_object_workflow_datastream($object_pid) {
+function islandora_workflow_create_workflow_datastream($object_pid) {
   //init
   module_load_include('inc', 'fedora_repository', 'api/fedora_item'); //for getting an object
   $object= new Fedora_Item($object_pid);
@@ -395,6 +395,15 @@ function islandora_workflow_claim_object($object_pid) {
 
 /**
  * This function will assign the fedora object to the indicated user
+ * @param string $object_pid: the fedora pid of the object to modify
+ * @return string $result: the return mesage from fedora
+ */
+function islandora_workflow_assign_object($object_pid, $user_id) {
+  
+}
+
+/**
+ * This function will do something that looks like deleteing it
  * @param string $object_pid: the fedora pid of the object to modify
  * @return string $result: the return mesage from fedora
  */
