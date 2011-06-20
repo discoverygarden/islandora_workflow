@@ -15,7 +15,7 @@
  * This is also handy to determin if the user has any permissions at that lvl:
  * if (islandora_workflow_get_current_users_collections($perm)!=FALSE) {}
  * if (islandora_workflow_get_current_users_collections()) {}
- * @param string $permission_level: the permission level we are looking for
+ * @param string $permission_level: the permission level we are looking for if it is the string 'all' it will get all collections the user has any access to
  * @return $collection_list: an associated array of collection pids and names, 
  * @return boolean: a false boolean if they don't have the indicated perms
  */
@@ -26,14 +26,17 @@ function islandora_workflow_get_current_users_collections($permission_level='isl
   if (user_access('islandora_workflow_Administrator') || user_access('administer')) {//admin show all
     $collection_list=islandora_workflow_get_all_collections();
   }
-  elseif (user_access($permission_level)) {//manager show permitted
+  elseif (user_access($permission_level) || $permission_level=='all') {//manager show permitted
     $collection_list=islandora_workflow_get_all_collections();
     //figure out owned collections
     //role perms
     $users_role_collection_permissions=islandora_workflow_get_current_users_role_permissions();
     foreach ($users_role_collection_permissions as $role_id => $collections) {
       foreach ($collections as $collection_id => $permission) {
-        if ($permission==$permission_level) {
+        if ($permission_level=='all') {//all available permissions
+          $permitted_collections[]=$collection_id;
+        }
+        elseif ($permission==$permission_level) {
           $permitted_collections[]=$collection_id;
         }
       }
@@ -42,7 +45,10 @@ function islandora_workflow_get_current_users_collections($permission_level='isl
     $users_user_collection_permissions=islandora_workflow_get_current_users_user_permissions();
     foreach ($users_user_collection_permissions as $role_id => $collections) {
       foreach ($collections as $collection_id => $permission) {
-        if ($permission==$permission_level) {
+        if ($permission_level=='all') {//all available permissions
+          $permitted_collections[]=$collection_id;
+        }
+        elseif ($permission==$permission_level) {
           $permitted_collections[]=$collection_id;
         }
       }
