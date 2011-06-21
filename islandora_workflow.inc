@@ -306,7 +306,6 @@ function islandora_workflow_get_users_with_module_permissions() {
  * This function will add a workflow datastream to a fedora object
  * @param string $object_id: the fedora pid of the object to modify
  * @return string $result: the return mesage from fedora
- * @todo: send assignee and workflow state to the rels ext
  */
 function islandora_workflow_create_workflow_datastream($object_id) {
   //init
@@ -320,20 +319,17 @@ function islandora_workflow_create_workflow_datastream($object_id) {
   $workflow_parser->load($default_xml_file_name);
   global $user;
   //get elements to populate dynamicaly
-  //$assignee_array=$workflow_parser->getElementsByTagName('assignee');
   $last_modified_by_array=$workflow_parser->getElementsByTagName('last_modified_by');
   $when_last_modified_array=$workflow_parser->getElementsByTagName('when_last_modified');
- /* 
-  //populate the elements
-  foreach ($assignee_array as $assignee_element) {
-    //create text node
-    $assignee=$workflow_parser->createTextNode($user->uid);
-    //insert text node
-    $assignee_element->appendChild($assignee);
-  }*/
+  
+  //rels-ext
+  islandora_workflow_set_object_state($object_id, 'created');
+  islandora_workflow_claim_object($object_id);
+  
+  //workflow DS
   foreach ($last_modified_by_array as $last_modified_by_element) {
     //create text node
-    $last_modified_by=$workflow_parser->createTextNode($user->uid);
+    $last_modified_by=$workflow_parser->createTextNode($user->name);
     //insert text node
     $last_modified_by_element->appendChild($last_modified_by);
   }
@@ -343,6 +339,7 @@ function islandora_workflow_create_workflow_datastream($object_id) {
     //insert text node
     $when_last_modified_element->appendChild($when_last_modified);
   }
+  
   $result=$object->add_datastream_from_string($workflow_parser->saveXML(), 'islandora_workflow', 'workflow', 'text/xml', 'X', 'Adding islandora_workflow datastream(workflow tracking).');
   return $result;
 }
@@ -350,56 +347,61 @@ function islandora_workflow_create_workflow_datastream($object_id) {
 /**
  * This function will move a fedora object to the rejected state
  * @param string $object_id: the fedora pid of the object to modify
- * @return string $result: the return mesage from fedora
+ * @return string: the return mesage from fedora
  */
 function islandora_workflow_reject_object($object_id) {
+  
+  return (islandora_workflow_set_object_state($object_id, 'rejected'));
   
 }
 
 /**
  * This function will move a fedora object to the approved state
  * @param string $object_id: the fedora pid of the object to modify
- * @return string $result: the return mesage from fedora
+ * @return string : the return mesage from fedora
  */
 function islandora_workflow_approve_object($object_id) {
-  
+  return (islandora_workflow_set_object_state($object_id, 'approved'));  
 } 
 
 /**
  * This function will move a fedora object to the published state
  * @param string $object_id: the fedora pid of the object to modify
- * @return string $result: the return mesage from fedora
+ * @return string: the return mesage from fedora
  */
 function islandora_workflow_publish_object($object_id) {
+  return (islandora_workflow_set_object_state($object_id, 'published'));
   
 }
 
 /**
  * This function will move a fedora object to the submitted state
+ * [wrapper function]
  * @param string $object_id: the fedora pid of the object to modify
- * @return string $result: the return mesage from fedora
+ * @return string: the return mesage from fedora
  */
 function islandora_workflow_submit_object($object_id) {
+  return (islandora_workflow_set_object_state($object_id, 'submitted'));
   
 }
 
 /**
  * This function will assign the object to the current user state
  * @param string $object_id: the fedora pid of the object to modify
- * @return string $result: the return mesage from fedora
+ * @return string: the return mesage from fedora
  */
 function islandora_workflow_claim_object($object_id) {
   global $user;
-  islandora_workflow_assign_object($object_id, $user->uid);
+  return (islandora_workflow_assign_object($object_id, $user->name));
 }
 
 /**
  * This function will assign the fedora object to the indicated user
  * @param string $object_id: the fedora pid of the object to modify
+ * @param string $user_name: the name of the drupal user to assign the object to
  * @return string $result: the return mesage from fedora
  */
-function islandora_workflow_assign_object($object_id, $user_id) {
-  
+function islandora_workflow_assign_object($object_id, $user_name) {
 }
 
 /**
@@ -407,7 +409,7 @@ function islandora_workflow_assign_object($object_id, $user_id) {
  * @param string $object_id: the fedora pid of the object to modify
  * @return string $result: the return mesage from fedora
  */
-function islandora_workflow_delete_object($object_id, $user_id) {
+function islandora_workflow_delete_object($object_id) {
   
 }
 
@@ -455,14 +457,4 @@ function islandora_workflow_get_object_assignee($object_id) {
   $assignee='';
    
   return $assignee;
-}
-
-/**
- * This function will set the current drupal user assignee for an object.
- * uses RELS-EXT
- * @param string $object_id: the fedora pid of the object to check the status of
- * @param string $assignee: The string reperesenting the drupal user's name
- * @return string $result: the return mesage from fedora
- */
-function islandora_workflow_set_object_assignee($object_id, $assignee) {
 }
