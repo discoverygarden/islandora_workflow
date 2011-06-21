@@ -24,19 +24,6 @@
         				</xsd:sequence>
       			</xsd:complexType>
       		</xsd:element>
-    			<xsd:element name="state" >
-					<xsd:simpleType>
-						<xsd:restriction base='xsd:string' >
-						   <xsd:enumeration value='created' />
-						   <xsd:enumeration value='rejected' />
-						   <xsd:enumeration value='submitted' />
-						   <xsd:enumeration value='approved' />
-						   <xsd:enumeration value='in_process' />
-						   <xsd:enumeration value='published' />
-						</xsd:restriction>
-					</xsd:simpleType>
-    			</xsd:element>
-    			<xsd:element name="assignee" type='xsd:string'/>
     			<xsd:element name="last_modified_by" type='xsd:string'/>
     			<xsd:element name="when_last_modified" type='xsd:dateTime'/>
     		</xsd:sequence>

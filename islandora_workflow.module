@@ -754,8 +754,6 @@ function islandora_workflow_user_permissions_form_submit($collection_user_permis
   * @param $work_form_state_form_state: An easier to use version of $work_form_form
  */
 function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
-  dsm($work_form);
-  dsm($work_form_state);
   //init
   $clicked_button = $work_form_state['clicked_button']['#value'];
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow'); 
@@ -782,7 +780,7 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
   elseif ($clicked_button=='Submit') {
     foreach ($selected_object_ids as $object_id) {
       if (islandora_workflow_get_object_state($object_id)=='created' || islandora_workflow_get_object_state($object_id)=='rejected') {
-        islandora_workflow_submit_object($object_pid);
+        islandora_workflow_submit_object($object_id);
       }
       else {
         drupal_set_message(t('The object '. $object_id .' could not be created, it was not in an aporopriate workflow state.'));
@@ -792,14 +790,14 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
   elseif ($clicked_button=='Delete') {//this is not supposed to actualy delete anything, ??
     foreach ($selected_object_ids as $object_id) {
       //@todo remove the create DS line and put in the delete line
-      //islandora_workflow_delete_object($object_pid);
-      islandora_workflow_create_workflow_datastream($object_pid);
+      //islandora_workflow_delete_object($object_id);
+      islandora_workflow_create_workflow_datastream($object_id);
     }
   }
   elseif ($clicked_button=='Reject') {
     foreach ($selected_object_ids as $object_id) {
       if (islandora_workflow_get_object_state($object_id)!='created' && islandora_workflow_get_object_state($object_id)!='rejected') {
-        islandora_workflow_reject_object($object_pid);
+        islandora_workflow_reject_object($object_id);
       }
       else {
         drupal_set_message(t('The object '. $object_id .' could not be rejected, it was not in an aporopriate workflow state.'));
@@ -810,7 +808,7 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
   elseif ($clicked_button=='Approve') {
     foreach ($selected_object_ids as $object_id) {
       if (islandora_workflow_get_object_state($object_id)!='published' && islandora_workflow_get_object_state($object_id)!='approved') {
-        islandora_workflow_approve_object($object_pid);
+        islandora_workflow_approve_object($object_id);
       }
       else {
         drupal_set_message(t('The object '. $object_id .' could not be approved, it was not in an aporopriate workflow state.'));
@@ -820,7 +818,7 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
   elseif ($clicked_button=='Publish') {
     foreach ($selected_object_ids as $object_id) {
       if (islandora_workflow_get_object_state($object_id)!='published') {
-        islandora_workflow_publish_object($object_pid);
+        islandora_workflow_publish_object($object_id);
       }
       else {
         drupal_set_message(t('The object '. $object_id .' could not be published, it was not in an aporopriate workflow state.'));
