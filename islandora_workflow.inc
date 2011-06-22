@@ -4,6 +4,7 @@
  * @author: William Panting
  * @date: 02/06/2011
  * This is a collection of helper functions and such for the islandora_workflow module.
+ * All the workflow wrapper functions are there so that in the future we can add specific error/permission reports and logic
  */
 
 
@@ -312,16 +313,13 @@ function islandora_workflow_create_workflow_datastream($object_id) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item'); //for getting an object
   $object= new Fedora_Item($object_id);
   $default_xml_file_name=drupal_get_path('module', 'islandora_workflow') . '/start_workflow.xml';
-  //$default_xml_file_handle=fopen($default_xml_file, "r");
-  //$default_workflow_datastream=fread($default_xml_file_handle, filesize($default_xml_file_name));
-  //fclose($default_xml_file_handle);
   $workflow_parser = new DOMDocument();
   $workflow_parser->load($default_xml_file_name);
   global $user;
   //get elements to populate dynamicaly
   $last_modified_by_array=$workflow_parser->getElementsByTagName('last_modified_by');
   $when_last_modified_array=$workflow_parser->getElementsByTagName('when_last_modified');
-  
+  /*
   //rels-ext
   islandora_workflow_set_object_state($object_id, 'created');
   islandora_workflow_claim_object($object_id);
@@ -341,7 +339,12 @@ function islandora_workflow_create_workflow_datastream($object_id) {
   }
   
   $result=$object->add_datastream_from_string($workflow_parser->saveXML(), 'islandora_workflow', 'workflow', 'text/xml', 'X', 'Adding islandora_workflow datastream(workflow tracking).');
-  return $result;
+  return $result;*/
+  
+  
+  //debugs
+  //islandora_workflow_get_object_fedora_state('islandora:2');
+  islandora_workflow_get_object_creator('islandora:2');
 }
 
 /**
@@ -350,9 +353,7 @@ function islandora_workflow_create_workflow_datastream($object_id) {
  * @return string: the return mesage from fedora
  */
 function islandora_workflow_reject_object($object_id) {
-  
   return (islandora_workflow_set_object_state($object_id, 'rejected'));
-  
 }
 
 /**
@@ -371,7 +372,6 @@ function islandora_workflow_approve_object($object_id) {
  */
 function islandora_workflow_publish_object($object_id) {
   return (islandora_workflow_set_object_state($object_id, 'published'));
-  
 }
 
 /**
@@ -382,7 +382,6 @@ function islandora_workflow_publish_object($object_id) {
  */
 function islandora_workflow_submit_object($object_id) {
   return (islandora_workflow_set_object_state($object_id, 'submitted'));
-  
 }
 
 /**
@@ -402,27 +401,7 @@ function islandora_workflow_claim_object($object_id) {
  * @return string $result: the return mesage from fedora
  */
 function islandora_workflow_assign_object($object_id, $user_name) {
-}
-
-/**
- * This function will do something that looks like deleteing it
- * @param string $object_id: the fedora pid of the object to modify
- * @return string $result: the return mesage from fedora
- */
-function islandora_workflow_delete_object($object_id) {
-  
-}
-
-/**
- * This function will get the current state of workflow for an object.
- * uses RELS-EXT
- * @param string $object_id: the fedora pid of the object to check the status of
- * @return string $state: The string reperesenting the state of the object in the workflow
- */
-function islandora_workflow_get_object_state($object_id) {
-  $state='';
-   
-  return $state;
+  return (islandora_workflow_set_object_relationship($object_id, 'islandora_workflow_assignee', $user_name));
 }
 
 /**
@@ -432,18 +411,71 @@ function islandora_workflow_get_object_state($object_id) {
  * @param string $state: The string reperesenting the state of the object in the workflow
  * @return string $result: the return mesage from fedora
  */
-function islandora_workflow_set_object_state($object_id, $state) {
+function islandora_workflow_set_object_workflow_state($object_id, $state) {
+  return (islandora_workflow_set_object_relationship($object_id, 'islandora_workflow_state', $state));
+}
+
+/**
+ * This function will do something that looks like deleteing it
+ * @param string $object_id: the fedora pid of the object to modify
+ * @return string $result: the return mesage from fedora
+ */
+function islandora_workflow_delete_object($object_id) {
+  //init
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item'); //for getting an object
+  $object= new Fedora_Item($object_id);
+  
+}
+
+/**
+ * This function will get the current state of workflow for an object.
+ * uses object properties
+ * @param string $object_id: the fedora pid of the object to check the status of
+ * @return string $state: The string reperesenting the state of the object in fedora
+ * @todo figure out why objState is not being reported
+ */
+function islandora_workflow_get_object_fedora_state($object_id) {
+  //init
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item'); //for getting an object
+  $object= new Fedora_Item($object_id);
+  $object_profile=$object->objectProfile;
+  dsm($object_profile);
+  $state=$object_profile->objState;
+  dsm($state);
+  return $state;
+}
+
+/**
+ * This function will get the current state of workflow for an object.
+ * uses RELS-EXT
+ * @param string $object_id: the fedora pid of the object to check the status of
+ * @return string $state: The string reperesenting the state of the object in the workflow
+ */
+function islandora_workflow_get_object_workflow_state($object_id) {
+  //init
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item'); //for getting an object
+  $object= new Fedora_Item($object_id);
+  $state='';
+   
+  return $state;
 }
 
 /**
  * This function will get the user who created the object [may or may not be a durpal user]
- * uses RELS-EXT
+ * uses object properties
  * @param string $object_id: the fedora pid of the object to check the status of
  * @return string $creator: The string reperesenting the creator of the object
+ * @todo: figure out why ownerid is not being reported and fix
  */
 function islandora_workflow_get_object_creator($object_id) {
-  $creator='';
+  //init
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item'); //for getting an object
+  $object= new Fedora_Item($object_id);
+  $object_profile=$object->objectProfile;
+  dsm($object_profile);
+  $creator=$object_profile->objOwnerId;
    
+  dsm($creator);
   return $creator;
 }
 
@@ -454,7 +486,25 @@ function islandora_workflow_get_object_creator($object_id) {
  * @return string $assignee: The string reperesenting the drupal user's name
  */
 function islandora_workflow_get_object_assignee($object_id) {
+  //init
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item'); //for getting an object
+  $object= new Fedora_Item($object_id);
   $assignee='';
    
+  dsm($assignee);
   return $assignee;
+}
+
+/**
+ * This function will set the indicated relationship on the indicated object.  
+ * It will create or replace the relationship  as apropriate.
+ * @param $object_id: the fedora pid of the object whos rels-ext will be modified
+ * @param string $relationship: the relationship to set
+ * @param string $target: a litteral or fedora pid string
+ */
+function islandora_workflow_set_object_relationship($object_id, $relationship, $target) {
+  //init
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item'); //for getting an object
+  $object= new Fedora_Item($object_id);
+  
 }
