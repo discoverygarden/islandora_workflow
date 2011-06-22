@@ -344,7 +344,9 @@ function islandora_workflow_create_workflow_datastream($object_id) {
   
   //debugs
   //islandora_workflow_get_object_fedora_state('islandora:2');
-  islandora_workflow_get_object_creator('islandora:2');
+  //islandora_workflow_get_object_creator('islandora:2');
+  //islandora_workflow_delete_object('islandora:1');
+  islandora_workflow_get_object_workflow_state($object_id);
 }
 
 /**
@@ -419,12 +421,33 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
  * This function will do something that looks like deleteing it
  * @param string $object_id: the fedora pid of the object to modify
  * @return string $result: the return mesage from fedora
+ * @todo: using modify_object sets all the other fedora object attributes to nil, 
+ * i need to get them and send the current values along 
  */
 function islandora_workflow_delete_object($object_id) {
   //init
   module_load_include('inc', 'fedora_repository', 'api/fedora_item'); //for getting an object
   $object= new Fedora_Item($object_id);
-  
+  return($object->modify_object('','D'));
+}
+
+/**
+ * This function will get the user who created the object [may or may not be a durpal user]
+ * uses object properties
+ * @param string $object_id: the fedora pid of the object to check the status of
+ * @return string $creator: The string reperesenting the creator of the object
+ * @todo: figure out why ownerid is not being reported and fix
+ */
+function islandora_workflow_get_object_creator($object_id) {
+  //init
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item'); //for getting an object
+  $object= new Fedora_Item($object_id);
+  $object_profile=$object->objectProfile;
+  dsm($object_profile);
+  $creator=$object_profile->objOwnerId;
+   
+  dsm($creator);
+  return $creator;
 }
 
 /**
@@ -455,28 +478,9 @@ function islandora_workflow_get_object_workflow_state($object_id) {
   //init
   module_load_include('inc', 'fedora_repository', 'api/fedora_item'); //for getting an object
   $object= new Fedora_Item($object_id);
-  $state='';
-   
+  $relationships=$object->get_relationships();
+  dsm($relationships);
   return $state;
-}
-
-/**
- * This function will get the user who created the object [may or may not be a durpal user]
- * uses object properties
- * @param string $object_id: the fedora pid of the object to check the status of
- * @return string $creator: The string reperesenting the creator of the object
- * @todo: figure out why ownerid is not being reported and fix
- */
-function islandora_workflow_get_object_creator($object_id) {
-  //init
-  module_load_include('inc', 'fedora_repository', 'api/fedora_item'); //for getting an object
-  $object= new Fedora_Item($object_id);
-  $object_profile=$object->objectProfile;
-  dsm($object_profile);
-  $creator=$object_profile->objOwnerId;
-   
-  dsm($creator);
-  return $creator;
 }
 
 /**
