@@ -319,9 +319,9 @@ function islandora_workflow_create_workflow_datastream($object_id) {
   //get elements to populate dynamicaly
   $last_modified_by_array=$workflow_parser->getElementsByTagName('last_modified_by');
   $when_last_modified_array=$workflow_parser->getElementsByTagName('when_last_modified');
-  /*
+  
   //rels-ext
-  islandora_workflow_set_object_state($object_id, 'created');
+  islandora_workflow_set_object_workflow_state($object_id, 'created');
   islandora_workflow_claim_object($object_id);
   
   //workflow DS
@@ -339,14 +339,14 @@ function islandora_workflow_create_workflow_datastream($object_id) {
   }
   
   $result=$object->add_datastream_from_string($workflow_parser->saveXML(), 'islandora_workflow', 'workflow', 'text/xml', 'X', 'Adding islandora_workflow datastream(workflow tracking).');
-  return $result;*/
+  return $result;
   
   
   //debugs
   //islandora_workflow_get_object_fedora_state('islandora:2');
   //islandora_workflow_get_object_creator('islandora:2');
   //islandora_workflow_delete_object('islandora:1');
-  islandora_workflow_get_object_workflow_state($object_id);
+  //islandora_workflow_get_object_workflow_state($object_id);
 }
 
 /**
@@ -428,7 +428,7 @@ function islandora_workflow_delete_object($object_id) {
   //init
   module_load_include('inc', 'fedora_repository', 'api/fedora_item'); //for getting an object
   $object= new Fedora_Item($object_id);
-  return($object->modify_object('','D'));
+  return ($object->modify_object('', 'D'));
 }
 
 /**
@@ -472,7 +472,8 @@ function islandora_workflow_get_object_fedora_state($object_id) {
  * This function will get the current state of workflow for an object.
  * uses RELS-EXT
  * @param string $object_id: the fedora pid of the object to check the status of
- * @return string $state: The string reperesenting the state of the object in the workflow
+ * @return $state: The string reperesenting the state of the object in the workflow 
+ * 													or a boolean FALSE if it has not ben set
  */
 function islandora_workflow_get_object_workflow_state($object_id) {
   //init
@@ -480,23 +481,32 @@ function islandora_workflow_get_object_workflow_state($object_id) {
   $object= new Fedora_Item($object_id);
   $relationships=$object->get_relationships();
   dsm($relationships);
-  return $state;
+  foreach ($relationships as $relationship) {
+    if ($relationship['predicate']=='islandora_workflow_state') {
+      return $relationship['predicate'];
+    }
+  }
+  return FALSE;
 }
 
 /**
  * This function will get the current assignee for a workflow object.
  * uses RELS-EXT
  * @param string $object_id: the fedora pid of the object to check the status of
- * @return string $assignee: The string reperesenting the drupal user's name
+ * @return string $assignee: The string reperesenting the drupal user's name, or false if none was set
  */
 function islandora_workflow_get_object_assignee($object_id) {
   //init
   module_load_include('inc', 'fedora_repository', 'api/fedora_item'); //for getting an object
   $object= new Fedora_Item($object_id);
-  $assignee='';
-   
-  dsm($assignee);
-  return $assignee;
+  $relationships=$object->get_relationships();
+  dsm($relationships);
+  foreach ($relationships as $relationship) {
+    if ($relationship['predicate']=='islandora_workflow_assignee') {
+      return $relationship['predicate'];
+    }
+  }
+  return FALSE;
 }
 
 /**
@@ -505,10 +515,24 @@ function islandora_workflow_get_object_assignee($object_id) {
  * @param $object_id: the fedora pid of the object whos rels-ext will be modified
  * @param string $relationship: the relationship to set
  * @param string $target: a litteral or fedora pid string
+ * @return: the response from fedora for adding/modifying the relationship
  */
-function islandora_workflow_set_object_relationship($object_id, $relationship, $target) {
+function islandora_workflow_set_object_relationship($object_id, $relationship_in, $target) {
   //init
   module_load_include('inc', 'fedora_repository', 'api/fedora_item'); //for getting an object
   $object= new Fedora_Item($object_id);
+  $relationships=$object->get_relationships();
+  /*
+  $relationship_in_present=FALSE;
+  foreach ($relationships as $relationship_key => $relationship) {
+    if ($relationship['predicate']==$relationship_in) {
+      $relationships[$relationship_key]['object']=$target;
+      $relationship_in_present=TRUE;
+    }
+  }
+  if ($relationship_in_present==FALSE) {
+    $relationships[]=array ('subject'=>$object_id, 'object'=>$target, 'predicate'=>$relationship_in);
+  }*/
   
+  return ($object->save_relationships($relationships));
 }
