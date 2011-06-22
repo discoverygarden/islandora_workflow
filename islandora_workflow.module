@@ -223,7 +223,7 @@ function islandora_workflow_menu() {
     'title' => 'Islandora workflow permissions',
     'description' => 'Here you can assign permissions to roles on a collection by collection level.',
     'page callback' => 'islandora_workflow_collection_permissions',
-    'access callback' => 'islandora_wokflow_check_permissions',
+    'access callback' => 'islandora_workflow_check_permissions',
     'access arguments' => array(array('islandora_workflow_Administrator', 'islandora_workflow_Manager')),
     'type' => MENU_NORMAL_ITEM
   );
@@ -232,7 +232,7 @@ function islandora_workflow_menu() {
     'title' => 'My Islandora work',
     'description' => 'This is the main access point to islandora_workflow',
     'page callback' => 'islandora_workflow_work',
-    'access callback' => 'islandora_wokflow_check_permissions',
+    'access callback' => 'islandora_workflow_check_permissions',
     'access arguments' => array(array('islandora_workflow_Administrator', 'islandora_workflow_Editor', 'islandora_workflow_Manager', 'islandora_workflow_Submitter')),
     'type' => MENU_NORMAL_ITEM
    );
@@ -244,7 +244,7 @@ function islandora_workflow_menu() {
  * @param $permission_array: those user roles to allow access
  * @return $bool: wheather or not to permit access
  */
-function islandora_wokflow_check_permissions($permission_array) {  
+function islandora_workflow_check_permissions($permission_array) {  
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
   //let the user into any page if they are a workflow admin
   if (in_array('islandora_workflow_Administrator', $permission_array) && user_access('islandora_workflow_Administrator')) {

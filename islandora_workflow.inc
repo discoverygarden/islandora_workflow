@@ -321,7 +321,7 @@ function islandora_workflow_create_workflow_datastream($object_id) {
   $when_last_modified_array=$workflow_parser->getElementsByTagName('when_last_modified');
   
   //rels-ext
-  islandora_workflow_set_object_workflow_state($object_id, 'created');
+  dsm(islandora_workflow_set_object_workflow_state($object_id, 'created'));
   islandora_workflow_claim_object($object_id);
   
   //workflow DS
@@ -522,17 +522,20 @@ function islandora_workflow_set_object_relationship($object_id, $relationship_in
   module_load_include('inc', 'fedora_repository', 'api/fedora_item'); //for getting an object
   $object= new Fedora_Item($object_id);
   $relationships=$object->get_relationships();
-  /*
+
   $relationship_in_present=FALSE;
   foreach ($relationships as $relationship_key => $relationship) {
+    //prepend 'info:fedora/' to each relationship's subject to make it insertable into the save_relationships function
+    $relationships[$relationship_key]['subject']='info:fedora/' . $relationships[$relationship_key]['subject'];
+    
     if ($relationship['predicate']==$relationship_in) {
       $relationships[$relationship_key]['object']=$target;
       $relationship_in_present=TRUE;
     }
   }
   if ($relationship_in_present==FALSE) {
-    $relationships[]=array ('subject'=>$object_id, 'object'=>$target, 'predicate'=>$relationship_in);
-  }*/
-  
+    $relationships[]=array ('subject' => 'info:fedora/' . $object_id, 'predicate' => $relationship_in, 'object' => $target);
+  }
+  dsm($relationships);
   return ($object->save_relationships($relationships));
 }
