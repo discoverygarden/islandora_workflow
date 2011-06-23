@@ -319,9 +319,9 @@ function islandora_workflow_create_workflow_datastream($object_id) {
   //get elements to populate dynamicaly
   $last_modified_by_array=$workflow_parser->getElementsByTagName('last_modified_by');
   $when_last_modified_array=$workflow_parser->getElementsByTagName('when_last_modified');
-  
+  /*
   //rels-ext
-  dsm(islandora_workflow_set_object_workflow_state($object_id, 'created'));
+  islandora_workflow_set_object_workflow_state($object_id, 'created');
   islandora_workflow_claim_object($object_id);
   
   //workflow DS
@@ -340,10 +340,10 @@ function islandora_workflow_create_workflow_datastream($object_id) {
   
   $result=$object->add_datastream_from_string($workflow_parser->saveXML(), 'islandora_workflow', 'workflow', 'text/xml', 'X', 'Adding islandora_workflow datastream(workflow tracking).');
   return $result;
-  
+  */
   
   //debugs
-  //islandora_workflow_get_object_fedora_state('islandora:2');
+  islandora_workflow_get_object_fedora_state('islandora:2');
   //islandora_workflow_get_object_creator('islandora:2');
   //islandora_workflow_delete_object('islandora:1');
   //islandora_workflow_get_object_workflow_state($object_id);
@@ -426,9 +426,9 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
  */
 function islandora_workflow_delete_object($object_id) {
   //init
-  module_load_include('inc', 'fedora_repository', 'api/fedora_item'); //for getting an object
-  $object= new Fedora_Item($object_id);
-  return ($object->modify_object('', 'D'));
+  module_load_include('object.inc', 'islandora_fedora_api', ''); //for getting an object
+  $object= new FedoraObject($object_id);
+  return ($object->__set('state', 'D'));
 }
 
 /**
@@ -459,11 +459,11 @@ function islandora_workflow_get_object_creator($object_id) {
  */
 function islandora_workflow_get_object_fedora_state($object_id) {
   //init
-  module_load_include('inc', 'fedora_repository', 'api/fedora_item'); //for getting an object
-  $object= new Fedora_Item($object_id);
-  $object_profile=$object->objectProfile;
+  module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
+  $object= new FedoraObject($object_id);
+  //$object_profile=$object->objectProfile;
   dsm($object_profile);
-  $state=$object_profile->objState;
+  $state=$object->__get('state');
   dsm($state);
   return $state;
 }
