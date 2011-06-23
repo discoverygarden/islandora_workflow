@@ -343,10 +343,7 @@ function islandora_workflow_init_workflow($object_id) {
   */
   
   //debugs
-  //islandora_workflow_get_object_fedora_state('islandora:2');
-  //islandora_workflow_get_object_creator('islandora:2');
-  islandora_workflow_delete_object('islandora:1');
-  //islandora_workflow_get_object_workflow_state($object_id);
+  islandora_workflow_get_object_workflow_state($object_id);
 }
 
 /**
@@ -426,7 +423,6 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
  */
 function islandora_workflow_delete_object($object_id) {
   //init
-  dsm($object_id);
   module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
   $object= new FedoraObject($object_id);
   return ($object->__set('state', 'D'));
@@ -471,15 +467,15 @@ function islandora_workflow_get_object_fedora_state($object_id) {
  */
 function islandora_workflow_get_object_workflow_state($object_id) {
   //init
-  module_load_include('inc', 'fedora_repository', 'api/fedora_item'); //for getting an object
-  $object= new Fedora_Item($object_id);
-  $relationships=$object->get_relationships();
+  module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
+  $object= new FedoraObject($object_id);
+  /*$relationships=$object->get_relationships();
   dsm($relationships);
   foreach ($relationships as $relationship) {
     if ($relationship['predicate']=='islandora_workflow_state') {
       return $relationship['predicate'];
     }
-  }
+  }*/
   return FALSE;
 }
 
