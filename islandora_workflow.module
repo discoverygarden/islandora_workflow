@@ -35,20 +35,6 @@ function islandora_workflow_work() {
           '#weight' => '2',
         );
   }
-  $page_tabs['New Object'] = array(
-        '#type' => 'tabpage',
-        '#title' => t('New Object'),
-        '#content' => 'asdt',//drupal_render($create_object_tab_form),
-        '#weight' => '3'
-      );
-  if (user_access('islandora_workflow_Administrator') || islandora_workflow_get_current_users_collections('islandora_workflow_Manager') || user_access('administer')) {
-    $page_tabs['New Collection'] = array(// available to admins
-          '#type' => 'tabpage',
-          '#title' => t('New Collection'),
-          '#content' => 'asdf',//drupal_render($create_collections_tab_form),
-          '#weight' => '4'
-        );
-  }    
   return tabs_render($page_tabs);
 }
 
@@ -791,7 +777,7 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
     foreach ($selected_object_ids as $object_id) {
       //@todo remove the create DS line and put in the delete line
       //islandora_workflow_delete_object($object_id);
-      islandora_workflow_create_workflow_datastream($object_id);
+      islandora_workflow_init_workflow($object_id);
     }
   }
   elseif ($clicked_button=='Reject') {
