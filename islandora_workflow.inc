@@ -321,6 +321,10 @@ function islandora_workflow_init_workflow($object_id) {
   $when_last_modified_array=$workflow_parser->getElementsByTagName('when_last_modified');
   /*
   //rels-ext
+  module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
+  $object= new FedoraObject($object_id);
+  return ($object->__set('state', 'I'));
+  
   islandora_workflow_set_object_workflow_state($object_id, 'created');
   islandora_workflow_claim_object($object_id);
   
@@ -371,6 +375,10 @@ function islandora_workflow_approve_object($object_id) {
  */
 function islandora_workflow_publish_object($object_id) {
   return (islandora_workflow_set_object_state($object_id, 'published'));
+  //make the object viewable
+  module_load_include('object.inc', 'islandora_fedora_api');
+  $object= new FedoraObject($object_id);
+  return ($object->__set('state', 'A'));
 }
 
 /**
@@ -422,7 +430,6 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
  * i need to get them and send the current values along 
  */
 function islandora_workflow_delete_object($object_id) {
-  //init
   module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
   $object= new FedoraObject($object_id);
   return ($object->__set('state', 'D'));
