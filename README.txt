@@ -10,6 +10,7 @@ Machine level workflow will be handled via fedora microservices.
 Human level workflow will be handled through this drupal module.
 
 Workflow can [not implemented yet] be enforced through the use of XACML. There is a settings toggle for this.
+This toggle is volatile, it may cause many problems.  We highly recommend only changing it at install time.
 
 There are concurency issues, more info pending.
 What happens when a Drupal admin revokes a permission that someone currently has with a collection? 
