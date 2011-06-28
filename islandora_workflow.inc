@@ -403,6 +403,7 @@ function islandora_workflow_publish_object($object_id) {
   return ($object->__set('state', 'A'));
 }
 
+
 /**
  * This function will move a fedora object to the submitted state
  * [wrapper function]
@@ -412,6 +413,7 @@ function islandora_workflow_publish_object($object_id) {
 function islandora_workflow_submit_object($object_id) {
   return (islandora_workflow_set_object_state($object_id, 'submitted'));
 }
+
 
 /**
  * This function will assign the object to the current user state
@@ -423,6 +425,7 @@ function islandora_workflow_claim_object($object_id) {
   return (islandora_workflow_assign_object($object_id, $user->name));
 }
 
+
 /**
  * This function will assign the fedora object to the indicated user
  * @param string $object_id: the fedora pid of the object to modify
@@ -433,6 +436,7 @@ function islandora_workflow_assign_object($object_id, $user_name) {
   return (islandora_workflow_set_object_relationship($object_id, 'islandora_workflow_assignee', $user_name));
 }
 
+
 /**
  * This function will set the current state of workflow for an object.
  * uses RELS-EXT
@@ -441,7 +445,7 @@ function islandora_workflow_assign_object($object_id, $user_name) {
  * @return string $result: the return mesage from fedora
  */
 function islandora_workflow_set_object_workflow_state($object_id, $state) {
-  return (islandora_workflow_set_object_relationship($object_id, 'islandora_workflow_state', $state));
+  return (islandora_workflow_set_object_relationship($object_id, 'state', $state));
 }
 
 /**
@@ -506,7 +510,6 @@ function islandora_workflow_get_object_workflow_state($object_id) {
 
   foreach ($state_elements->item(0)->childNodes as $state_node) {
     $state=$state_node->nodeValue;
-    //dsm($state);
     return $state;
   }
   
@@ -533,6 +536,7 @@ function islandora_workflow_get_object_assignee($object_id) {
   return FALSE;
 }
 
+
 /**
  * This function will set the indicated relationship on the indicated object.  
  * It will create or replace the relationship  as apropriate.
@@ -543,28 +547,21 @@ function islandora_workflow_get_object_assignee($object_id) {
  */
 function islandora_workflow_set_object_relationship($object_id, $relationship_in, $target) {
   //init
-  /*
-  module_load_include('inc', 'fedora_repository', 'api/fedora_item'); //for getting an object
-  $object= new Fedora_Item($object_id);
-  $relationships=$object->get_relationships();
-  $relationship_in_present=FALSE;
-  foreach ($relationships as $relationship_key => $relationship) {
-    //prepend 'info:fedora/' to each relationship's subject to make it insertable into the save_relationships function
-    $relationships[$relationship_key]['subject']='info:fedora/' . $relationships[$relationship_key]['subject'];
-    
-    if ($relationship['predicate']==$relationship_in) {
-      $relationships[$relationship_key]['object']=$target;
-      $relationship_in_present=TRUE;
-    }
-  }
-  if ($relationship_in_present==FALSE) {
-    $relationships[]=array ('subject' => 'info:fedora/' . $object_id, 'predicate' => $relationship_in, 'object' => $target);
-  }
- // dsm($relationships);
-  return ($object->save_relationships($relationships));
-  */
-  //init
+  $islandora_workflow_namespace='info:islandora/islandora-system:def/islandora_workflow#';
   module_load_include('raw.inc', 'islandora_fedora_api'); //for getting an object
   $apim_object= new FedoraAPIM();
-  $relationships=$apim_object->addRelationship($object_id, 'test', '2', array('is_literal' => 'true'));
+  
+  //get existing relationshp
+  $relationships=$apim_object->getRelationships($object_id, $islandora_workflow_namespace . $relationship_in);
+  $relationships_parser = new DOMDocument();
+  $relationships_parser->loadXML($relationships->data);
+  $state_elements=$relationships_parser->getElementsByTagNameNS($islandora_workflow_namespace, $relationship_in);
+  $state=NULL;
+  foreach ($state_elements->item(0)->childNodes as $state_node) {
+    $state=$state_node->nodeValue;
+    //clear current relationship
+    $apim_object->purgeRelationship($object_id, $islandora_workflow_namespace . $relationship_in, $state, array('isLiteral' => 'true'));
+  }
+  //set new relationship
+  $apim_object->addRelationship($object_id, $islandora_workflow_namespace . $relationship_in, $target, array('isLiteral' => 'true'));
 }
