@@ -369,7 +369,7 @@ function islandora_workflow_init_workflow($object_id) {
   */
   
   //debugs
-  islandora_workflow_get_object_workflow_state($object_id);
+  islandora_workflow_set_object_workflow_state('islandora:1', 'approved');
 }
 
 /**
@@ -543,10 +543,10 @@ function islandora_workflow_get_object_assignee($object_id) {
  */
 function islandora_workflow_set_object_relationship($object_id, $relationship_in, $target) {
   //init
+  /*
   module_load_include('inc', 'fedora_repository', 'api/fedora_item'); //for getting an object
   $object= new Fedora_Item($object_id);
   $relationships=$object->get_relationships();
-
   $relationship_in_present=FALSE;
   foreach ($relationships as $relationship_key => $relationship) {
     //prepend 'info:fedora/' to each relationship's subject to make it insertable into the save_relationships function
@@ -562,4 +562,9 @@ function islandora_workflow_set_object_relationship($object_id, $relationship_in
   }
  // dsm($relationships);
   return ($object->save_relationships($relationships));
+  */
+  //init
+  module_load_include('raw.inc', 'islandora_fedora_api'); //for getting an object
+  $apim_object= new FedoraAPIM();
+  $relationships=$apim_object->addRelationship($object_id, 'test', '2', array('is_literal' => 'true'));
 }
