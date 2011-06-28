@@ -90,7 +90,8 @@ function islandora_workflow_get_all_role_permissions() {
 /**
  * This function query's drupal's DB for all the collection permission entries for users
  * Used when displaying the current state for the permission page
- * @return array $perm_list: list of all permisions that users have  with the form  $perm_list[$user_id][$collection_id][1...4]=perms
+ * @return array $perm_list
+ *   list of all permisions that users have  with the form  $perm_list[$user_id][$collection_id][1...4]=perms
  */
 function islandora_workflow_get_all_user_permissions() {
   $perm_list=array();
@@ -109,21 +110,44 @@ function islandora_workflow_get_all_user_permissions() {
 
 /**
  * This is a helper function that will search the 
- * @param string $perm the permission to search for
- * @return array $users the list of users with the permission in the form users[user_id]=user_name
+ * @param string $perm 
+ *   the permission to search for
+ * @return array $users 
+ *   the list of users with the permission in the form users[user_id]=user_name
  */
 function user_access_list($perm = NULL) {
   $uids = FALSE;
-    if (isset($perm)) {
-      $query = "SELECT u.uid, u.name FROM {users} u, {users_roles} ur, {permission} p
-      WHERE        u.uid = ur.uid
-       AND          ur.rid = p.rid
-      AND          p.perm LIKE '%%%s%'
+  if (isset($perm)) {
+    $users_query = "SELECT u.uid, u.name FROM {users} u, {users_roles} ur, {permission} p
+    WHERE        u.uid = ur.uid
+    AND          ur.rid = p.rid
+    AND          p.perm LIKE '%%%s%'
+    ";
+    $users_result = db_query($users_query, $perm);
+    $users = array();
+    while ($u = db_fetch_object($users_result)) {
+      $users[$u->uid]=$u->name;
+    }
+  /*Drupal 6(note the 6) users_roles table does not record authenticated/anonymous/admin user
+    *I need to know about authenticated users so, here we manualy check and add them to the list
+    *TODO:
+    *  implement this
+    */
+    $authenticated_users_query = "SELECT rid, perm FROM {permission}
+      WHERE       rid = 2
+      AND          perm LIKE '%%%s%'
       ";
-      $result = db_query($query, $perm);
-      $users = array();
-      while ($u = db_fetch_object($result)) {
+    $authenticated_users_result = db_query($authenticated_users_query, $perm);
+
+    while ($u = db_fetch_object($authenticated_users_result)) {
+      $get_authenticated_users_query = "SELECT uid, name FROM {users}
+        WHERE       uid > 0
+        ";
+      $get_authenticated_users_result = db_query($get_authenticated_users_query);
+  
+      while ($u = db_fetch_object($get_authenticated_users_result)) {
         $users[$u->uid]=$u->name;
+      }
     }
   }
   return $users;
@@ -282,7 +306,6 @@ function islandora_workflow_get_users_with_module_permissions() {
    $manager_users=user_access_list('islandora_workflow_Manager');
    $editor_users=user_access_list('islandora_workflow_Editor');
    $submitter_users=user_access_list('islandora_workflow_Submitter');
-   
    //modify the returned arrays to include the permission name, and merge into one array [role_pid][role_name][0...4]permission
    foreach ($admin_users as $user_id => $user_name) {
      $privledged_users[$user_id][$user_name][]='islandora_workflow_Administrator';
@@ -299,7 +322,6 @@ function islandora_workflow_get_users_with_module_permissions() {
    foreach ($submitter_users as $user_id => $user_name) {
      $privledged_users[$user_id][$user_name][]='islandora_workflow_Submitter';
    }
-   
    return $privledged_users;
 }
 
@@ -480,12 +502,12 @@ function islandora_workflow_get_object_workflow_state($object_id) {
   $relationships_parser = new DOMDocument();
   $relationships_parser->loadXML($relationships->data);
 
-  $state_elements=$relationships_parser->getElementsByTagNameNS('info:islandora/islandora-system:def/pageinfo#','isPageNumber');
+  $state_elements=$relationships_parser->getElementsByTagNameNS('info:islandora/islandora-system:def/pageinfo#', 'isPageNumber');
 
-  foreach($state_elements->item(0)->childNodes as $state_node) {
+  foreach ($state_elements->item(0)->childNodes as $state_node) {
     $state=$state_node->nodeValue;
-    dsm($state);
-    return($state);
+    //dsm($state);
+    return $state;
   }
   
   return FALSE;
@@ -502,7 +524,7 @@ function islandora_workflow_get_object_assignee($object_id) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item'); //for getting an object
   $object= new Fedora_Item($object_id);
   $relationships=$object->get_relationships();
-  dsm($relationships);
+  //dsm($relationships);
   foreach ($relationships as $relationship) {
     if ($relationship['predicate']=='islandora_workflow_assignee') {
       return $relationship['predicate'];
@@ -538,6 +560,6 @@ function islandora_workflow_set_object_relationship($object_id, $relationship_in
   if ($relationship_in_present==FALSE) {
     $relationships[]=array ('subject' => 'info:fedora/' . $object_id, 'predicate' => $relationship_in, 'object' => $target);
   }
-  dsm($relationships);
+ // dsm($relationships);
   return ($object->save_relationships($relationships));
 }
