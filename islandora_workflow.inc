@@ -476,13 +476,18 @@ function islandora_workflow_get_object_workflow_state($object_id) {
   //init
   module_load_include('raw.inc', 'islandora_fedora_api'); //for getting an object
   $apim_object= new FedoraAPIM();
-  $relationships=$apim_object->getRelationships($object_id, 'islandora_workflow_state');
-  dsm($relationships);
-  /*foreach ($relationships as $relationship) {
-    if ($relationship['predicate']=='islandora_workflow_state') {
-      return $relationship['predicate'];
-    }
-  }*/
+  $relationships=$apim_object->getRelationships($object_id, 'info:islandora/islandora-system:def/pageinfo#isPageNumber');
+  $relationships_parser = new DOMDocument();
+  $relationships_parser->loadXML($relationships->data);
+
+  $state_elements=$relationships_parser->getElementsByTagNameNS('info:islandora/islandora-system:def/pageinfo#','isPageNumber');
+
+  foreach($state_elements->item(0)->childNodes as $state_node) {
+    $state=$state_node->nodeValue;
+    dsm($state);
+    return($state);
+  }
+  
   return FALSE;
 }
 
