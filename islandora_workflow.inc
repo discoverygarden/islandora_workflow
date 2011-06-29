@@ -6,9 +6,6 @@
  * This is a collection of helper functions and such for the islandora_workflow module.
  * All the workflow wrapper functions are there so that in the future we can add specific error/permission reports and logic
  * @todo
- *   where we change workflow state, if it changes to something other than published make sure 
- *   that the object state gets set to 'I'
- * @todo
  *   refactor checks on state change to store results of get state in a tmp var for permformance
  */
 
@@ -503,6 +500,12 @@ function islandora_workflow_assign_object($object_id, $user_name) {
  *   the return mesage from fedora
  */
 function islandora_workflow_set_object_workflow_state($object_id, $state) {
+  //make sure that the object's fedora state is going to be set to I if the object is still in workflow
+  if ($state!='published' && islandora_workflow_get_object_fedora_state($object_id)!='I') {
+    module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
+    $object= new FedoraObject($object_id);
+    $object->__get('state', 'I');
+  }
   return (islandora_workflow_set_object_relationship($object_id, 'state', $state));
 }
 
