@@ -392,7 +392,8 @@ function islandora_workflow_init_workflow($object_id) {
  *   false if the rejection was not attempted
  */
 function islandora_workflow_reject_object($object_id) {
-  if (islandora_workflow_get_object_workflow_state($object_id)!='created' && islandora_workflow_get_object_workflow_state($object_id)!='rejected') {
+  $workflow_state=islandora_workflow_get_object_workflow_state($object_id);
+  if ($workflow_state!='created' && $workflow_state!='rejected') {
     return (islandora_workflow_set_object_workflow_state($object_id, 'rejected'));
   }
   else {
@@ -411,7 +412,8 @@ function islandora_workflow_reject_object($object_id) {
  *   false if the approval was not attempted
  */
 function islandora_workflow_approve_object($object_id) {
-  if (islandora_workflow_get_object_workflow_state($object_id)!='published' && islandora_workflow_get_object_workflow_state($object_id)!='approved') {
+  $workflow_state=islandora_workflow_get_object_workflow_state($object_id);
+  if ($workflow_state!='published' && $workflow_state!='approved') {
     return (islandora_workflow_set_object_workflow_state($object_id, 'approved'));
   }
   else {
@@ -455,7 +457,8 @@ function islandora_workflow_publish_object($object_id) {
  *   false if the submission was not attempted
  */
 function islandora_workflow_submit_object($object_id) {
-  if (islandora_workflow_get_object_workflow_state($object_id)=='created' || islandora_workflow_get_object_workflow_state($object_id)=='rejected') {
+  $workflow_state=islandora_workflow_get_object_workflow_state($object_id);
+  if ($workflow_state=='created' || $workflow_state=='rejected') {
     return (islandora_workflow_set_object_workflow_state($object_id, 'submitted'));
   }
   else {
