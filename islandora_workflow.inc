@@ -5,8 +5,10 @@
  * @date: 02/06/2011
  * This is a collection of helper functions and such for the islandora_workflow module.
  * All the workflow wrapper functions are there so that in the future we can add specific error/permission reports and logic
+ * @todo
+ *   where we change workflow state, if it changes to something other than published make sure 
+ *   that the object state gets set to 'I'
  */
-
 
 /**
  * This function uses the get_all_collections() function in the case of an admin user
@@ -130,8 +132,6 @@ function user_access_list($perm = NULL) {
     }
   /*Drupal 6(note the 6) users_roles table does not record authenticated/anonymous/admin user
     *I need to know about authenticated users so, here we manualy check and add them to the list
-    *TODO:
-    *  implement this
     */
     $authenticated_users_query = "SELECT rid, perm FROM {permission}
       WHERE       rid = 2
@@ -444,8 +444,6 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
  * This function will do something that looks like deleteing it
  * @param string $object_id: the fedora pid of the object to modify
  * @return string $result: the return mesage from fedora
- * @todo: using modify_object sets all the other fedora object attributes to nil, 
- * i need to get them and send the current values along 
  */
 function islandora_workflow_delete_object($object_id) {
   module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
@@ -458,7 +456,6 @@ function islandora_workflow_delete_object($object_id) {
  * uses object properties
  * @param string $object_id: the fedora pid of the object to check the status of
  * @return string $creator: The string reperesenting the creator of the object
- * @todo: figure out why ownerid is not being reported and fix
  */
 function islandora_workflow_get_object_creator($object_id) {
   //init
@@ -473,7 +470,6 @@ function islandora_workflow_get_object_creator($object_id) {
  * uses object properties
  * @param string $object_id: the fedora pid of the object to check the status of
  * @return string $state: The string reperesenting the state of the object in fedora
- * @todo figure out why objState is not being reported
  */
 function islandora_workflow_get_object_fedora_state($object_id) {
   //init
