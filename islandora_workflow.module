@@ -108,10 +108,29 @@ function islandora_workflow_work_form($tab) {
     foreach ($users_manager_collections as $collection_id => $collection_name) {
       //get all objects in collection
       $collection_members=get_related_items_as_array($collection_id, 'isMemberOf', 10000 , 0, FALSE);
-      //filter collection items if in workflow tab @todo: implement
+    
+      //filter collection items if in workflow tab
       if ($tab=='workflow') {
-        
+        foreach ($collection_members as $member) {
+          //show things in approved state
+          if(islandora_workflow_get_object_workflow_state($member)!='approved') {
+            unset($collection_members[$member]);
+          }
+        }
       }
+      //filter collection items if in overview tab
+      if ($tab=='overview') {
+        foreach ($collection_members as $member) {
+          //filter collection items if the user is not an admin
+          if (!user_access('islandora_workflow_Administrator')) {
+            //show things not in published state
+            if(islandora_workflow_get_object_workflow_state($member)=='published') {
+              unset($collection_members[$member]);
+            }
+          }
+        }
+      }
+      
       foreach ($collection_members as $member) {
         $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Edit']=array(
         '#type' => 'submit',
@@ -136,10 +155,30 @@ function islandora_workflow_work_form($tab) {
       if (!isset($users_manager_collections[$collection_id])) {//exclude higher level permissions in the same collection
         //get all objects in collection
         $collection_members=get_related_items_as_array($collection_id, 'isMemberOf', 10000 , 0, FALSE);
-        //filter collection items if in workflow tab @todo: implement
+        
+        //filter collection items if in workflow tab
         if ($tab=='workflow') {
-          
+          foreach ($collection_members as $member) {
+            //show things in approved state
+            if(islandora_workflow_get_object_workflow_state($member)!='submitted') {
+              unset($collection_members[$member]);
+            }
+          }
         }
+        //filter collection items if in overview tab
+        if ($tab=='overview') {
+          foreach ($collection_members as $member) {
+            //filter collection items if the user is not an admin
+            if (!user_access('islandora_workflow_Administrator')) {
+              //show things not in published state
+              $workflow_state=islandora_workflow_get_object_workflow_state($member);
+              if($workflow_state=='published' || $workflow_state=='approved') {
+                unset($collection_members[$member]);
+              }
+            }
+          }
+        }
+      
         foreach ($collection_members as $member) {
           $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Edit']=array(
           '#type' => 'submit',
@@ -166,10 +205,30 @@ function islandora_workflow_work_form($tab) {
       if ((!isset($users_manager_collections[$collection_id])) && (!isset($users_editor_collections[$collection_id]))) {//exclude higher level permissions in the same collection
         // get all objects in those collections that they are submitters (only) in collection
         $collection_members=get_related_items_as_array($collection_id, 'isMemberOf', 10000 , 0, FALSE);
-        //filter collection items if in workflow tab @todo: implement
+
+        //filter collection items if in workflow tab
         if ($tab=='workflow') {
-          
+          foreach ($collection_members as $member) {
+            //show things in approved state
+            global $user;
+            if(islandora_workflow_get_object_workflow_state($member)!='created' && islandora_workflow_get_object_creator($member)==$user->name) {
+              unset($collection_members[$member]);
+            }
+          }
         }
+        //filter collection items if in overview tab
+        if ($tab=='overview') {
+          foreach ($collection_members as $member) {
+            //filter collection items if the user is not an admin
+            if (!user_access('islandora_workflow_Administrator')) {
+              //show things not in published state
+              if(islandora_workflow_get_object_creator($member)==$user->name) {
+                unset($collection_members[$member]);
+              }
+            }
+          }
+        }
+        
         foreach ($collection_members as $member) {
           $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Edit']=array(
           '#type' => 'submit',

@@ -5,8 +5,6 @@
  * @date: 02/06/2011
  * This is a collection of helper functions and such for the islandora_workflow module.
  * All the workflow wrapper functions are there so that in the future we can add specific error/permission reports and logic
- * @todo
- *   refactor checks on state change to store results of get state in a tmp var for permformance
  */
 
 /**
