@@ -332,7 +332,6 @@ function islandora_workflow_get_users_with_module_permissions() {
  */
 function islandora_workflow_init_workflow($object_id) {
   //init
-  dsm($object_id);
   module_load_include('inc', 'fedora_repository', 'api/fedora_item'); //for getting an object
   $object= new Fedora_Item($object_id);
   $default_xml_file_name=drupal_get_path('module', 'islandora_workflow') . '/start_workflow.xml';
@@ -553,12 +552,16 @@ function islandora_workflow_set_object_relationship($object_id, $relationship_in
   $relationships=$apim_object->getRelationships($object_id, $islandora_workflow_namespace . $relationship_in);
   $relationships_parser = new DOMDocument();
   $relationships_parser->loadXML($relationships->data);
-  $state_elements=$relationships_parser->getElementsByTagNameNS($islandora_workflow_namespace, $relationship_in);
-  $state=NULL;
-  foreach ($state_elements->item(0)->childNodes as $state_node) {
-    $state=$state_node->nodeValue;
-    //clear current relationship
-    $apim_object->purgeRelationship($object_id, $islandora_workflow_namespace . $relationship_in, $state, array('isLiteral' => 'true'));
+  $relationship_elements=$relationships_parser->getElementsByTagNameNS($islandora_workflow_namespace, $relationship_in);
+  $current_relationship=NULL;
+  $relationship_exists=$relationship_elements->item(0);
+  if(!empty($relationship_exists))
+  {
+    foreach ($relationship_elements->item(0)->childNodes as $relationship_node) {
+      $current_relationship=$relationship_node->nodeValue;
+      //clear current relationship
+      $apim_object->purgeRelationship($object_id, $islandora_workflow_namespace . $relationship_in, $current_relationship, array('isLiteral' => 'true'));
+    }
   }
   //set new relationship
   $apim_object->addRelationship($object_id, $islandora_workflow_namespace . $relationship_in, $target, array('isLiteral' => 'true'));

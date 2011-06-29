@@ -362,7 +362,7 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
       if (isset($vars['list'][$collection_id][$member])) { //The isset is here so that only populated items are rendered into HTML for display
         
         $vars['list'][$collection_id][$member]['state']=islandora_workflow_get_object_workflow_state($member);//current workflow state
-        dsm($vars['list'][$collection_id][$member]['state']);
+
         //render each element
         $vars['list'][$collection_id][$member]['Edit']=drupal_render($vars['list'][$collection_id][$member]['Edit']);
         $vars['list'][$collection_id][$member]['Manage']=drupal_render($vars['list'][$collection_id][$member]['Manage']);
@@ -759,7 +759,13 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
   }
   
   //handle buttons
-  //@todo edit and manage don't need to have those if statements, they should just get the pid
+  /*
+  @todo
+    edit and manage don't need to have those if statements, they should just get the pid
+  @todo
+    remove the drupal set messages to the associated method in the inc file so that they 
+    can be called from other functions/forms etc. [cleaner implementation]
+  */
   if ($clicked_button=='Edit') {
     $object_id=$work_form_state['clicked_button']['#parents'][array_search($clicked_button, $work_form_state['clicked_button']['#parents'])-1];
 
@@ -780,9 +786,7 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
   }
   elseif ($clicked_button=='Delete') {//this is not supposed to actualy delete anything, ??
     foreach ($selected_object_ids as $object_id) {
-      //@todo remove the create DS line and put in the delete line
-      //islandora_workflow_delete_object($object_id);
-      islandora_workflow_init_workflow($object_id);
+      islandora_workflow_delete_object($object_id);
     }
   }
   elseif ($clicked_button=='Reject') {
