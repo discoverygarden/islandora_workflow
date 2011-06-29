@@ -124,7 +124,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
       if ($tab=='overview') {
         foreach ($collection_members as $member_key => $member) {
           //filter collection items if the user is not an admin
-          if (!user_access('islandora_workflow_Administrator')) {
+          if (!user_access('islandora_workflow_Administrator') && !user_access('administer')) {
             //show things not in published state
             if (islandora_workflow_get_object_workflow_state($member)=='published') {
               unset($collection_members[$member_key]);
@@ -171,7 +171,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
         if ($tab=='overview') {
           foreach ($collection_members as $member_key => $member) {
             //filter collection items if the user is not an admin
-            if (!user_access('islandora_workflow_Administrator')) {
+            if (!user_access('islandora_workflow_Administrator') && !user_access('administer')) {
               //show things not in published state
               $workflow_state=islandora_workflow_get_object_workflow_state($member);
               if ($workflow_state=='published' || $workflow_state=='approved') {
@@ -222,7 +222,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
         if ($tab=='overview') {
           foreach ($collection_members as $member_key => $member) {
             //filter collection items if the user is not an admin
-            if (!user_access('islandora_workflow_Administrator')) {
+            if (!user_access('islandora_workflow_Administrator') && !user_access('administer')) {
               //show things not in published state
               global $user;
               if (islandora_workflow_get_object_creator($member)!=$user->name) {

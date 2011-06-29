@@ -12,7 +12,6 @@ Human level workflow will be handled through this drupal module.
 Workflow can [not implemented yet] be enforced through the use of XACML. There is a settings toggle for this.
 This toggle is volatile, it may cause many problems.  We highly recommend only changing it at install time.
 
-There are concurency issues, more info pending.
 What happens when a Drupal admin revokes a permission that someone currently has with a collection? 
 Please make sure not to do this: remove the workflow perms first to ensure database sync.
 
@@ -20,5 +19,6 @@ How do we recover if Drupal side modifications occured when Fedora was inactive?
 
 To be able to set user specific roles without restriction you need to set authenticated user permissions to include islandora_workflow_Submitter, islandora_workflow_Editor and islandora_workflow_Manager permissions.
 Do not set the islandora_workflow_Administrator permission for the authenticated user role.
+If a user has two levels or more of permissions on the same collection the highest level takes precedence.
 
-You may need to delete/modify the 'permit-anything-to-administrator.xml' file.
+You may need to delete/modify the 'permit-anything-to-administrator.xml' (Fedora xacml)file.
