@@ -52,9 +52,6 @@ function islandora_workflow_work_form(&$form_state, $tab) {
   $users_editor_collections=islandora_workflow_get_current_users_collections('islandora_workflow_Editor');
   $users_submitter_collections=islandora_workflow_get_current_users_collections('islandora_workflow_Submitter');
   
-
-  dsm($tab);
-  
   //tab forms
   $workflow_tabs_form['objects_form']=array(    
     '#type' => 'fieldset',
