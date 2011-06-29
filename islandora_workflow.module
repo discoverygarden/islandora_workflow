@@ -110,21 +110,21 @@ function islandora_workflow_work_form(&$form_state, $tab) {
     
       //filter collection items if in workflow tab
       if ($tab=='workflow') {
-        foreach ($collection_members as $member) {
+        foreach ($collection_members as $member_key => $member) {
           //show things in approved state
           if(islandora_workflow_get_object_workflow_state($member)!='approved') {
-            unset($collection_members[$member]);
+            unset($collection_members[$member_key]);
           }
         }
       }
       //filter collection items if in overview tab
       if ($tab=='overview') {
-        foreach ($collection_members as $member) {
+        foreach ($collection_members as $member_key => $member) {
           //filter collection items if the user is not an admin
           if (!user_access('islandora_workflow_Administrator')) {
             //show things not in published state
             if(islandora_workflow_get_object_workflow_state($member)=='published') {
-              unset($collection_members[$member]);
+              unset($collection_members[$member_key]);
             }
           }
         }
@@ -157,22 +157,22 @@ function islandora_workflow_work_form(&$form_state, $tab) {
         
         //filter collection items if in workflow tab
         if ($tab=='workflow') {
-          foreach ($collection_members as $member) {
+          foreach ($collection_members as $member_key => $member) {
             //show things in approved state
             if(islandora_workflow_get_object_workflow_state($member)!='submitted') {
-              unset($collection_members[$member]);
+              unset($collection_members[$member_key]);
             }
           }
         }
         //filter collection items if in overview tab
         if ($tab=='overview') {
-          foreach ($collection_members as $member) {
+          foreach ($collection_members as $member_key => $member) {
             //filter collection items if the user is not an admin
             if (!user_access('islandora_workflow_Administrator')) {
               //show things not in published state
               $workflow_state=islandora_workflow_get_object_workflow_state($member);
               if($workflow_state=='published' || $workflow_state=='approved') {
-                unset($collection_members[$member]);
+                unset($collection_members[$member_key]);
               }
             }
           }
@@ -207,22 +207,22 @@ function islandora_workflow_work_form(&$form_state, $tab) {
 
         //filter collection items if in workflow tab
         if ($tab=='workflow') {
-          foreach ($collection_members as $member) {
+          foreach ($collection_members as $member_key => $member) {
             //show things in approved state
             global $user;
-            if(islandora_workflow_get_object_workflow_state($member)!='created' && islandora_workflow_get_object_creator($member)==$user->name) {
-              unset($collection_members[$member]);
+            if(islandora_workflow_get_object_workflow_state($member)!='created' || islandora_workflow_get_object_creator($member)!=$user->name) {
+              unset($collection_members[$member_key]);
             }
           }
         }
         //filter collection items if in overview tab
         if ($tab=='overview') {
-          foreach ($collection_members as $member) {
+          foreach ($collection_members as $member_key => $member) {
             //filter collection items if the user is not an admin
             if (!user_access('islandora_workflow_Administrator')) {
               //show things not in published state
-              if(islandora_workflow_get_object_creator($member)==$user->name) {
-                unset($collection_members[$member]);
+              if(islandora_workflow_get_object_creator($member)!=$user->name) {
+                unset($collection_members[$member_key]);
               }
             }
           }
