@@ -17,7 +17,8 @@ Please make sure not to do this: remove the workflow perms first to ensure datab
 
 How do we recover if Drupal side modifications occured when Fedora was inactive? Please don't do this, be mindful of fedora's state.
 
-To be able to set user specific roles without restriction you need to set authenticated user permissions to include islandora_workflow_Submitter, islandora_workflow_Editor and islandora_workflow_Manager permissions.
+To be able to set user specific roles without restriction you need to set authenticated user permissions to islandora_workflow_Submitter, islandora_workflow_Editor and islandora_workflow_Manager permissions.
+Also, anyone who is to edit other users permissions will need the permission 'access administration pages'.
 Do not set the islandora_workflow_Administrator permission for the authenticated user role.
 If a user has two levels or more of permissions on the same collection the highest level takes precedence.
 
