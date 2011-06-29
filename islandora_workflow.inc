@@ -8,6 +8,8 @@
  * @todo
  *   where we change workflow state, if it changes to something other than published make sure 
  *   that the object state gets set to 'I'
+ * @todo
+ *   refactor checks on state change to store results of get state in a tmp var for permformance
  */
 
 /**
@@ -389,9 +391,17 @@ function islandora_workflow_init_workflow($object_id) {
  *   the fedora pid of the object to modify
  * @return string
  *   the return mesage from fedora
+ * @return boolean
+ *   false if the rejection was not attempted
  */
 function islandora_workflow_reject_object($object_id) {
-  return (islandora_workflow_set_object_workflow_state($object_id, 'rejected'));
+  if (islandora_workflow_get_object_workflow_state($object_id)!='created' && islandora_workflow_get_object_workflow_state($object_id)!='rejected') {
+    return (islandora_workflow_set_object_workflow_state($object_id, 'rejected'));
+  }
+  else {
+    drupal_set_message(t('The object '. $object_id .' could not be rejected, it was not in an aporopriate workflow state.'));
+    return FALSE;
+  }
 }
 
 /**
@@ -400,9 +410,17 @@ function islandora_workflow_reject_object($object_id) {
  *   the fedora pid of the object to modify
  * @return string
  *   the return mesage from fedora
+ * @return boolean
+ *   false if the approval was not attempted
  */
 function islandora_workflow_approve_object($object_id) {
-  return (islandora_workflow_set_object_workflow_state($object_id, 'approved'));  
+  if (islandora_workflow_get_object_workflow_state($object_id)!='published' && islandora_workflow_get_object_workflow_state($object_id)!='approved') {
+    return (islandora_workflow_set_object_workflow_state($object_id, 'approved'));
+  }
+  else {
+    drupal_set_message(t('The object '. $object_id .' could not be approved, it was not in an aporopriate workflow state.'));
+    return FALSE;
+  }
 } 
 
 /**
@@ -411,13 +429,22 @@ function islandora_workflow_approve_object($object_id) {
  *   the fedora pid of the object to modify
  * @return string
  *   the return mesage from fedora [on changing state to 'A']
+ * @return boolean
+ *   false if the publication was not attempted
  */
 function islandora_workflow_publish_object($object_id) {
-  islandora_workflow_set_object_workflow_state($object_id, 'published');
-  //make the object viewable
-  module_load_include('object.inc', 'islandora_fedora_api');
-  $object= new FedoraObject($object_id);
-  return ($object->__set('state', 'A'));
+  
+  if (islandora_workflow_get_object_workflow_state($object_id)!='published') {
+    islandora_workflow_set_object_workflow_state($object_id, 'published');
+    //make the object viewable
+    module_load_include('object.inc', 'islandora_fedora_api');
+    $object= new FedoraObject($object_id);
+    return ($object->__set('state', 'A'));
+  }
+  else {
+    drupal_set_message(t('The object '. $object_id .' could not be published, it was not in an aporopriate workflow state.'));
+    return FALSE;
+  }
 }
 
 /**
@@ -427,9 +454,17 @@ function islandora_workflow_publish_object($object_id) {
  *   the fedora pid of the object to modify
  * @return string
  *   the return mesage from fedora
+ * @return boolean
+ *   false if the submission was not attempted
  */
 function islandora_workflow_submit_object($object_id) {
-  return (islandora_workflow_set_object_workflow_state($object_id, 'submitted'));
+  if (islandora_workflow_get_object_workflow_state($object_id)=='created' || islandora_workflow_get_object_workflow_state($object_id)=='rejected') {
+    return (islandora_workflow_set_object_workflow_state($object_id, 'submitted'));
+  }
+  else {
+    drupal_set_message(t('The object '. $object_id .' could not be submitted, it was not in an aporopriate workflow state.'));
+    return FALSE;
+  }
 }
 
 /**
