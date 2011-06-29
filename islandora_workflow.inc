@@ -537,10 +537,14 @@ function islandora_workflow_get_object_assignee($object_id) {
 /**
  * This function will set the indicated relationship on the indicated object.  
  * It will create or replace the relationship  as apropriate.
- * @param $object_id: the fedora pid of the object whos rels-ext will be modified
- * @param string $relationship: the relationship to set
- * @param string $target: a litteral or fedora pid string
- * @return: the response from fedora for adding/modifying the relationship
+ * @param $object_id
+ *   the fedora pid of the object whos rels-ext will be modified
+ * @param string $relationship
+ *   the relationship to set
+ * @param string $target
+ *   a litteral or fedora pid string
+ * @return
+ *   the response from fedora for adding/modifying the relationship
  */
 function islandora_workflow_set_object_relationship($object_id, $relationship_in, $target) {
   //init
@@ -554,11 +558,10 @@ function islandora_workflow_set_object_relationship($object_id, $relationship_in
   $relationships_parser->loadXML($relationships->data);
   $relationship_elements=$relationships_parser->getElementsByTagNameNS($islandora_workflow_namespace, $relationship_in);
   $current_relationship=NULL;
-  $relationship_exists=$relationship_elements->item(0);
-  if(!empty($relationship_exists))
-  {
-    foreach ($relationship_elements->item(0)->childNodes as $relationship_node) {
-      $current_relationship=$relationship_node->nodeValue;
+  $relationship=$relationship_elements->item(0);
+  if (!empty($relationship)) {
+    foreach ($relationship->childNodes as $relationship_text_node) {
+      $current_relationship=$relationship_text_node->nodeValue;
       //clear current relationship
       $apim_object->purgeRelationship($object_id, $islandora_workflow_namespace . $relationship_in, $current_relationship, array('isLiteral' => 'true'));
     }
