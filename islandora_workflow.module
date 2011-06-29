@@ -45,13 +45,16 @@ function islandora_workflow_work() {
  *   the array containing the aporpriate form
  */
 function islandora_workflow_work_form(&$form_state, $tab) {
-  dsm($tab);
   //init
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow'); //for getting workflow info
   module_load_include('inc', 'fedora_repository', 'api/fedora_collection'); //for getting members of collections etc.
   $users_manager_collections=islandora_workflow_get_current_users_collections();
   $users_editor_collections=islandora_workflow_get_current_users_collections('islandora_workflow_Editor');
   $users_submitter_collections=islandora_workflow_get_current_users_collections('islandora_workflow_Submitter');
+  
+
+  dsm($tab);
+  
   //tab forms
   $workflow_tabs_form['objects_form']=array(    
     '#type' => 'fieldset',
@@ -112,7 +115,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
       if ($tab=='workflow') {
         foreach ($collection_members as $member_key => $member) {
           //show things in approved state
-          if(islandora_workflow_get_object_workflow_state($member)!='approved') {
+          if (islandora_workflow_get_object_workflow_state($member)!='approved') {
             unset($collection_members[$member_key]);
           }
         }
@@ -123,7 +126,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
           //filter collection items if the user is not an admin
           if (!user_access('islandora_workflow_Administrator')) {
             //show things not in published state
-            if(islandora_workflow_get_object_workflow_state($member)=='published') {
+            if (islandora_workflow_get_object_workflow_state($member)=='published') {
               unset($collection_members[$member_key]);
             }
           }
@@ -159,7 +162,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
         if ($tab=='workflow') {
           foreach ($collection_members as $member_key => $member) {
             //show things in approved state
-            if(islandora_workflow_get_object_workflow_state($member)!='submitted') {
+            if (islandora_workflow_get_object_workflow_state($member)!='submitted') {
               unset($collection_members[$member_key]);
             }
           }
@@ -171,7 +174,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
             if (!user_access('islandora_workflow_Administrator')) {
               //show things not in published state
               $workflow_state=islandora_workflow_get_object_workflow_state($member);
-              if($workflow_state=='published' || $workflow_state=='approved') {
+              if ($workflow_state=='published' || $workflow_state=='approved') {
                 unset($collection_members[$member_key]);
               }
             }
@@ -210,7 +213,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
           foreach ($collection_members as $member_key => $member) {
             //show things in approved state
             global $user;
-            if(islandora_workflow_get_object_workflow_state($member)!='created' || islandora_workflow_get_object_creator($member)!=$user->name) {
+            if (islandora_workflow_get_object_workflow_state($member)!='created' || islandora_workflow_get_object_creator($member)!=$user->name) {
               unset($collection_members[$member_key]);
             }
           }
@@ -221,13 +224,14 @@ function islandora_workflow_work_form(&$form_state, $tab) {
             //filter collection items if the user is not an admin
             if (!user_access('islandora_workflow_Administrator')) {
               //show things not in published state
-              if(islandora_workflow_get_object_creator($member)!=$user->name) {
+              global $user;
+              if (islandora_workflow_get_object_creator($member)!=$user->name) {
                 unset($collection_members[$member_key]);
               }
             }
           }
         }
-        dsm($collection_members);
+        
         foreach ($collection_members as $member) {
           $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Edit']=array(
           '#type' => 'submit',
@@ -303,7 +307,7 @@ function islandora_workflow_check_permissions($permission_array) {
   //loop through permissions allowed
   foreach ($permission_array as $permission) {
     //return true if the user has an allowed permission
-    if ($permission != 'islandora_workflow_Administrator' && (user_access($permission) && islandora_workflow_get_current_users_collections($permission))) {
+    if ($permission != 'islandora_workflow_Administrator' && user_access($permission) && islandora_workflow_get_current_users_collections($permission)!=FALSE) {
       return TRUE;
     }
   }

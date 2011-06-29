@@ -205,6 +205,7 @@ function islandora_workflow_get_current_users_user_permissions() {
   $query='SELECT user, collection, permission FROM {islandora_workflow_user_permissions}';
   $user_id=$user->uid;
   $query=$query . ' WHERE user="' . $user_id . '"';
+  $results=db_query($query);
   
   //build return array
   while ($row=db_fetch_array($results)) {
