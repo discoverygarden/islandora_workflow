@@ -332,6 +332,7 @@ function islandora_workflow_get_users_with_module_permissions() {
  */
 function islandora_workflow_init_workflow($object_id) {
   //init
+  dsm($object_id);
   module_load_include('inc', 'fedora_repository', 'api/fedora_item'); //for getting an object
   $object= new Fedora_Item($object_id);
   $default_xml_file_name=drupal_get_path('module', 'islandora_workflow') . '/start_workflow.xml';
@@ -341,11 +342,11 @@ function islandora_workflow_init_workflow($object_id) {
   //get elements to populate dynamicaly
   $last_modified_by_array=$workflow_parser->getElementsByTagName('last_modified_by');
   $when_last_modified_array=$workflow_parser->getElementsByTagName('when_last_modified');
-  /*
+  
   //rels-ext
   module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
   $object= new FedoraObject($object_id);
-  return ($object->__set('state', 'I'));
+  $object->__set('state', 'I');
   
   islandora_workflow_set_object_workflow_state($object_id, 'created');
   islandora_workflow_claim_object($object_id);
@@ -364,12 +365,8 @@ function islandora_workflow_init_workflow($object_id) {
     $when_last_modified_element->appendChild($when_last_modified);
   }
   
-  $result=$object->add_datastream_from_string($workflow_parser->saveXML(), 'islandora_workflow', 'workflow', 'text/xml', 'X', 'Adding islandora_workflow datastream(workflow tracking).');
+  $result=$object->addDatastream('islandora_workflow', NULL,  $workflow_parser->saveXML(), array('dsLabel' => 'workflow', 'mimeType' => 'text/xml', 'controlGroup' => 'X', 'logMessage' => 'Adding islandora_workflow datastream(workflow tracking).'));
   return $result;
-  */
-  
-  //debugs
-  islandora_workflow_set_object_workflow_state('islandora:1', 'approved');
 }
 
 /**

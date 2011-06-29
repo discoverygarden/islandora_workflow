@@ -360,6 +360,7 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
   $collection_members=get_related_items_as_array($collection_id, 'isMemberOf', 10000 , 0, FALSE);
     foreach ($collection_members as $member) {
       if (isset($vars['list'][$collection_id][$member])) { //The isset is here so that only populated items are rendered into HTML for display
+        
         $vars['list'][$collection_id][$member]['state']=islandora_workflow_get_object_workflow_state($member);//current workflow state
         dsm($vars['list'][$collection_id][$member]['state']);
         //render each element
