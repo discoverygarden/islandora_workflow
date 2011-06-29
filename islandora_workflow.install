@@ -8,7 +8,8 @@
 
 /**
  * This function handles setting up the islandora_workflow module's database schema
- * @return $workflow_schema: the associative array containing the database table(s) for islandora_workflow
+ * @return $workflow_schema
+ *   the associative array containing the database table(s) for islandora_workflow
  */
 function islandora_workflow_schema() {
   $workflow_schema=array();

@@ -18,9 +18,12 @@
  * This is also handy to determin if the user has any permissions at that lvl:
  * if (islandora_workflow_get_current_users_collections($perm)!=FALSE) {}
  * if (islandora_workflow_get_current_users_collections()) {}
- * @param string $permission_level: the permission level we are looking for if it is the string 'all' it will get all collections the user has any access to
- * @return $collection_list: an associated array of collection pids and names, 
- * @return boolean: a false boolean if they don't have the indicated perms
+ * @param string $permission_level
+ *   the permission level we are looking for if it is the string 'all' it will get all collections the user has any access to
+ * @return $collection_list
+ *   an associated array of collection pids and names, 
+ * @return boolean
+ *   a false boolean if they don't have the indicated perms
  */
 function islandora_workflow_get_current_users_collections($permission_level='islandora_workflow_Manager') {
   //init
@@ -72,7 +75,8 @@ function islandora_workflow_get_current_users_collections($permission_level='isl
 /**
  * This function query's drupal's DB for all the collection permission entries by role
  * Used when displaying the current state for the permission page
- * @return array $perm_list: list of permissions that roles have with the form $perm_list[$role_id][$collection_id][1...4]=perms
+ * @return array $perm_list
+ *   list of permissions that roles have with the form $perm_list[$role_id][$collection_id][1...4]=perms
  */
 function islandora_workflow_get_all_role_permissions() {
   $perm_list=array();
@@ -156,7 +160,8 @@ function user_access_list($perm = NULL) {
 /**
  * This function query's drupal's DB for all the collection permission entries related to the current user
  * Most usefull for building the work portal, and also used for getting user's owned collections
- * @return array $perm_list: list of permissions the current user has with the indicated $perm_list[$role_id][$collection_id][1...4]=perms
+ * @return array $perm_list
+ *   list of permissions the current user has with the indicated $perm_list[$role_id][$collection_id][1...4]=perms
  */
 function islandora_workflow_get_current_users_role_permissions() {
   //do islandora_workflow_get_all_role_permissions with restrictions on the roles to the list of roles the current user has
@@ -189,7 +194,8 @@ function islandora_workflow_get_current_users_role_permissions() {
 /**
 * This function query's drupal's DB for all the collection permission entries related to the current user
  * Most usefull for building the work portal, and also used for getting user's owned collections
- * @return array $perm_list: list of permissions the current user has with the indicated $perm_list[$role_id][$collection_id][1...4]=perms
+ * @return array $perm_list
+ *   list of permissions the current user has with the indicated $perm_list[$role_id][$collection_id][1...4]=perms
  */
 function islandora_workflow_get_current_users_user_permissions() {
   //do islandora_workflow_get_all_role_permissions with restrictions on the roles to the list of roles the current user has
@@ -210,7 +216,8 @@ function islandora_workflow_get_current_users_user_permissions() {
 
  /**
  * This function is used to get a list containing all of the islandora collections in a Fedora repo
- * @return $collection_list: an associated array of collection pids and names
+ * @return $collection_list
+ *   an associated array of collection pids and names
  */
 function islandora_workflow_get_all_collections() {
   
@@ -227,8 +234,10 @@ function islandora_workflow_get_all_collections() {
  
  /**
  *This function executes a query on Fedora's resource index
- * @param string $itql_query:
- * @return array $list_of_objects:
+ * @param string $itql_query
+ *   A query to use for searching the index
+ * @return array $list_of_objects
+ *   a nice array of objects
  */
 function islandora_workflow_get_related_objects($itql_query) {
   module_load_include('inc', 'fedora_repository', 'CollectionClass');
@@ -240,8 +249,10 @@ function islandora_workflow_get_related_objects($itql_query) {
 
 /**
  *This function turns an itql result into a usefull array
- * @param string $query_results: 
- * @return array $list_of_objects: 
+ * @param string $query_results
+ *   The ugly string version
+ * @return array $list_of_objects
+ *   The well formed array version
  */
 function islandora_workflow_itql_to_array($query_results) {
   try {
@@ -263,7 +274,8 @@ function islandora_workflow_itql_to_array($query_results) {
 
 /**
  * This function will return a list of all roles that have islandora_workflow permissions
- * @return array $privledged_roles: The list of roles
+ * @return array $privledged_roles
+ *   The list of roles
  */
 function islandora_workflow_get_roles_with_module_permissions() {
    $privledged_roles=array();
@@ -296,7 +308,8 @@ function islandora_workflow_get_roles_with_module_permissions() {
 
 /**
  * This function will return a list of all users that have islandora_workflow permissions
- * @return array $privledged_users: The list of users
+ * @return array $privledged_users
+ *   The list of users
  */
 function islandora_workflow_get_users_with_module_permissions() {
    $privledged_users=array();
@@ -327,8 +340,10 @@ function islandora_workflow_get_users_with_module_permissions() {
 
 /**
  * This function will add a workflow datastream to a fedora object
- * @param string $object_id: the fedora pid of the object to modify
- * @return string $result: the return mesage from fedora
+ * @param string $object_id
+ *   the fedora pid of the object to modify
+ * @return string $result
+ *   the return mesage from fedora
  */
 function islandora_workflow_init_workflow($object_id) {
   //init
@@ -370,8 +385,10 @@ function islandora_workflow_init_workflow($object_id) {
 
 /**
  * This function will move a fedora object to the rejected state
- * @param string $object_id: the fedora pid of the object to modify
- * @return string: the return mesage from fedora
+ * @param string $object_id
+ *   the fedora pid of the object to modify
+ * @return string
+ *   the return mesage from fedora
  */
 function islandora_workflow_reject_object($object_id) {
   return (islandora_workflow_set_object_workflow_state($object_id, 'rejected'));
@@ -379,8 +396,10 @@ function islandora_workflow_reject_object($object_id) {
 
 /**
  * This function will move a fedora object to the approved state
- * @param string $object_id: the fedora pid of the object to modify
- * @return string : the return mesage from fedora
+ * @param string $object_id
+ *   the fedora pid of the object to modify
+ * @return string
+ *   the return mesage from fedora
  */
 function islandora_workflow_approve_object($object_id) {
   return (islandora_workflow_set_object_workflow_state($object_id, 'approved'));  
@@ -388,8 +407,10 @@ function islandora_workflow_approve_object($object_id) {
 
 /**
  * This function will move a fedora object to the published state
- * @param string $object_id: the fedora pid of the object to modify
- * @return string: the return mesage from fedora [on changing state to 'A']
+ * @param string $object_id
+ *   the fedora pid of the object to modify
+ * @return string
+ *   the return mesage from fedora [on changing state to 'A']
  */
 function islandora_workflow_publish_object($object_id) {
   islandora_workflow_set_object_workflow_state($object_id, 'published');
@@ -402,8 +423,10 @@ function islandora_workflow_publish_object($object_id) {
 /**
  * This function will move a fedora object to the submitted state
  * [wrapper function]
- * @param string $object_id: the fedora pid of the object to modify
- * @return string: the return mesage from fedora
+ * @param string $object_id
+ *   the fedora pid of the object to modify
+ * @return string
+ *   the return mesage from fedora
  */
 function islandora_workflow_submit_object($object_id) {
   return (islandora_workflow_set_object_workflow_state($object_id, 'submitted'));
@@ -411,8 +434,10 @@ function islandora_workflow_submit_object($object_id) {
 
 /**
  * This function will assign the object to the current user state
- * @param string $object_id: the fedora pid of the object to modify
- * @return string: the return mesage from fedora
+ * @param string $object_id
+ *   the fedora pid of the object to modify
+ * @return string
+ *   the return mesage from fedora
  */
 function islandora_workflow_claim_object($object_id) {
   global $user;
@@ -421,9 +446,12 @@ function islandora_workflow_claim_object($object_id) {
 
 /**
  * This function will assign the fedora object to the indicated user
- * @param string $object_id: the fedora pid of the object to modify
- * @param string $user_name: the name of the drupal user to assign the object to
- * @return string $result: the return mesage from fedora
+ * @param string $object_id
+ *   the fedora pid of the object to modify
+ * @param string $user_name
+ *   the name of the drupal user to assign the object to
+ * @return string $result
+ *   the return mesage from fedora
  */
 function islandora_workflow_assign_object($object_id, $user_name) {
   return (islandora_workflow_set_object_relationship($object_id, 'assignee', $user_name));
@@ -432,9 +460,12 @@ function islandora_workflow_assign_object($object_id, $user_name) {
 /**
  * This function will set the current state of workflow for an object.
  * uses RELS-EXT
- * @param string $object_id: the fedora pid of the object to check the status of
- * @param string $state: The string reperesenting the state of the object in the workflow
- * @return string $result: the return mesage from fedora
+ * @param string $object_id
+ *   the fedora pid of the object to check the status of
+ * @param string $state
+ *   The string reperesenting the state of the object in the workflow
+ * @return string $result
+ *   the return mesage from fedora
  */
 function islandora_workflow_set_object_workflow_state($object_id, $state) {
   return (islandora_workflow_set_object_relationship($object_id, 'state', $state));
@@ -442,8 +473,10 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
 
 /**
  * This function will do something that looks like deleteing it
- * @param string $object_id: the fedora pid of the object to modify
- * @return string $result: the return mesage from fedora
+ * @param string $object_id
+ *   the fedora pid of the object to modify
+ * @return string $result
+ *   the return mesage from fedora
  */
 function islandora_workflow_delete_object($object_id) {
   module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
@@ -454,8 +487,10 @@ function islandora_workflow_delete_object($object_id) {
 /**
  * This function will get the user who created the object [may or may not be a durpal user]
  * uses object properties
- * @param string $object_id: the fedora pid of the object to check the status of
- * @return string $creator: The string reperesenting the creator of the object
+ * @param string $object_id
+ *   the fedora pid of the object to check the status of
+ * @return string $creator
+ *   The string reperesenting the creator of the object
  */
 function islandora_workflow_get_object_creator($object_id) {
   //init
@@ -468,8 +503,10 @@ function islandora_workflow_get_object_creator($object_id) {
 /**
  * This function will get the current state of workflow for an object.
  * uses object properties
- * @param string $object_id: the fedora pid of the object to check the status of
- * @return string $state: The string reperesenting the state of the object in fedora
+ * @param string $object_id
+ *   the fedora pid of the object to check the status of
+ * @return string $state
+ *   The string reperesenting the state of the object in fedora
  */
 function islandora_workflow_get_object_fedora_state($object_id) {
   //init
@@ -482,9 +519,11 @@ function islandora_workflow_get_object_fedora_state($object_id) {
 /**
  * This function will get the current state of workflow for an object.
  * uses RELS-EXT
- * @param string $object_id: the fedora pid of the object to check the status of
- * @return $state: The string reperesenting the state of the object in the workflow 
- * 													or a boolean FALSE if it has not ben set
+ * @param string $object_id
+ *   the fedora pid of the object to check the status of
+ * @return $state
+ *   The string reperesenting the state of the object in the workflow 
+ * 	  or a boolean FALSE if it has not ben set
  */
 function islandora_workflow_get_object_workflow_state($object_id) {
   //init
