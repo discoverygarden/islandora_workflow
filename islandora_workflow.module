@@ -44,7 +44,8 @@ function islandora_workflow_work() {
  * @return array $form
  *   the array containing the aporpriate form
  */
-function islandora_workflow_work_form($tab) {
+function islandora_workflow_work_form(&$form_state, $tab) {
+  dsm($tab);
   //init
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow'); //for getting workflow info
   module_load_include('inc', 'fedora_repository', 'api/fedora_collection'); //for getting members of collections etc.
@@ -226,7 +227,7 @@ function islandora_workflow_work_form($tab) {
             }
           }
         }
-        
+        dsm($collection_members);
         foreach ($collection_members as $member) {
           $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Edit']=array(
           '#type' => 'submit',
