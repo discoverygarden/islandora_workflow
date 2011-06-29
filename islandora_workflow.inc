@@ -403,7 +403,6 @@ function islandora_workflow_publish_object($object_id) {
   return ($object->__set('state', 'A'));
 }
 
-
 /**
  * This function will move a fedora object to the submitted state
  * [wrapper function]
@@ -413,7 +412,6 @@ function islandora_workflow_publish_object($object_id) {
 function islandora_workflow_submit_object($object_id) {
   return (islandora_workflow_set_object_state($object_id, 'submitted'));
 }
-
 
 /**
  * This function will assign the object to the current user state
@@ -425,7 +423,6 @@ function islandora_workflow_claim_object($object_id) {
   return (islandora_workflow_assign_object($object_id, $user->name));
 }
 
-
 /**
  * This function will assign the fedora object to the indicated user
  * @param string $object_id: the fedora pid of the object to modify
@@ -433,9 +430,8 @@ function islandora_workflow_claim_object($object_id) {
  * @return string $result: the return mesage from fedora
  */
 function islandora_workflow_assign_object($object_id, $user_name) {
-  return (islandora_workflow_set_object_relationship($object_id, 'islandora_workflow_assignee', $user_name));
+  return (islandora_workflow_set_object_relationship($object_id, 'assignee', $user_name));
 }
-
 
 /**
  * This function will set the current state of workflow for an object.
@@ -502,11 +498,11 @@ function islandora_workflow_get_object_workflow_state($object_id) {
   //init
   module_load_include('raw.inc', 'islandora_fedora_api'); //for getting an object
   $apim_object= new FedoraAPIM();
-  $relationships=$apim_object->getRelationships($object_id, 'info:islandora/islandora-system:def/pageinfo#isPageNumber');
+  $relationships=$apim_object->getRelationships($object_id, 'info:islandora/islandora-system:def/islandora_workflow#state');
   $relationships_parser = new DOMDocument();
   $relationships_parser->loadXML($relationships->data);
 
-  $state_elements=$relationships_parser->getElementsByTagNameNS('info:islandora/islandora-system:def/pageinfo#', 'isPageNumber');
+  $state_elements=$relationships_parser->getElementsByTagNameNS('info:islandora/islandora-system:def/islandora_workflow#', 'state');
 
   foreach ($state_elements->item(0)->childNodes as $state_node) {
     $state=$state_node->nodeValue;
@@ -519,23 +515,28 @@ function islandora_workflow_get_object_workflow_state($object_id) {
 /**
  * This function will get the current assignee for a workflow object.
  * uses RELS-EXT
- * @param string $object_id: the fedora pid of the object to check the status of
- * @return string $assignee: The string reperesenting the drupal user's name, or false if none was set
+ * @param string $object_id
+ *   the fedora pid of the object to check the status of
+ * @return string $assignee
+ *   The string reperesenting the drupal user's name, or false if none was set
  */
 function islandora_workflow_get_object_assignee($object_id) {
   //init
-  module_load_include('inc', 'fedora_repository', 'api/fedora_item'); //for getting an object
-  $object= new Fedora_Item($object_id);
-  $relationships=$object->get_relationships();
-  //dsm($relationships);
-  foreach ($relationships as $relationship) {
-    if ($relationship['predicate']=='islandora_workflow_assignee') {
-      return $relationship['predicate'];
-    }
+  module_load_include('raw.inc', 'islandora_fedora_api'); //for getting an object
+  $apim_object= new FedoraAPIM();
+  $relationships=$apim_object->getRelationships($object_id, 'info:islandora/islandora-system:def/islandora_workflow#assignee');
+  $relationships_parser = new DOMDocument();
+  $relationships_parser->loadXML($relationships->data);
+
+  $assignee_elements=$relationships_parser->getElementsByTagNameNS('info:islandora/islandora-system:def/islandora_workflow#', 'assignee');
+
+  foreach ($assignee_elements->item(0)->childNodes as $assignee_node) {
+    $assignee=$assignee_node->nodeValue;
+    return $assignee;
   }
+  
   return FALSE;
 }
-
 
 /**
  * This function will set the indicated relationship on the indicated object.  
