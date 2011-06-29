@@ -374,7 +374,7 @@ function islandora_workflow_init_workflow($object_id) {
  * @return string: the return mesage from fedora
  */
 function islandora_workflow_reject_object($object_id) {
-  return (islandora_workflow_set_object_state($object_id, 'rejected'));
+  return (islandora_workflow_set_object_workflow_state($object_id, 'rejected'));
 }
 
 /**
@@ -383,16 +383,16 @@ function islandora_workflow_reject_object($object_id) {
  * @return string : the return mesage from fedora
  */
 function islandora_workflow_approve_object($object_id) {
-  return (islandora_workflow_set_object_state($object_id, 'approved'));  
+  return (islandora_workflow_set_object_workflow_state($object_id, 'approved'));  
 } 
 
 /**
  * This function will move a fedora object to the published state
  * @param string $object_id: the fedora pid of the object to modify
- * @return string: the return mesage from fedora
+ * @return string: the return mesage from fedora [on changing state to 'A']
  */
 function islandora_workflow_publish_object($object_id) {
-  return (islandora_workflow_set_object_state($object_id, 'published'));
+  islandora_workflow_set_object_workflow_state($object_id, 'published');
   //make the object viewable
   module_load_include('object.inc', 'islandora_fedora_api');
   $object= new FedoraObject($object_id);
@@ -406,7 +406,7 @@ function islandora_workflow_publish_object($object_id) {
  * @return string: the return mesage from fedora
  */
 function islandora_workflow_submit_object($object_id) {
-  return (islandora_workflow_set_object_state($object_id, 'submitted'));
+  return (islandora_workflow_set_object_workflow_state($object_id, 'submitted'));
 }
 
 /**

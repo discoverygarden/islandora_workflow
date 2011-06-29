@@ -776,12 +776,7 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
   }
   elseif ($clicked_button=='Submit') {
     foreach ($selected_object_ids as $object_id) {
-      if (islandora_workflow_get_object_state($object_id)=='created' || islandora_workflow_get_object_state($object_id)=='rejected') {
-        islandora_workflow_submit_object($object_id);
-      }
-      else {
-        drupal_set_message(t('The object '. $object_id .' could not be created, it was not in an aporopriate workflow state.'));
-      }
+      islandora_workflow_submit_object($object_id);
     }
   }
   elseif ($clicked_button=='Delete') {//this is not supposed to actualy delete anything, ??
@@ -791,33 +786,17 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
   }
   elseif ($clicked_button=='Reject') {
     foreach ($selected_object_ids as $object_id) {
-      if (islandora_workflow_get_object_state($object_id)!='created' && islandora_workflow_get_object_state($object_id)!='rejected') {
-        islandora_workflow_reject_object($object_id);
-      }
-      else {
-        drupal_set_message(t('The object '. $object_id .' could not be rejected, it was not in an aporopriate workflow state.'));
-      }
+      islandora_workflow_reject_object($object_id);
     }
-    
   }
   elseif ($clicked_button=='Approve') {
     foreach ($selected_object_ids as $object_id) {
-      if (islandora_workflow_get_object_state($object_id)!='published' && islandora_workflow_get_object_state($object_id)!='approved') {
-        islandora_workflow_approve_object($object_id);
-      }
-      else {
-        drupal_set_message(t('The object '. $object_id .' could not be approved, it was not in an aporopriate workflow state.'));
-      }
+      islandora_workflow_approve_object($object_id);
     }
   }
   elseif ($clicked_button=='Publish') {
     foreach ($selected_object_ids as $object_id) {
-      if (islandora_workflow_get_object_state($object_id)!='published') {
         islandora_workflow_publish_object($object_id);
-      }
-      else {
-        drupal_set_message(t('The object '. $object_id .' could not be published, it was not in an aporopriate workflow state.'));
-      }
     }
   }
 }
