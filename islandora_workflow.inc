@@ -393,6 +393,13 @@ function islandora_workflow_init_workflow($object_id) {
  *   false if the rejection was not attempted
  */
 function islandora_workflow_reject_object($object_id) {
+  
+  //permission check
+  if (!islandora_workflow_user_object_permission_check($object_id)) {
+    drupal_set_message(t('The object '. $object_id .' could not be rejected, you do not have the necessary permissions.'));
+    return FALSE;
+  }
+  
   islandora_workflow_get_object_parent($object_id);
   
   $workflow_state=islandora_workflow_get_object_workflow_state($object_id);
@@ -415,6 +422,13 @@ function islandora_workflow_reject_object($object_id) {
  *   false if the approval was not attempted
  */
 function islandora_workflow_approve_object($object_id) {
+  
+  //permission check
+  if (!islandora_workflow_user_object_permission_check($object_id)) {
+    drupal_set_message(t('The object '. $object_id .' could not be approved, you do not have the necessary permissions.'));
+    return FALSE;
+  }
+  
   $workflow_state=islandora_workflow_get_object_workflow_state($object_id);
   if ($workflow_state!='published' && $workflow_state!='approved') {
     return (islandora_workflow_set_object_workflow_state($object_id, 'approved'));
@@ -435,6 +449,11 @@ function islandora_workflow_approve_object($object_id) {
  *   false if the publication was not attempted
  */
 function islandora_workflow_publish_object($object_id) {
+  //permission check
+  if (!islandora_workflow_user_object_permission_check($object_id)) {
+    drupal_set_message(t('The object '. $object_id .' could not be published, you do not have the necessary permissions.'));
+    return FALSE;
+  }
   
   if (islandora_workflow_get_object_workflow_state($object_id)!='published') {
     islandora_workflow_set_object_workflow_state($object_id, 'published');
@@ -461,10 +480,7 @@ function islandora_workflow_publish_object($object_id) {
  */
 function islandora_workflow_submit_object($object_id) {
   //permission check
-  dsm(islandora_workflow_get_current_users_collections('all'));
-  dsm(islandora_workflow_get_object_parent($object_id));
-  dsm(in_array(islandora_workflow_get_object_parent($object_id), islandora_workflow_get_current_users_collections('all')));
-  if (!in_array(islandora_workflow_get_object_parent($object_id), islandora_workflow_get_current_users_collections('all'))) {
+  if (!islandora_workflow_user_object_permission_check($object_id)) {
     drupal_set_message(t('The object '. $object_id .' could not be submitted, you do not have the necessary permissions.'));
     return FALSE;
   }
@@ -501,6 +517,11 @@ function islandora_workflow_claim_object($object_id) {
  *   the return mesage from fedora
  */
 function islandora_workflow_assign_object($object_id, $user_name) {
+  //permission check
+  if (!islandora_workflow_user_object_permission_check($object_id)) {
+    drupal_set_message(t('The object '. $object_id .' could not be assigned, you do not have the necessary permissions.'));
+    return FALSE;
+  }
   return (islandora_workflow_set_object_relationship($object_id, 'assignee', $user_name));
 }
 
@@ -688,4 +709,38 @@ function islandora_workflow_get_object_parent($object_id) {
     }
   }
   return $parent;
+}
+
+/**
+ * 
+ */
+function islandora_workflow_user_object_permission_check($object_id, $user_in=null) {
+  //init
+  $editor_permissions=islandora_workflow_get_current_users_collections('editor');
+  $manager_permissions=islandora_workflow_get_current_users_collections('manager');
+  $submitter_permissions=islandora_workflow_get_current_users_collections('submitter');
+  $workflow_state=islandora_workflow_get_object_workflow_state($object_id);
+  $creator=islandora_workflow_get_object_creator($object_id);
+  $parent=islandora_workflow_get_object_parent($object_id);
+  $user_id=null;
+  //get user name
+  if ($user_in=null) {
+    global $user;
+    $user_name=$user->name;
+  }
+  else {
+    $user_name=$user_in->name;
+  }
+  
+  //if the user has manager level access return true
+  
+  //editor level
+  
+  //submitter level
+  
+  if (!(isset($submitter_permissions[$parent]) && $workflow_state=='created' ) && !(isset($editor_permissions[$parent]) && ($workflow_state=='submitted' || $workflow_state=='created')) && !isset($manager_permissions[$parent]) ) {
+    drupal_set_message(t('The object '. $object_id .' could not be rejected, you do not have the necessary permissions.'));
+    return FALSE;
+  }
+  return FALSE;
 }
