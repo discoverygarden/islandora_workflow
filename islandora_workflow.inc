@@ -646,3 +646,19 @@ function islandora_workflow_set_object_relationship($object_id, $relationship_in
   //set new relationship
   $apim_object->addRelationship($object_id, $islandora_workflow_namespace . $relationship_in, $target, array('isLiteral' => 'true'));
 }
+
+/**
+ * This function will get the collection that the indicated object is a member of
+ * @param string $object_id
+ *   The id of the object to get the parent of
+ * @return string $parent
+ *   The id of the collection object that contains the $object_id object
+ */
+function islandora_workflow_get_object_parent($object_id) {
+  $parent_relationship='info:fedora/fedora-system:def/relations-external#isMemberOf';
+  
+  $parent='';
+  
+  return $parent;
+  
+}
