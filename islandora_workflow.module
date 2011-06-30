@@ -265,8 +265,8 @@ function islandora_workflow_work_form(&$form_state, $tab) {
  */
 function islandora_workflow_forms($form_id, $args) {  
   
-  $form_info['islandora_workflow_workflow_form']= array('callback' =>'islandora_workflow_work_form', 'callback arguments' => array('workflow'));
-  $form_info['islandora_workflow_overview_form']= array('callback' =>'islandora_workflow_work_form', 'callback arguments' => array('overview'));
+  $form_info['islandora_workflow_workflow_form']= array('callback' => 'islandora_workflow_work_form', 'callback arguments' => array('workflow'));
+  $form_info['islandora_workflow_overview_form']= array('callback' => 'islandora_workflow_work_form', 'callback arguments' => array('overview'));
 
   return $form_info;
 }
