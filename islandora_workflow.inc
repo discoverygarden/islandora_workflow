@@ -712,17 +712,31 @@ function islandora_workflow_get_object_parent($object_id) {
 }
 
 /**
- * 
+ * Init is broken up for performance.
  */
 function islandora_workflow_user_object_permission_check($object_id, $user_in=null) {
   //init
-  $editor_permissions=islandora_workflow_get_current_users_collections('editor');
   $manager_permissions=islandora_workflow_get_current_users_collections('manager');
-  $submitter_permissions=islandora_workflow_get_current_users_collections('submitter');
+  $parent=islandora_workflow_get_object_parent($object_id); 
+  
+  //if the user has manager level access return true
+  if (isset($manager_permissions[$parent])) {
+    return TRUE;
+  }
+  
+  //more init
+  $editor_permissions=islandora_workflow_get_current_users_collections('editor');
   $workflow_state=islandora_workflow_get_object_workflow_state($object_id);
+  
+  //editor level
+  if (isset($editor_permissions[$parent]) && ($workflow_state=='submitted' || $workflow_state=='created')) {
+    return TRUE;
+  }
+  
+  //even more init
+  $submitter_permissions=islandora_workflow_get_current_users_collections('submitter');
   $creator=islandora_workflow_get_object_creator($object_id);
-  $parent=islandora_workflow_get_object_parent($object_id);
-  $user_id=null;
+  $user_name=null;
   //get user name
   if ($user_in=null) {
     global $user;
@@ -732,15 +746,11 @@ function islandora_workflow_user_object_permission_check($object_id, $user_in=nu
     $user_name=$user_in->name;
   }
   
-  //if the user has manager level access return true
-  
-  //editor level
-  
   //submitter level
-  
-  if (!(isset($submitter_permissions[$parent]) && $workflow_state=='created' ) && !(isset($editor_permissions[$parent]) && ($workflow_state=='submitted' || $workflow_state=='created')) && !isset($manager_permissions[$parent]) ) {
-    drupal_set_message(t('The object '. $object_id .' could not be rejected, you do not have the necessary permissions.'));
-    return FALSE;
+  if (isset($submitter_permissions[$parent]) && $workflow_state=='created' && $user_name==$creator) {
+    return TRUE;
   }
+  
+  //permission denied
   return FALSE;
 }
