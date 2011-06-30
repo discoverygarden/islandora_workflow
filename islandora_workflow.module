@@ -51,6 +51,8 @@ function islandora_workflow_work_form(&$form_state, $tab) {
   $users_manager_collections=islandora_workflow_get_current_users_collections();
   $users_editor_collections=islandora_workflow_get_current_users_collections('islandora_workflow_Editor');
   $users_submitter_collections=islandora_workflow_get_current_users_collections('islandora_workflow_Submitter');
+  //submit_function declaration
+  $workflow_tabs_form['#submit']=array('islandora_workflow_work_form_submit');
   
   //tab forms
   $workflow_tabs_form['objects_form']=array(    
@@ -851,7 +853,6 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow'); 
   $collections=islandora_workflow_get_all_collections();
   $selected_object_ids=array();
-  dsm($work_form_state);
   foreach ($work_form_state['values']['objects_form']['objects_form_elems'] as $collection) {
     foreach ($collection as $object_id => $object_form_elements) {
       if ($object_form_elements['Selecter']==1) {
@@ -861,18 +862,11 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
   }
   
   //handle buttons
-  /*
-  @todo
-    edit and manage don't need to have those if statements, they should just get the pid
-  */
-  dsm($clicked_button);
   if ($clicked_button=='Edit') {
     $object_id=$work_form_state['clicked_button']['#parents'][array_search($clicked_button, $work_form_state['clicked_button']['#parents'])-1];
-
   }
   elseif ($clicked_button=='Manage') {
     $object_id=$work_form_state['clicked_button']['#parents'][array_search($clicked_button, $work_form_state['clicked_button']['#parents'])-1];
-
   }
   elseif ($clicked_button=='Submit') {
     foreach ($selected_object_ids as $object_id) {
@@ -885,9 +879,7 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
     }
   }
   elseif ($clicked_button=='Reject') {
-    dsm('in reject button');
     foreach ($selected_object_ids as $object_id) {
-      dsm('in foreach');
       islandora_workflow_reject_object($object_id);
     }
   }
