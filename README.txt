@@ -23,3 +23,5 @@ Do not set the islandora_workflow_Administrator permission for the authenticated
 If a user has two levels or more of permissions on the same collection the highest level takes precedence.
 
 You may need to delete/modify the 'permit-anything-to-administrator.xml' (Fedora xacml)file.
+
+To start an object in the workflow call this function from islandora_workflow.inc: islandora_workflow_init_workflow($object_id)
