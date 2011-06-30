@@ -460,6 +460,15 @@ function islandora_workflow_publish_object($object_id) {
  *   false if the submission was not attempted
  */
 function islandora_workflow_submit_object($object_id) {
+  //permission check
+  dsm(islandora_workflow_get_current_users_collections('all'));
+  dsm(islandora_workflow_get_object_parent($object_id));
+  dsm(in_array(islandora_workflow_get_object_parent($object_id), islandora_workflow_get_current_users_collections('all')));
+  if (!in_array(islandora_workflow_get_object_parent($object_id), islandora_workflow_get_current_users_collections('all'))) {
+    drupal_set_message(t('The object '. $object_id .' could not be submitted, you do not have the necessary permissions.'));
+    return FALSE;
+  }
+  
   $workflow_state=islandora_workflow_get_object_workflow_state($object_id);
   if ($workflow_state=='created' || $workflow_state=='rejected') {
     return (islandora_workflow_set_object_workflow_state($object_id, 'submitted'));
@@ -674,8 +683,8 @@ function islandora_workflow_get_object_parent($object_id) {
   if (!empty($relationship)) {
     $parent=$relationship->getAttributeNS('http://www.w3.org/1999/02/22-rdf-syntax-ns#', 'resource');
     //cut out 'info:fedora/'
-    if(substr($parent,0,12)=='info:fedora/') {
-      $parent=substr($parent,12,strlen($parent));
+    if (substr($parent, 0, 12)=='info:fedora/') {
+      $parent=substr($parent, 12, strlen($parent));
     }
   }
   return $parent;
