@@ -25,13 +25,13 @@ function islandora_workflow_work() {
   $page_tabs['Workflow'] = array(
         '#type' => 'tabpage',
         '#title' => t('Workflow'),
-        '#content' => drupal_get_form('islandora_workflow_work_form', 'workflow'),
+        '#content' => drupal_get_form('islandora_workflow_workflow_form'),
         '#weight' => '1',
       );
   $page_tabs['Overview'] = array(
         '#type' => 'tabpage',
         '#title' => t('Overview'),
-        '#content' => drupal_get_form('islandora_workflow_work_form', 'overview'),
+        '#content' => drupal_get_form('islandora_workflow_overview_form'),
         '#weight' => '2',
       );
   return tabs_render($page_tabs);
@@ -249,6 +249,24 @@ function islandora_workflow_work_form(&$form_state, $tab) {
     }
   }
   return $workflow_tabs_form;
+}
+
+/**
+ *This function is used to let me have multiple 'islandora_workflow_work_form's on 
+ *the same page without collision
+ *@param string $form_id 
+ *  the string identifying the form
+ *@param array $args
+ *  an array containign the arguments provided to drupal_get_form()
+ *@return array $form_info
+ *  an associative array containing the form_id callback and arguments 
+ */
+function islandora_workflow_forms($form_id, $args) {  
+  
+  $form_info['islandora_workflow_workflow_form']= array('callback' =>'islandora_workflow_work_form', 'callback arguments' => array('workflow'));
+  $form_info['islandora_workflow_overview_form']= array('callback' =>'islandora_workflow_work_form', 'callback arguments' => array('overview'));
+
+  return $form_info;
 }
 
 /**
@@ -833,6 +851,7 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow'); 
   $collections=islandora_workflow_get_all_collections();
   $selected_object_ids=array();
+  dsm($work_form_state);
   foreach ($work_form_state['values']['objects_form']['objects_form_elems'] as $collection) {
     foreach ($collection as $object_id => $object_form_elements) {
       if ($object_form_elements['Selecter']==1) {
@@ -845,10 +864,8 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
   /*
   @todo
     edit and manage don't need to have those if statements, they should just get the pid
-  @todo
-    remove the drupal set messages to the associated method in the inc file so that they 
-    can be called from other functions/forms etc. [cleaner implementation]
   */
+  dsm($clicked_button);
   if ($clicked_button=='Edit') {
     $object_id=$work_form_state['clicked_button']['#parents'][array_search($clicked_button, $work_form_state['clicked_button']['#parents'])-1];
 
@@ -868,7 +885,9 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
     }
   }
   elseif ($clicked_button=='Reject') {
+    dsm('in reject button');
     foreach ($selected_object_ids as $object_id) {
+      dsm('in foreach');
       islandora_workflow_reject_object($object_id);
     }
   }
