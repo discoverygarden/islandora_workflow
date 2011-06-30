@@ -393,6 +393,8 @@ function islandora_workflow_init_workflow($object_id) {
  *   false if the rejection was not attempted
  */
 function islandora_workflow_reject_object($object_id) {
+  islandora_workflow_get_object_parent($object_id);
+  
   $workflow_state=islandora_workflow_get_object_workflow_state($object_id);
   if ($workflow_state!='created' && $workflow_state!='rejected') {
     return (islandora_workflow_set_object_workflow_state($object_id, 'rejected'));
@@ -651,14 +653,30 @@ function islandora_workflow_set_object_relationship($object_id, $relationship_in
  * This function will get the collection that the indicated object is a member of
  * @param string $object_id
  *   The id of the object to get the parent of
- * @return string $parent
- *   The id of the collection object that contains the $object_id object
+ * @return mixed $parent
+ *   The id of the collection object that contains the $object_id object or FALSE if no parent found
  */
 function islandora_workflow_get_object_parent($object_id) {
-  $parent_relationship='info:fedora/fedora-system:def/relations-external#isMemberOf';
+  //init
+  $parent_relationship='isMemberOf';
+  $parent_relationship_namespace='info:fedora/fedora-system:def/relations-external#';
+  module_load_include('raw.inc', 'islandora_fedora_api'); //for getting an object
+  $apim_object= new FedoraAPIM();
+
+  $relationships=$apim_object->getRelationships($object_id, $parent_relationship_namespace . $parent_relationship);
+  $relationships_parser = new DOMDocument();
+  $relationships_parser->loadXML($relationships->data);
+  $relationship_elements=$relationships_parser->getElementsByTagNameNS($parent_relationship_namespace, $parent_relationship);
+
+  $parent=FALSE;
+  $relationship=$relationship_elements->item(0);
   
-  $parent='';
-  
+  if (!empty($relationship)) {
+    $parent=$relationship->getAttributeNS('http://www.w3.org/1999/02/22-rdf-syntax-ns#', 'resource');
+    //cut out 'info:fedora/'
+    if(substr($parent,0,12)=='info:fedora/') {
+      $parent=substr($parent,12,strlen($parent));
+    }
+  }
   return $parent;
-  
 }
