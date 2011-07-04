@@ -721,8 +721,14 @@ function islandora_workflow_get_object_parent($object_id) {
 
 /**
  * This function is for general workflow permission retrieval on individual 
- * non-collection objects.
- * Init is broken up for performance.
+ * non-collection objects.  Please note that this function does not simply report
+ * the indicated user's permission level with the parent object.  The function also 
+ * takes into consideration the workflow state of the object, and only reports those 
+ * permissions that will allow for altering the state of the object. 
+ * ie. islandora_workflow_Submitter will not be reported on objects that have the 
+ * 'published' workflow state.
+ * Init is broken up for performance reasons.
+ * 
  * @param string $object_id
  *   The object that we are looking for permissions on
  * @param object $user_in
