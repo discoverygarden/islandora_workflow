@@ -5,13 +5,12 @@
  * @date: 02/06/2011
  * This is a collection of helper functions and such for the islandora_workflow module.
  * All the workflow wrapper functions are there so that in the future we can add specific error/permission reports and logic
- * @todo
- *   permission checks on workflow operations need to be implemented
  */
 
 /**
  * this function will get all the drupal users who
- * @param
+ * @param $collection 
+ *   the collection to get the permissions on
  * @return array $users
  *   an array of all the drupal user names that have permissions on the collection
  */
@@ -549,6 +548,8 @@ function islandora_workflow_assign_object($object_id, $user_name) {
  *   The string reperesenting the state of the object in the workflow
  * @return string $result
  *   the return mesage from fedora
+ *   @todo
+ *   last updated by and when in workflow DS need to be updated
  */
 function islandora_workflow_set_object_workflow_state($object_id, $state) {
   //make sure that the object's fedora state is going to be set to I if the object is still in workflow
