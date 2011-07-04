@@ -10,6 +10,19 @@
  */
 
 /**
+ * this function will get all the drupal users who
+ * @param
+ * @return array $users
+ *   an array of all the drupal user names that have permissions on the collection
+ */
+function islandora_workflow_get_all_users_with_collection_permissions($collection) {
+  //init
+  $users=array();
+  
+  return $users;
+}
+
+/**
  * This function uses the get_all_collections() function in the case of an admin user
  * but otherwise will use the supplied permission string to search
  * the drupal database table 'islandora_workflow_permissions' to compile a list of 
@@ -133,7 +146,7 @@ function user_access_list($perm = NULL) {
     while ($u = db_fetch_object($users_result)) {
       $users[$u->uid]=$u->name;
     }
-  /*Drupal 6(note the 6) users_roles table does not record authenticated/anonymous/admin user
+  /*Drupal 6(this may be different in 7) users_roles table does not record authenticated/anonymous/admin user
     *I need to know about authenticated users so, here we manualy check and add them to the list
     */
     $authenticated_users_query = "SELECT rid, perm FROM {permission}
