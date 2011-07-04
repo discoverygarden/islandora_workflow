@@ -548,7 +548,7 @@ function islandora_workflow_assign_object($object_id, $user_name) {
  *   The string reperesenting the state of the object in the workflow
  * @return string $result
  *   the return mesage from fedora
- *   @todo
+ * @todo
  *   last updated by and when in workflow DS need to be updated
  */
 function islandora_workflow_set_object_workflow_state($object_id, $state) {
@@ -556,7 +556,7 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
   if ($state!='published' && islandora_workflow_get_object_fedora_state($object_id)!='I') {
     module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
     $object= new FedoraObject($object_id);
-    $object->__get('state', 'I');
+    $object->__set('state', 'I');
   }
   return (islandora_workflow_set_object_relationship($object_id, 'state', $state));
 }
