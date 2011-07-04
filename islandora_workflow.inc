@@ -395,7 +395,8 @@ function islandora_workflow_init_workflow($object_id) {
 function islandora_workflow_reject_object($object_id) {
   
   //permission check
-  if (!islandora_workflow_user_object_permission_check($object_id)) {
+  $tmp=islandora_workflow_user_object_permission_check($object_id);
+  if ($tmp!='islandora_workflow_Editor' && $tmp!='islandora_workflow_Manager') {
     drupal_set_message(t('The object '. $object_id .' could not be rejected, you do not have the necessary permissions.'));
     return FALSE;
   }
@@ -424,7 +425,8 @@ function islandora_workflow_reject_object($object_id) {
 function islandora_workflow_approve_object($object_id) {
   
   //permission check
-  if (!islandora_workflow_user_object_permission_check($object_id)) {
+  $tmp=islandora_workflow_user_object_permission_check($object_id);
+  if ($tmp!='islandora_workflow_Editor' && $tmp!='islandora_workflow_Manager') {
     drupal_set_message(t('The object '. $object_id .' could not be approved, you do not have the necessary permissions.'));
     return FALSE;
   }
@@ -450,7 +452,7 @@ function islandora_workflow_approve_object($object_id) {
  */
 function islandora_workflow_publish_object($object_id) {
   //permission check
-  if (!islandora_workflow_user_object_permission_check($object_id)) {
+  if (islandora_workflow_user_object_permission_check($object_id)!='islandora_workflow_Manager') {
     drupal_set_message(t('The object '. $object_id .' could not be published, you do not have the necessary permissions.'));
     return FALSE;
   }
@@ -553,6 +555,12 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
  *   the return mesage from fedora
  */
 function islandora_workflow_delete_object($object_id) {
+  //permission check
+  if (!islandora_workflow_user_object_permission_check($object_id)) {
+    drupal_set_message(t('The object '. $object_id .' could not be deleted, you do not have the necessary permissions.'));
+    return FALSE;
+  }
+  
   module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
   $object= new FedoraObject($object_id);
   return ($object->__set('state', 'D'));
@@ -712,33 +720,42 @@ function islandora_workflow_get_object_parent($object_id) {
 }
 
 /**
+ * This function is for general workflow permission retrieval on individual 
+ * non-collection objects.
  * Init is broken up for performance.
+ * @param string $object_id
+ *   The object that we are looking for permissions on
+ * @param object $user_in
+ *   The Drupal user whose permissions we are checking or null for the current user
+ * @return mixed
+ *   Iether the string of the highest available permission to the user on the object or 
+ *   false if there are no permissions
  */
 function islandora_workflow_user_object_permission_check($object_id, $user_in=null) {
   //init
-  $manager_permissions=islandora_workflow_get_current_users_collections('manager');
+  $manager_permissions=islandora_workflow_get_current_users_collections('islandora_workflow_Manager');
   $parent=islandora_workflow_get_object_parent($object_id); 
   
   //if the user has manager level access return true
   if (isset($manager_permissions[$parent])) {
-    return TRUE;
+    return 'islandora_workflow_Manager';
   }
   
   //more init
-  $editor_permissions=islandora_workflow_get_current_users_collections('editor');
+  $editor_permissions=islandora_workflow_get_current_users_collections('islandora_workflow_Editor');
   $workflow_state=islandora_workflow_get_object_workflow_state($object_id);
   
   //editor level
   if (isset($editor_permissions[$parent]) && ($workflow_state=='submitted' || $workflow_state=='created')) {
-    return TRUE;
+    return 'islandora_workflow_Editor';
   }
   
   //even more init
-  $submitter_permissions=islandora_workflow_get_current_users_collections('submitter');
+  $submitter_permissions=islandora_workflow_get_current_users_collections('islandora_workflow_Submitter');
   $creator=islandora_workflow_get_object_creator($object_id);
-  $user_name=null;
+  $user_name=NULL;
   //get user name
-  if ($user_in=null) {
+  if ($user_in==NULL) {
     global $user;
     $user_name=$user->name;
   }
@@ -747,8 +764,8 @@ function islandora_workflow_user_object_permission_check($object_id, $user_in=nu
   }
   
   //submitter level
-  if (isset($submitter_permissions[$parent]) && $workflow_state=='created' && $user_name==$creator) {
-    return TRUE;
+  if (isset($submitter_permissions[$parent]) && ($workflow_state=='created' || $workflow_state=='rejected' ) && $user_name==$creator) {
+    return 'islandora_workflow_Submitter';
   }
   
   //permission denied
