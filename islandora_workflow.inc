@@ -552,10 +552,18 @@ function islandora_workflow_assign_object($object_id, $user_name) {
  *   last updated by and when in workflow DS need to be updated
  */
 function islandora_workflow_set_object_workflow_state($object_id, $state) {
+  //init
+  module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
+  $object= new FedoraObject($object_id);
+  
+  //update last modified user/time
+  $object_datastreams=$object->get_datastreams();
+  $workflow_datastream=$object_datastreams['islandora_workflow'];
+  $workflow_string=$workflow_datastream->__get('content');
+  dsm($workflow_string);
+  $workflow_datastream->__set('content',$workflow_string);
   //make sure that the object's fedora state is going to be set to I if the object is still in workflow
   if ($state!='published' && islandora_workflow_get_object_fedora_state($object_id)!='I') {
-    module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
-    $object= new FedoraObject($object_id);
     $object->__set('state', 'I');
   }
   return (islandora_workflow_set_object_relationship($object_id, 'state', $state));
