@@ -369,27 +369,7 @@ function islandora_workflow_init_workflow($object_id) {
   $last_modified_by_array=$workflow_parser->getElementsByTagName('last_modified_by');
   $when_last_modified_array=$workflow_parser->getElementsByTagName('when_last_modified');
   
-  //rels-ext
-  module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
-  $object= new FedoraObject($object_id);
-  $object->__set('state', 'I');
-  
   islandora_workflow_set_object_workflow_state($object_id, 'created');
-  islandora_workflow_claim_object($object_id);
-  
-  //workflow DS
-  foreach ($last_modified_by_array as $last_modified_by_element) {
-    //create text node
-    $last_modified_by=$workflow_parser->createTextNode($user->name);
-    //insert text node
-    $last_modified_by_element->appendChild($last_modified_by);
-  }
-  foreach ($when_last_modified_array as $when_last_modified_element) {
-    //create text node
-    $when_last_modified=$workflow_parser->createTextNode(date('c'));//date('c') is supposed to give back an xml friendly string
-    //insert text node
-    $when_last_modified_element->appendChild($when_last_modified);
-  }
   
   $result=$object->addDatastream('islandora_workflow', NULL,  $workflow_parser->saveXML(), array('dsLabel' => 'workflow', 'mimeType' => 'text/xml', 'controlGroup' => 'X', 'logMessage' => 'Adding islandora_workflow datastream(workflow tracking).'));
   return $result;
@@ -555,13 +535,59 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
   //init
   module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
   $object= new FedoraObject($object_id);
+  $workflow_parser = new DOMDocument();
+  global $user;
+  $object_datastreams=$object->get_datastreams();
   
   //update last modified user/time
-  $object_datastreams=$object->get_datastreams();
-  $workflow_datastream=$object_datastreams['islandora_workflow'];
-  $workflow_string=$workflow_datastream->__get('content');
-  dsm($workflow_string);
-  $workflow_datastream->__set('content',$workflow_string);
+  if (isset($object_datastreams)) {//build xml from DS
+    $workflow_datastream=$object_datastreams['islandora_workflow'];
+    $workflow_string=$workflow_datastream->__get('content');
+    $workflow_parser->loadXML($workflow_string);
+  //get elements to populate dynamicaly
+    $last_modified_by_array=$workflow_parser->getElementsByTagName('last_modified_by');
+    $when_last_modified_array=$workflow_parser->getElementsByTagName('when_last_modified');
+    //workflow DS
+    foreach ($last_modified_by_array as $last_modified_by_element) {
+      //create text node
+      $last_modified_by=$workflow_parser->createElement('last_modified_by');
+      $last_modified_by->appendChild($workflow_parser->createTextNode($user->name));
+      //insert text node
+      $last_modified_by_element->parentNode->replaceChild($last_modified_by,$last_modified_by_element);
+    }
+    foreach ($when_last_modified_array as $when_last_modified_element) {
+      //create text node
+      $when_last_modified=$workflow_parser->createElement('when_last_modified');
+      $when_last_modified->appendChild($workflow_parser->createTextNode(date('c')));
+      //insert text node
+      $when_last_modified_element->parentNode->replaceChild($when_last_modified,$when_last_modified_element);
+    }
+    $workflow_datastream->__set('content',$workflow_parser->saveXML());
+  }
+  
+  else {//build xml from default if there is no DS present
+    $default_xml_file_name=drupal_get_path('module', 'islandora_workflow') . '/start_workflow.xml';
+    $workflow_parser = new DOMDocument();
+    $workflow_parser->load($default_xml_file_name);
+    //get elements to populate dynamicaly
+    $last_modified_by_array=$workflow_parser->getElementsByTagName('last_modified_by');
+    $when_last_modified_array=$workflow_parser->getElementsByTagName('when_last_modified');
+    //workflow DS
+    foreach ($last_modified_by_array as $last_modified_by_element) {
+      //create text node
+      $last_modified_by=$workflow_parser->createTextNode($user->name);
+      //insert text node
+      $last_modified_by_element->appendChild($last_modified_by);
+    }
+    foreach ($when_last_modified_array as $when_last_modified_element) {
+      //create text node
+      $when_last_modified=$workflow_parser->createTextNode(date('c'));//date('c') is supposed to give back an xml friendly string
+      //insert text node
+      $when_last_modified_element->appendChild($when_last_modified);
+    }
+    $object->addDatastream('islandora_workflow', NULL,  $workflow_parser->saveXML(), array('dsLabel' => 'workflow', 'mimeType' => 'text/xml', 'controlGroup' => 'X', 'logMessage' => 'Adding islandora_workflow datastream(workflow tracking).'));
+  }
+  
   //make sure that the object's fedora state is going to be set to I if the object is still in workflow
   if ($state!='published' && islandora_workflow_get_object_fedora_state($object_id)!='I') {
     $object->__set('state', 'I');
