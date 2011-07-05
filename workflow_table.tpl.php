@@ -36,7 +36,7 @@
         print('<TR>');
         print('<TD>'. $list[$collection_id][$member]['Selecter'] .'</TD><TD>'.$member.
         '</TD><TD>'.$collection_name.'</TD><TD>' . $list[$collection_id][$member]['state'] .
-         '</TD><TD></TD><TD>'.'ASSIGNEE SELECT'.'</TD><TD>');
+         '</TD><TD></TD><TD>'.$list[$collection_id][$member]['Assign'].'</TD><TD>');
         print($list[$collection_id][$member]['Edit']);
         print($list[$collection_id][$member]['Manage']);
         print('</TD></TR>');

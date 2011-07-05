@@ -61,9 +61,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
   
   //populate an array of all users in relevent collections, to be used in the assign-to-user drop down
   $users_collections_members=islandora_workflow_get_all_users_with_collection_permissions($users_collections);
-  dsm($users_collections_members);
-  
-  
+ 
   //submit_function declaration
   $workflow_tabs_form['#submit']=array('islandora_workflow_work_form_submit');
   
@@ -125,7 +123,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
   
   //get all members of the collections the user has manager/admin access to
   /*setting the name as $member for edit and manage buttons is against the forms api
-  * but neccessary to get around a drupal bug that has submit buttons with the same name
+  * but neccessary to get around a drupalism that has submit buttons with the same name
   * reporting an incorrect parent
   */
   if ($users_manager_collections) {
@@ -169,6 +167,12 @@ function islandora_workflow_work_form(&$form_state, $tab) {
         $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selecter']=array(
         '#type' => 'checkbox',
         '#title' => t(''),
+        );
+        $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Assign'] = array(
+        '#type' => 'select',
+        //default value works, but if you hit refresh on the page the values do not go back to the default... navigating away does reset the value
+        '#default_value' => '0',//array_search($current_collection_permissions[$user_id][$collection_id], $current_module_permissions[$user_id][key($user_name)]),//make this into whatever the current setting is for that collection/user
+        '#options' => $users_collections_members[$collection_id],
         );
       }
     }
@@ -219,6 +223,12 @@ function islandora_workflow_work_form(&$form_state, $tab) {
           '#type' => 'checkbox',
           '#title' => t(''),
           );
+        $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Assign'] = array(
+        '#type' => 'select',
+        //default value works, but if you hit refresh on the page the values do not go back to the default... navigating away does reset the value
+        '#default_value' => '0',//array_search($current_collection_permissions[$user_id][$collection_id], $current_module_permissions[$user_id][key($user_name)]),//make this into whatever the current setting is for that collection/user
+        '#options' => $users_collections_members[$collection_id],
+        );
         }
       }
     }
@@ -269,6 +279,12 @@ function islandora_workflow_work_form(&$form_state, $tab) {
           '#value' => t('Manage'),
           '#name' => $member
           );
+        $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Assign'] = array(
+        '#type' => 'select',
+        //default value works, but if you hit refresh on the page the values do not go back to the default... navigating away does reset the value
+        '#default_value' => '0',//array_search($current_collection_permissions[$user_id][$collection_id], $current_module_permissions[$user_id][key($user_name)]),//make this into whatever the current setting is for that collection/user
+        '#options' => $users_collections_members[$collection_id],
+        );
         }
      }
     }
@@ -484,6 +500,7 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
         $vars['list'][$collection_id][$member]['Edit']=drupal_render($vars['list'][$collection_id][$member]['Edit']);
         $vars['list'][$collection_id][$member]['Manage']=drupal_render($vars['list'][$collection_id][$member]['Manage']);
         $vars['list'][$collection_id][$member]['Selecter']=drupal_render($vars['list'][$collection_id][$member]['Selecter']);
+        $vars['list'][$collection_id][$member]['Assign']=drupal_render($vars['list'][$collection_id][$member]['Assign']);
       }
     }
   }

@@ -8,7 +8,7 @@
  */
 
 /**
- * this function will get all the drupal users who have any level of access to the indicated collections
+ * This function will get all the drupal users who have any level of access to the indicated collections
  * @param array $collections 
  *   the collection(s) to get the permissions on
  * @return array $users
@@ -24,24 +24,32 @@ function islandora_workflow_get_all_users_with_collection_permissions($collectio
   //all users that may be in collections
   $possible_users=islandora_workflow_get_users_with_module_permissions();
   $users=array();
+  $admins=user_access_list('islandora_workflow_Administrator');
+  
+  //make sure those users with admin rights show up for every collection
   foreach ($collections as $collection_id => $collection_name) {
     $users[$collection_id]=array();
+    //islandora_workflow_Administrator
+    foreach ($admins as $user_id => $user_name) {
+      $users[$collection_id][]=$user_id;
+    }
   }
+  
   //from user perms
-  foreach ($user_permissions as $user_id =>$collection_permission) {
+  foreach ($user_permissions as $user_id => $collection_permission) {
     foreach ($collection_permission as $collection_id => $permission) {
         //init the collection if it needs to be
       if (!isset($users[$collection_id])) {
         $users[$collection_id]=array();
       }
-      if (!in_array($user_id,$users[$collection_id])) {
+      if (!in_array($user_id, $users[$collection_id])) {
         //add the user to the users array for the collection if they aren't in it
         $users[$collection_id][]=$user_id;
       }
     }
   }
   //from role perms
-  foreach ($role_permissions as $role_id =>$collection_permission) {
+  foreach ($role_permissions as $role_id => $collection_permission) {
     foreach ($collection_permission as $collection_id => $permission) {
       //populate users per role
       if (!isset($users_via_role[$role_id])) {
@@ -54,20 +62,19 @@ function islandora_workflow_get_all_users_with_collection_permissions($collectio
         $users_result = db_query($users_query, $role_id);
         while ($row = db_fetch_object($users_result)) {
           $users_via_role[$role_id][]=$row->uid;
+        }
       }
-    }
     //add the user/collection relationships for each role to the $users list if they are not already on it
      foreach ($users_via_role[$role_id] as $user_id) {
       if (!isset($users[$collection_id])) {
         $users[$collection_id]=array();
       }
-      if (!in_array($user_id,$users[$collection_id])) {
+      if (!in_array($user_id, $users[$collection_id])) {
         $users[$collection_id][]=$user_id;
       }
      }
     }
   }
-  
   return $users;
 }
 
@@ -601,16 +608,16 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
       $last_modified_by=$workflow_parser->createElement('last_modified_by');
       $last_modified_by->appendChild($workflow_parser->createTextNode($user->name));
       //insert text node
-      $last_modified_by_element->parentNode->replaceChild($last_modified_by,$last_modified_by_element);
+      $last_modified_by_element->parentNode->replaceChild($last_modified_by, $last_modified_by_element);
     }
     foreach ($when_last_modified_array as $when_last_modified_element) {
       //create text node
       $when_last_modified=$workflow_parser->createElement('when_last_modified');
       $when_last_modified->appendChild($workflow_parser->createTextNode(date('c')));
       //insert text node
-      $when_last_modified_element->parentNode->replaceChild($when_last_modified,$when_last_modified_element);
+      $when_last_modified_element->parentNode->replaceChild($when_last_modified, $when_last_modified_element);
     }
-    $workflow_datastream->__set('content',$workflow_parser->saveXML());
+    $workflow_datastream->__set('content', $workflow_parser->saveXML());
   }
   
   else {//build xml from default if there is no DS present
@@ -833,7 +840,7 @@ function islandora_workflow_get_object_parent($object_id) {
  *   Iether the string of the highest available permission to the user on the object or 
  *   false if there are no permissions
  */
-function islandora_workflow_user_object_permission_check($object_id, $user_in=null) {
+function islandora_workflow_user_object_permission_check($object_id, $user_in=NULL) {
   //init
   $manager_permissions=islandora_workflow_get_current_users_collections('islandora_workflow_Manager');
   $parent=islandora_workflow_get_object_parent($object_id); 
