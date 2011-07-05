@@ -31,20 +31,21 @@ function islandora_workflow_get_all_users_with_collection_permissions($collectio
     $users[$collection_id]=array();
     //islandora_workflow_Administrator
     foreach ($admins as $user_id => $user_name) {
-      $users[$collection_id][]=$user_id;
+      $users[$collection_id][]=$user_name;
     }
   }
   
   //from user perms
   foreach ($user_permissions as $user_id => $collection_permission) {
     foreach ($collection_permission as $collection_id => $permission) {
+      $user_name=user_load($user_id)->name;
         //init the collection if it needs to be
       if (!isset($users[$collection_id])) {
         $users[$collection_id]=array();
       }
-      if (!in_array($user_id, $users[$collection_id])) {
+      if (!in_array($user_name, $users[$collection_id])) {
         //add the user to the users array for the collection if they aren't in it
-        $users[$collection_id][]=$user_id;
+        $users[$collection_id][]=$user_name;
       }
     }
   }
@@ -66,11 +67,12 @@ function islandora_workflow_get_all_users_with_collection_permissions($collectio
       }
     //add the user/collection relationships for each role to the $users list if they are not already on it
      foreach ($users_via_role[$role_id] as $user_id) {
+      $user_name=user_load($user_id)->name;
       if (!isset($users[$collection_id])) {
         $users[$collection_id]=array();
       }
-      if (!in_array($user_id, $users[$collection_id])) {
-        $users[$collection_id][]=$user_id;
+      if (!in_array($user_name, $users[$collection_id])) {
+        $users[$collection_id][]=$user_name;
       }
      }
     }
