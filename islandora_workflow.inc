@@ -8,15 +8,65 @@
  */
 
 /**
- * this function will get all the drupal users who
- * @param $collection 
- *   the collection to get the permissions on
+ * this function will get all the drupal users who have any level of access to the indicated collections
+ * @param array $collections 
+ *   the collection(s) to get the permissions on
  * @return array $users
- *   an array of all the drupal user names that have permissions on the collection
+ *   an associative array of the indicated collections and all the drupal user names that have permissions on them
  */
-function islandora_workflow_get_all_users_with_collection_permissions($collection) {
+function islandora_workflow_get_all_users_with_collection_permissions($collections) {
   //init
+  //all user perms
+  $user_permissions=islandora_workflow_get_all_user_permissions();
+  //all role perms
+  $role_permissions=islandora_workflow_get_all_role_permissions();
+  $users_via_role=array();
+  //all users that may be in collections
+  $possible_users=islandora_workflow_get_users_with_module_permissions();
   $users=array();
+  foreach ($collections as $collection_id => $collection_name) {
+    $users[$collection_id]=array();
+  }
+  //from user perms
+  foreach ($user_permissions as $user_id =>$collection_permission) {
+    foreach ($collection_permission as $collection_id => $permission) {
+        //init the collection if it needs to be
+      if (!isset($users[$collection_id])) {
+        $users[$collection_id]=array();
+      }
+      if (!in_array($user_id,$users[$collection_id])) {
+        //add the user to the users array for the collection if they aren't in it
+        $users[$collection_id][]=$user_id;
+      }
+    }
+  }
+  //from role perms
+  foreach ($role_permissions as $role_id =>$collection_permission) {
+    foreach ($collection_permission as $collection_id => $permission) {
+      //populate users per role
+      if (!isset($users_via_role[$role_id])) {
+        $users_via_role[$role_id]=array();
+        $users_query = "SELECT u.uid FROM {users} u, {users_roles} ur, {permission} p
+          WHERE        u.uid = ur.uid
+          AND          ur.rid = p.rid
+          AND          p.rid LIKE '%%%s%'
+          ";
+        $users_result = db_query($users_query, $role_id);
+        while ($row = db_fetch_object($users_result)) {
+          $users_via_role[$role_id][]=$row->uid;
+      }
+    }
+    //add the user/collection relationships for each role to the $users list if they are not already on it
+     foreach ($users_via_role[$role_id] as $user_id) {
+      if (!isset($users[$collection_id])) {
+        $users[$collection_id]=array();
+      }
+      if (!in_array($user_id,$users[$collection_id])) {
+        $users[$collection_id][]=$user_id;
+      }
+     }
+    }
+  }
   
   return $users;
 }
@@ -126,14 +176,14 @@ function islandora_workflow_get_all_user_permissions() {
 }
 
 /**
- * This is a helper function that will search the 
+ * This is a helper function that will search the drupal core database for all users with a specified permission
  * @param string $perm 
  *   the permission to search for
  * @return array $users 
- *   the list of users with the permission in the form users[user_id]=user_name
+ *   the list of users with the permission in the form users[user_id]=user_name or false
  */
 function user_access_list($perm = NULL) {
-  $uids = FALSE;
+  $users = FALSE;
   if (isset($perm)) {
     $users_query = "SELECT u.uid, u.name FROM {users} u, {users_roles} ur, {permission} p
     WHERE        u.uid = ur.uid
@@ -528,8 +578,6 @@ function islandora_workflow_assign_object($object_id, $user_name) {
  *   The string reperesenting the state of the object in the workflow
  * @return string $result
  *   the return mesage from fedora
- * @todo
- *   last updated by and when in workflow DS need to be updated
  */
 function islandora_workflow_set_object_workflow_state($object_id, $state) {
   //init

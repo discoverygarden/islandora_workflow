@@ -57,13 +57,11 @@ function islandora_workflow_work_form(&$form_state, $tab) {
   $users_manager_collections=islandora_workflow_get_current_users_collections();
   $users_editor_collections=islandora_workflow_get_current_users_collections('islandora_workflow_Editor');
   $users_submitter_collections=islandora_workflow_get_current_users_collections('islandora_workflow_Submitter');
-  $user_collection_members=islandora_workflow_get_current_users_collections('all');
+  $users_collections=islandora_workflow_get_current_users_collections('all');
   
   //populate an array of all users in relevent collections, to be used in the assign-to-user drop down
-  foreach($user_collection_members as $collection_id => $collection_name) {
-    $user_collection_members[$collection_id]=islandora_workflow_get_all_users_with_collection_permissions($collection_id);
-  }
-  //dsm($user_collection_members);
+  $users_collections_members=islandora_workflow_get_all_users_with_collection_permissions($users_collections);
+  dsm($users_collections_members);
   
   
   //submit_function declaration
