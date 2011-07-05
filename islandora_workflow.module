@@ -170,8 +170,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
         );
         $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Assign'] = array(
         '#type' => 'select',
-        //default value works, but if you hit refresh on the page the values do not go back to the default... navigating away does reset the value
-        '#default_value' => '0',//array_search($current_collection_permissions[$user_id][$collection_id], $current_module_permissions[$user_id][key($user_name)]),//make this into whatever the current setting is for that collection/user
+        '#default_value' => array_search(islandora_workflow_get_object_assignee($member), $users_collections_members[$collection_id]),
         '#options' => $users_collections_members[$collection_id],
         );
       }
@@ -225,8 +224,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
           );
         $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Assign'] = array(
         '#type' => 'select',
-        //default value works, but if you hit refresh on the page the values do not go back to the default... navigating away does reset the value
-        '#default_value' => '0',//array_search($current_collection_permissions[$user_id][$collection_id], $current_module_permissions[$user_id][key($user_name)]),//make this into whatever the current setting is for that collection/user
+        '#default_value' => array_search(islandora_workflow_get_object_assignee($member), $users_collections_members[$collection_id]),
         '#options' => $users_collections_members[$collection_id],
         );
         }
@@ -281,8 +279,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
           );
         $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Assign'] = array(
         '#type' => 'select',
-        //default value works, but if you hit refresh on the page the values do not go back to the default... navigating away does reset the value
-        '#default_value' => '0',//array_search($current_collection_permissions[$user_id][$collection_id], $current_module_permissions[$user_id][key($user_name)]),//make this into whatever the current setting is for that collection/user
+        '#default_value' => array_search(islandora_workflow_get_object_assignee($member), $users_collections_members[$collection_id]),
         '#options' => $users_collections_members[$collection_id],
         );
         }
@@ -890,6 +887,7 @@ function islandora_workflow_user_permissions_form_submit($collection_user_permis
   *   An easier to use version of $work_form_form
  */
 function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
+  dsm($work_form_state);
   //init
   $clicked_button = $work_form_state['clicked_button']['#value'];
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow'); 
