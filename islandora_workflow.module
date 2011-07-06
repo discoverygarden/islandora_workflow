@@ -55,15 +55,15 @@ function islandora_workflow_work_form(&$form_state, $tab) {
   $users_editor_collections=islandora_workflow_get_current_users_collections('islandora_workflow_Editor');
   $users_submitter_collections=islandora_workflow_get_current_users_collections('islandora_workflow_Submitter');
   $users_collections=islandora_workflow_get_current_users_collections('all');
-  //pager stuff
+  //pager init stuff
   global $pager_page_array, $pager_total;
-  $page=0;//the current page should be assumed as 0
   if ($tab=='workflow') {
     $pager_index=1;
   }
   if ($tab=='overview') {
     $pager_index=0;
   }
+  //@todo: get this reporting the correct page
   if (isset($pager_page_array[$pager_index])) {
     $pager_page_array[$pager_index]=$pager_page_array[$pager_index]+1;
   }
@@ -73,9 +73,14 @@ function islandora_workflow_work_form(&$form_state, $tab) {
   if (!isset($pager_total[$pager_index])) {
     $pager_total[$pager_index]=0;
   }
+  dsm($pager_page_array[$pager_index]);
   $pager_page_array[$pager_index]=max(0, min((int)$pager_page_array[$pager_index], ((int)$pager_total[$pager_index]-1)));
   $objects_per_page=2;
   $object_count=0;
+  $object_lower_bound=$pager_page_array[$pager_index]*$objects_per_page;
+  $object_upper_bound=$object_lower_bound+$objects_per_page;
+  dsm($pager_page_array[$pager_index]);
+  
   //populate an array of all users in relevent collections, to be used in the assign-to-user drop down
   $users_collections_members=islandora_workflow_get_all_users_with_collection_permissions($users_collections);
  
@@ -178,25 +183,27 @@ function islandora_workflow_work_form(&$form_state, $tab) {
       }
       foreach ($collection_members as $member) {
         $object_count++;//keeping track of objects to show
-        $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Edit']=array(
-          '#type' => 'submit',
-          '#value' => t('Edit'),
-          '#name' => $member
-        );
-        $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Manage']=array(
-          '#type' => 'submit',
-          '#value' => t('Manage'),
-          '#name' => $member
-        );
-        $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selecter']=array(
-          '#type' => 'checkbox',
-          '#title' => t(''),
-        );
-        $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Assign'] = array(
-          '#type' => 'select',
-          '#default_value' => array_search(islandora_workflow_get_object_assignee($member), $users_collections_members[$collection_id]),
-          '#options' => $users_collections_members[$collection_id],
-        );
+        if ($object_count > $object_lower_bound && $object_count <=$object_upper_bound) {
+          $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Edit']=array(
+            '#type' => 'submit',
+            '#value' => t('Edit'),
+            '#name' => $member
+          );
+          $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Manage']=array(
+            '#type' => 'submit',
+            '#value' => t('Manage'),
+            '#name' => $member
+          );
+          $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selecter']=array(
+            '#type' => 'checkbox',
+            '#title' => t(''),
+          );
+          $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Assign'] = array(
+            '#type' => 'select',
+            '#default_value' => array_search(islandora_workflow_get_object_assignee($member), $users_collections_members[$collection_id]),
+            '#options' => $users_collections_members[$collection_id],
+          );
+        }
       }
     }
   }
@@ -232,26 +239,28 @@ function islandora_workflow_work_form(&$form_state, $tab) {
       
         foreach ($collection_members as $member) {
           $object_count++;//keeping track of objects to show
-          $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Edit']=array(
-            '#type' => 'submit',
-            '#value' => t('Edit'),
-            '#name' => $member
-          );
-          
-          $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Manage']=array(
-            '#type' => 'submit',
-            '#value' => t('Manage'),
-            '#name' => $member
-          );
-          $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selecter']=array(
-            '#type' => 'checkbox',
-            '#title' => t(''),
-          );
-          $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Assign'] = array(
-            '#type' => 'select',
-            '#default_value' => array_search(islandora_workflow_get_object_assignee($member), $users_collections_members[$collection_id]),
-            '#options' => $users_collections_members[$collection_id],
-          );
+          if ($object_count > $object_lower_bound && $object_count <=$object_upper_bound) {
+            $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Edit']=array(
+              '#type' => 'submit',
+              '#value' => t('Edit'),
+              '#name' => $member
+            );
+            
+            $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Manage']=array(
+              '#type' => 'submit',
+              '#value' => t('Manage'),
+              '#name' => $member
+            );
+            $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selecter']=array(
+              '#type' => 'checkbox',
+              '#title' => t(''),
+            );
+            $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Assign'] = array(
+              '#type' => 'select',
+              '#default_value' => array_search(islandora_workflow_get_object_assignee($member), $users_collections_members[$collection_id]),
+              '#options' => $users_collections_members[$collection_id],
+            );
+          }
         }
       }
     }
@@ -288,25 +297,27 @@ function islandora_workflow_work_form(&$form_state, $tab) {
         }
         foreach ($collection_members as $member) {
           $object_count++;//keeping track of objects to show
-          $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Edit']=array(
-            '#type' => 'submit',
-            '#value' => t('Edit'),
-            '#name' => $member
-          );
-          $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selecter']=array(
-            '#type' => 'checkbox',
-            '#title' => t(''),
-          );
-          $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Manage']=array(
-            '#type' => 'submit',
-            '#value' => t('Manage'),
-            '#name' => $member
-          );
-          $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Assign'] = array(
-            '#type' => 'select',
-            '#default_value' => array_search(islandora_workflow_get_object_assignee($member), $users_collections_members[$collection_id]),
-            '#options' => $users_collections_members[$collection_id],
-          );
+          if ($object_count > $object_lower_bound && $object_count <=$object_upper_bound) {
+            $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Edit']=array(
+              '#type' => 'submit',
+              '#value' => t('Edit'),
+              '#name' => $member
+            );
+            $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selecter']=array(
+              '#type' => 'checkbox',
+              '#title' => t(''),
+            );
+            $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Manage']=array(
+              '#type' => 'submit',
+              '#value' => t('Manage'),
+              '#name' => $member
+            );
+            $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Assign'] = array(
+              '#type' => 'select',
+              '#default_value' => array_search(islandora_workflow_get_object_assignee($member), $users_collections_members[$collection_id]),
+              '#options' => $users_collections_members[$collection_id],
+            );
+          }
         }
       }
     }
