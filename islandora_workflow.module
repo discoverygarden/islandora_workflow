@@ -887,20 +887,32 @@ function islandora_workflow_user_permissions_form_submit($collection_user_permis
   *   An easier to use version of $work_form_form
  */
 function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
-  dsm($work_form_state);
   //init
   $clicked_button = $work_form_state['clicked_button']['#value'];
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow'); 
   $collections=islandora_workflow_get_all_collections();
   $selected_object_ids=array();
+  $assignees=array();
+  $assignee_indexes=array();
+  //get selected objects
   foreach ($work_form_state['values']['objects_form']['objects_form_elems'] as $collection) {
     foreach ($collection as $object_id => $object_form_elements) {
       if ($object_form_elements['Selecter']==1) {
         $selected_object_ids[]=$object_id;
+        $assignee_indexes[$object_id]=$object_form_elements['Assign'];
       }
     }
   }
-  
+  //get selected assignees
+  foreach ($work_form['objects_form']['objects_form_elems'] as $collection) {
+    if (isset($collection['#post']) && is_array($collection)) {//makes sure we only operate on the object elements
+      foreach ($collection as $object_id => $object) {
+        if (isset($object['#post']) && is_array($object)) {
+          $assignees[$object_id]=$object['Assign']['#options'][$assignee_indexes[$object_id]];
+        }
+      }
+    }
+  }
   //handle buttons
   if ($clicked_button=='Edit') {
     $object_id=$work_form_state['clicked_button']['#parents'][array_search($clicked_button, $work_form_state['clicked_button']['#parents'])-1];
@@ -940,8 +952,7 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
   }
   elseif ($clicked_button=='Assign') {
     foreach ($selected_object_ids as $object_id) {
-      //@todo implement the second parameter of assign_object to be the selected option in the drop down
-      islandora_workflow_assign_object($object_id);
+      islandora_workflow_assign_object($object_id,$assignees[$object_id]);
     }
   }
 }
