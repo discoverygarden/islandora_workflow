@@ -952,7 +952,7 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
   }
   elseif ($clicked_button=='Assign') {
     foreach ($selected_object_ids as $object_id) {
-      islandora_workflow_assign_object($object_id,$assignees[$object_id]);
+      islandora_workflow_assign_object($object_id, $assignees[$object_id]);
     }
   }
 }
