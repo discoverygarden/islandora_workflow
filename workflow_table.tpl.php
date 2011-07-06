@@ -47,3 +47,7 @@
 	</TBODY>
 	
 </TABLE>
+<?php 
+$pager=theme('pager', NULL, 2, $pager_index);
+print($pager);
+?>
