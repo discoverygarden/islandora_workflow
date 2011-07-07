@@ -597,7 +597,7 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
   $object_datastreams=$object->get_datastreams();
   
   //update last modified user/time
-  if (isset($object_datastreams)) {//build xml from DS
+  if (isset($object_datastreams['islandora_workflow'])) {//build xml from DS
     $workflow_datastream=$object_datastreams['islandora_workflow'];
     $workflow_string=$workflow_datastream->__get('content');
     $workflow_parser->loadXML($workflow_string);
@@ -881,4 +881,59 @@ function islandora_workflow_user_object_permission_check($object_id, $user_in=NU
   
   //permission denied
   return FALSE;
+}
+
+/**
+ * This is a helper function that will set the note on an object
+ * From and timestamp are generated from the current user/time
+ * @param string $object_id
+ *   The pid of the object to set the note on
+ * @param string $subject
+ *   The subject of the message
+ * @param string $body
+ *   The content of the message
+ * @return mixed
+ *   the response from fedora for adding/modifying the datastream or false if the datastream was missing
+ */
+function islandora_workflow_set_object_note($object_id, $subject, $body) {
+  //init
+  module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
+  $object= new FedoraObject($object_id);
+  $workflow_parser = new DOMDocument();
+  global $user;
+  $object_datastreams=$object->get_datastreams();
+}
+
+/**
+ * This is a helper function that will retrieve the note on an object
+ * @param string $object_id
+ *   The pid of the object to get the note for
+ * @return mixed
+ *   The contents of the object's note's subject or false if the datastream was missing
+ */
+function islandora_workflow_get_object_note_subject($object_id) {
+  //init
+  module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
+  $object= new FedoraObject($object_id);
+  $workflow_parser = new DOMDocument();
+  global $user;
+  $object_datastreams=$object->get_datastreams();
+  
+}
+
+/**
+ * This is a helper function that will retrieve the note on an object
+ * @param string $object_id
+ *   The pid of the object to get the note for
+ * @return mixed
+ *   The contents of the object's note's body or false if the datastream was missing
+ */
+function islandora_workflow_get_object_note_body($object_id) {
+  //init
+  module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
+  $object= new FedoraObject($object_id);
+  $workflow_parser = new DOMDocument();
+  global $user;
+  $object_datastreams=$object->get_datastreams();
+  
 }
