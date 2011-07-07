@@ -902,6 +902,9 @@ function islandora_workflow_set_object_note($object_id, $subject, $body) {
   $workflow_parser = new DOMDocument();
   global $user;
   $object_datastreams=$object->get_datastreams();
+  if (!isset($object_datastreams['islandora_workflow'])) {
+    return FALSE;
+  }
 }
 
 /**
@@ -918,6 +921,9 @@ function islandora_workflow_get_object_note_subject($object_id) {
   $workflow_parser = new DOMDocument();
   global $user;
   $object_datastreams=$object->get_datastreams();
+  if (!isset($object_datastreams['islandora_workflow'])) {
+    return FALSE;
+  }
   
 }
 
@@ -935,5 +941,8 @@ function islandora_workflow_get_object_note_body($object_id) {
   $workflow_parser = new DOMDocument();
   global $user;
   $object_datastreams=$object->get_datastreams();
+  if (!isset($object_datastreams['islandora_workflow'])) {
+    return FALSE;
+  }
   
 }
