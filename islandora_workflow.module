@@ -417,8 +417,27 @@ function islandora_workflow_menu() {
     'access arguments' => array(array('islandora_workflow_Administrator', 'islandora_workflow_Editor', 'islandora_workflow_Manager', 'islandora_workflow_Submitter')),
     'type' => MENU_NORMAL_ITEM
    );
+  //main working page for islandora_workflow
+  $menuEntries['islandora_workflow_edit_note']=array(
+    'title' => 'Edit Note',
+    'description' => 'You may edit the note on this object',
+    'page callback' => 'islandora_workflow_edit_note',
+    'access callback' => 'islandora_workflow_check_permissions',
+    'access arguments' => array(array('islandora_workflow_Administrator', 'islandora_workflow_Editor', 'islandora_workflow_Manager', 'islandora_workflow_Submitter')),
+    'type' => MENU_CALLBACK
+   );
  return $menuEntries;
 }
+
+/**
+ * 
+ */
+function islandora_workflow_edit_note() {
+  $output='asdfawrget';
+  
+  return $output;
+}
+
 
 /**
  * This function is the access callback used for access to the workflow/perm section of this module
@@ -574,7 +593,7 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
         $vars['list'][$collection_id][$member]['Manage']=drupal_render($vars['list'][$collection_id][$member]['Manage']);
         $vars['list'][$collection_id][$member]['Selecter']=drupal_render($vars['list'][$collection_id][$member]['Selecter']);
         $vars['list'][$collection_id][$member]['Assign']=drupal_render($vars['list'][$collection_id][$member]['Assign']);
-        $vars['list'][$collection_id][$member]['note_subject']=islandora_workflow_get_object_note_subject($member);
+        $vars['list'][$collection_id][$member]['note_subject']=l(islandora_workflow_get_object_note_subject($member),'/islandora_workflow_edit_note?object='.$member);
       }
     }
   }
