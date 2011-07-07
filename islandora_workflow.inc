@@ -893,7 +893,7 @@ function islandora_workflow_user_object_permission_check($object_id, $user_in=NU
  * @param string $body
  *   The content of the message
  * @return mixed
- *   the response from fedora for adding/modifying the datastream or false if the datastream was missing
+ *   the response from fedora api for adding/modifying the datastream or false if the datastream was missing
  */
 function islandora_workflow_set_object_note($object_id, $subject, $body) {
   //init
@@ -911,42 +911,81 @@ function islandora_workflow_set_object_note($object_id, $subject, $body) {
   $workflow_parser->loadXML($workflow_string);
   
   //modify DS xml
-  //get elements to populate dynamicaly
-  $from_array=$workflow_parser->getElementsByTagName('from');
-  $timestamp_array=$workflow_parser->getElementsByTagName('timestamp');
-  $subject_array=$workflow_parser->getElementsByTagName('subject');
-  $body_array=$workflow_parser->getElementsByTagName('body');
-  //workflow DS
-  foreach ($from_array as $from_element) {
-    //create text node
-    $from=$workflow_parser->createElement('from');
-    $from->appendChild($workflow_parser->createTextNode($user->name));
-    //insert text node
-    $from_element->parentNode->replaceChild($from, $from_element);
+  //get elements to populate dynamicaly, these lists are dynamic so no need to update later
+  $from_node_list=$workflow_parser->getElementsByTagName('from');
+  $timestamp_node_list=$workflow_parser->getElementsByTagName('timestamp');
+  $subject_node_list=$workflow_parser->getElementsByTagName('subject');
+  $body_node_list=$workflow_parser->getElementsByTagName('body');
+  $note_node_list=$workflow_parser->getElementsByTagName('note');
+  $notes_node_list=$workflow_parser->getElementsByTagName('notes');
+  
+  //@todo: put in logic to add the element(s) if it doesn't exist
+  //make sure that the notes and note elements are present and add them if they are not
+  if (!$notes_node_list->item(0)) {
+    $notes=$workflow_parser->createElement('notes');
+    $workflow_node_list=$workflow_parser->getElementsByTagName('workflow');
+    $workflow_node_list->item(0)->appendChild($notes);
+    
   }
-  foreach ($timestamp_array as $timestamp_element) {
-    //create text node
-    $timestamp=$workflow_parser->createElement('timestamp');
-    $timestamp->appendChild($workflow_parser->createTextNode(date('c')));
-    //insert text node
-    $timestamp_element->parentNode->replaceChild($timestamp, $timestamp_element);
+  if (!$note_node_list->item(0)) {
+    $note=$workflow_parser->createElement('note');
+    $notes_node_list->item(0)->appendChild($note);
   }
-  foreach ($subject_array as $subject_element) {
-    //create text node
-    $subject=$workflow_parser->createElement('subject');
-    $subject->appendChild($workflow_parser->createTextNode($subject));
-    //insert text node
-    $subject_element->parentNode->replaceChild($subject, $subject_element);
+  
+  //create from node
+  $from=$workflow_parser->createElement('from');
+  $from->appendChild($workflow_parser->createTextNode($user->name));
+  if ($from_node_list->item(0)) {
+    foreach ($from_node_list as $from_element) {
+      $from_element->parentNode->replaceChild($from, $from_element);
+    }
   }
-  foreach ($body_array as $body_element) {
-    //create text node
-    $body=$workflow_parser->createElement('body');
-    $body->appendChild($workflow_parser->createTextNode($body));
-    //insert text node
-    $body_element->parentNode->replaceChild($body, $body_element);
+  else {
+    $note_node_list->item(0)->appendChild($from);
   }
+  
+  //create timestamp
+  $timestamp=$workflow_parser->createElement('timestamp');
+  $timestamp->appendChild($workflow_parser->createTextNode(date('c')));
+  if ($timestamp_node_list->item(0)) {
+    foreach ($timestamp_node_list as $timestamp_element) {
+      //insert text node
+      $timestamp_element->parentNode->replaceChild($timestamp, $timestamp_element);
+    }
+  }
+  else {
+    $note_node_list->item(0)->appendChild($timestamp);
+  }
+  
+  //create subject node
+  $subject_new_element=$workflow_parser->createElement('subject');
+  $subject_new_element->appendChild($workflow_parser->createTextNode($subject));
+  if ($subject_node_list->item(0)) {
+    foreach ($subject_node_list as $subject_element) {
+      //insert text node
+      $subject_element->parentNode->replaceChild($subject_new_element, $subject_element);
+    }
+  }
+  else {
+    $note_node_list->item(0)->appendChild($subject_new_element);
+  }
+  
+  
+  //create body node
+  $body_new_element=$workflow_parser->createElement('body');
+  $body_new_element->appendChild($workflow_parser->createTextNode($body));
+  if ($body_node_list->item(0)) {
+    foreach ($body_array as $body_element) {
+      //insert text node
+      $body_element->parentNode->replaceChild($body_new_element, $body_element);
+    }
+  }
+  else {
+    $note_node_list->item(0)->appendChild($body_new_element);
+  }
+  
   //set the new DS content
-  return($workflow_datastream->__set('content',$workflow_parser->saveXML()));
+  return ($workflow_datastream->__set('content', $workflow_parser->saveXML()));
 }
 
 /**
@@ -972,6 +1011,11 @@ function islandora_workflow_get_object_note_subject($object_id) {
   $workflow_parser->loadXML($workflow_string);
   $subject='';
   
+  $subject_node_list=$workflow_parser->getElementsByTagName('subject');
+  foreach ($subject_node_list as $subject_element) {
+    //get the text
+    $subject=$subject_element->nodeValue;
+  }
   return $subject;
 }
 
@@ -998,6 +1042,14 @@ function islandora_workflow_get_object_note_body($object_id) {
   $workflow_parser->loadXML($workflow_string);
   
   $body='';
+  
+  $body_node_list=$workflow_parser->getElementsByTagName('body');
+  
+  foreach ($body_node_list as $body_element) {
+    //get the text
+    $body=$body_element->nodeValue;
+  }
+
   
   return $body;
 }

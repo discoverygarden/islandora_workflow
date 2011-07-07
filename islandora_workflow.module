@@ -23,7 +23,7 @@ function islandora_workflow_work() {
     '#type' => 'tabset',
   );
   //make the last page-changed tab selected
-  if(isset($_SESSION['workflow_page']['pager_page_array']) && isset($_GET['page'])) {
+  if (isset($_SESSION['workflow_page']['pager_page_array']) && isset($_GET['page'])) {
     $page=$_GET['page'];
     $current_pages=explode(',', $page);
     $last_pages=$_SESSION['workflow_page']['pager_page_array'];
@@ -83,8 +83,6 @@ function islandora_workflow_work() {
  *   which tab is calling the form, iether 'overview' or 'workflow'
  * @return array $form
  *   the array containing the aporpriate form
- * @todo
- *   put in pagination
  */
 function islandora_workflow_work_form(&$form_state, $tab) {
   //init
@@ -576,6 +574,7 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
         $vars['list'][$collection_id][$member]['Manage']=drupal_render($vars['list'][$collection_id][$member]['Manage']);
         $vars['list'][$collection_id][$member]['Selecter']=drupal_render($vars['list'][$collection_id][$member]['Selecter']);
         $vars['list'][$collection_id][$member]['Assign']=drupal_render($vars['list'][$collection_id][$member]['Assign']);
+        $vars['list'][$collection_id][$member]['note_subject']=islandora_workflow_get_object_note_subject($member);
       }
     }
   }
@@ -974,10 +973,12 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
   $assignee_indexes=array();
   //get selected objects
   foreach ($work_form_state['values']['objects_form']['objects_form_elems'] as $collection) {
-    foreach ($collection as $object_id => $object_form_elements) {
-      if ($object_form_elements['Selecter']==1) {
-        $selected_object_ids[]=$object_id;
-        $assignee_indexes[$object_id]=$object_form_elements['Assign'];
+    if (is_array($collection)) {//prevent a warning
+      foreach ($collection as $object_id => $object_form_elements) {
+        if ($object_form_elements['Selecter']==1) {
+          $selected_object_ids[]=$object_id;
+          $assignee_indexes[$object_id]=$object_form_elements['Assign'];
+        }
       }
     }
   }
