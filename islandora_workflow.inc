@@ -911,7 +911,40 @@ function islandora_workflow_set_object_note($object_id, $subject, $body) {
   $workflow_parser->loadXML($workflow_string);
   
   //modify DS xml
-  
+  //get elements to populate dynamicaly
+  $from_array=$workflow_parser->getElementsByTagName('from');
+  $timestamp_array=$workflow_parser->getElementsByTagName('timestamp');
+  $subject_array=$workflow_parser->getElementsByTagName('subject');
+  $body_array=$workflow_parser->getElementsByTagName('body');
+  //workflow DS
+  foreach ($from_array as $from_element) {
+    //create text node
+    $from=$workflow_parser->createElement('from');
+    $from->appendChild($workflow_parser->createTextNode($user->name));
+    //insert text node
+    $from_element->parentNode->replaceChild($from, $from_element);
+  }
+  foreach ($timestamp_array as $timestamp_element) {
+    //create text node
+    $timestamp=$workflow_parser->createElement('timestamp');
+    $timestamp->appendChild($workflow_parser->createTextNode(date('c')));
+    //insert text node
+    $timestamp_element->parentNode->replaceChild($timestamp, $timestamp_element);
+  }
+  foreach ($subject_array as $subject_element) {
+    //create text node
+    $subject=$workflow_parser->createElement('subject');
+    $subject->appendChild($workflow_parser->createTextNode($subject));
+    //insert text node
+    $subject_element->parentNode->replaceChild($subject, $subject_element);
+  }
+  foreach ($body_array as $body_element) {
+    //create text node
+    $body=$workflow_parser->createElement('body');
+    $body->appendChild($workflow_parser->createTextNode($body));
+    //insert text node
+    $body_element->parentNode->replaceChild($body, $body_element);
+  }
   //set the new DS content
   return($workflow_datastream->__set('content',$workflow_parser->saveXML()));
 }
