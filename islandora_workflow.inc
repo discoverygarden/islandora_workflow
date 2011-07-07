@@ -905,6 +905,15 @@ function islandora_workflow_set_object_note($object_id, $subject, $body) {
   if (!isset($object_datastreams['islandora_workflow'])) {
     return FALSE;
   }
+  //get the DS xml in dom object
+  $workflow_datastream=$object_datastreams['islandora_workflow'];
+  $workflow_string=$workflow_datastream->__get('content');
+  $workflow_parser->loadXML($workflow_string);
+  
+  //modify DS xml
+  
+  //set the new DS content
+  return($workflow_datastream->__set('content',$workflow_parser->saveXML()));
 }
 
 /**
@@ -924,7 +933,13 @@ function islandora_workflow_get_object_note_subject($object_id) {
   if (!isset($object_datastreams['islandora_workflow'])) {
     return FALSE;
   }
+  //get the DS xml in dom object
+  $workflow_datastream=$object_datastreams['islandora_workflow'];
+  $workflow_string=$workflow_datastream->__get('content');
+  $workflow_parser->loadXML($workflow_string);
+  $subject='';
   
+  return $subject;
 }
 
 /**
@@ -944,5 +959,12 @@ function islandora_workflow_get_object_note_body($object_id) {
   if (!isset($object_datastreams['islandora_workflow'])) {
     return FALSE;
   }
+  //get the DS xml in dom object
+  $workflow_datastream=$object_datastreams['islandora_workflow'];
+  $workflow_string=$workflow_datastream->__get('content');
+  $workflow_parser->loadXML($workflow_string);
   
+  $body='';
+  
+  return $body;
 }
