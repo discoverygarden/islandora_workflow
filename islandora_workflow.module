@@ -22,6 +22,45 @@ function islandora_workflow_work() {
   $page_tabs=array(
     '#type' => 'tabset',
   );
+  //make the last page-changed tab selected
+  if(isset($_SESSION['workflow_page']['pager_page_array']) && isset($_GET['page'])) {
+    $page=$_GET['page'];
+    $current_pages=explode(',', $page);
+    $last_pages=$_SESSION['workflow_page']['pager_page_array'];
+    if ($current_pages[0] != $last_pages[0]) {//workflow page change
+      $page_tabs['Workflow'] = array(
+        '#type' => 'tabpage',
+        '#title' => t('Workflow'),
+        '#content' => drupal_get_form('islandora_workflow_workflow_form'),
+        '#selected' => TRUE,
+        '#weight' => '1',
+      );
+      $page_tabs['Overview'] = array(
+            '#type' => 'tabpage',
+            '#title' => t('Overview'),
+            '#content' => drupal_get_form('islandora_workflow_overview_form'),
+            '#weight' => '2',
+          );
+      return tabs_render($page_tabs);
+    }
+    elseif ($current_pages[1] != $last_pages[1]) {//overview tab page change
+      $page_tabs['Workflow'] = array(
+        '#type' => 'tabpage',
+        '#title' => t('Workflow'),
+        '#content' => drupal_get_form('islandora_workflow_workflow_form'),
+        '#weight' => '1',
+      );
+      $page_tabs['Overview'] = array(
+            '#type' => 'tabpage',
+            '#title' => t('Overview'),
+            '#content' => drupal_get_form('islandora_workflow_overview_form'),
+            '#selected' => TRUE,
+            '#weight' => '2',
+          );
+      return tabs_render($page_tabs);
+    }
+  }
+  //no previous pages or changes to pages
   $page_tabs['Workflow'] = array(
         '#type' => 'tabpage',
         '#title' => t('Workflow'),
@@ -57,30 +96,23 @@ function islandora_workflow_work_form(&$form_state, $tab) {
   $users_collections=islandora_workflow_get_current_users_collections('all');
   //pager init stuff
   global $pager_page_array, $pager_total;
+  //which pager applies to this tab
   if ($tab=='workflow') {
-    $pager_index=1;
-  }
-  if ($tab=='overview') {
     $pager_index=0;
   }
-  //@todo: get this reporting the correct page
-  if (isset($pager_page_array[$pager_index])) {
-    $pager_page_array[$pager_index]=$pager_page_array[$pager_index]+1;
+  if ($tab=='overview') {
+    $pager_index=1;
   }
-  else {
-    $pager_page_array[$pager_index]=0;
-  }
-  if (!isset($pager_total[$pager_index])) {
-    $pager_total[$pager_index]=0;
-  }
-  dsm($pager_page_array[$pager_index]);
-  $pager_page_array[$pager_index]=max(0, min((int)$pager_page_array[$pager_index], ((int)$pager_total[$pager_index]-1)));
-  $objects_per_page=2;
+  //set the current page
+  $page=isset($_GET['page']) ? $_GET['page'] : '';  
+  $pager_page_array=explode(',', $page);
+  //control the objects displayed on each page
+  $objects_per_page=10;
   $object_count=0;
   $object_lower_bound=$pager_page_array[$pager_index]*$objects_per_page;
   $object_upper_bound=$object_lower_bound+$objects_per_page;
-  dsm($pager_page_array[$pager_index]);
-  
+  //record the current $pager_page_array for comparison with the next time the page loads [to pick the tab to display]
+  $_SESSION['workflow_page']['pager_page_array']=$pager_page_array;
   //populate an array of all users in relevent collections, to be used in the assign-to-user drop down
   $users_collections_members=islandora_workflow_get_all_users_with_collection_permissions($users_collections);
  

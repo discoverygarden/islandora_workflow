@@ -48,6 +48,6 @@
 	
 </TABLE>
 <?php 
-$pager=theme('pager', NULL, 2, $pager_index);
+$pager=theme('pager', NULL, NULL, $pager_index);
 print($pager);
 ?>
