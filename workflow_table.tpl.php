@@ -34,7 +34,7 @@
     foreach($collection_members as $member) {
       if (isset($list[$collection_id][$member])) { //The isset is here so that only populated items are displayed on the workflow tab
         print('<TR>');
-        print('<TD>'. $list[$collection_id][$member]['Selecter'] .'</TD><TD>'.$member.
+        print('<TD>'. $list[$collection_id][$member]['Selecter'] .'</TD><TD>'.$list[$collection_id][$member]['object'].
         '</TD><TD>'.$collection_name.'</TD><TD>' . $list[$collection_id][$member]['state'] .
          '</TD><TD>' . $list[$collection_id][$member]['note_subject'] . '</TD><TD>'.$list[$collection_id][$member]['Assign'].'</TD><TD>');
         print($list[$collection_id][$member]['Edit']);

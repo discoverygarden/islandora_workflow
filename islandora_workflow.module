@@ -645,6 +645,9 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
         $vars['list'][$collection_id][$member]['note_subject']=
           l(islandora_workflow_get_object_note_subject($member), 
             'islandora_workflow_edit_note',  array('query' => 'object=' . $member));
+        $vars['list'][$collection_id][$member]['object']=
+          l($member, 
+            'fedora/repository/'. $member);
       }
     }
   }
@@ -1121,5 +1124,4 @@ function islandora_workflow_edit_note_form_submit($edit_note_form, &$edit_note_f
   $body=$edit_note_form_state['values']['note_form']['Body'];
   
   islandora_workflow_set_object_note($object_id, $subject, $body);
- // return array('islandora_workflow');
 }
