@@ -975,7 +975,7 @@ function islandora_workflow_set_object_note($object_id, $subject, $body) {
   $body_new_element=$workflow_parser->createElement('body');
   $body_new_element->appendChild($workflow_parser->createTextNode($body));
   if ($body_node_list->item(0)) {
-    foreach ($body_array as $body_element) {
+    foreach ($body_node_list as $body_element) {
       //insert text node
       $body_element->parentNode->replaceChild($body_new_element, $body_element);
     }

@@ -356,8 +356,8 @@ function islandora_workflow_work_form(&$form_state, $tab) {
   //drupal hack to pass a variable to my preprocessor function
   $workflow_tabs_form['objects_form']['objects_form_elems']['tab']=array(
     '#type' => 'textfield',
-    '#default_value' => $pager_index,//this will give a coder warning ignore it 
-    '#access' => 'FALSE'  
+    '#default_value' => $pager_index,
+    '#access' => FALSE
   );
   //set pager total now that we know how many objects there are
   
@@ -432,25 +432,57 @@ function islandora_workflow_menu() {
 
 /**
  * This function is the hook_form for the islandora_workflow_edit_note callback for editing the note on an object
- * @return array
+ * @return array $edit_note_form
  *   The drupal form array for editing a note.
  */
 function islandora_workflow_edit_note_form() {
-  $edit_note_form['note_form']=array(    
-    '#type' => 'fieldset',
-    '#title' => t('Note'),
-    '#collapsible' => FALSE,
-    '#collapsed' => FALSE,
-    '#tree' => TRUE,
-    '#description' => t('Change the note attached to this this object.'),
-  );
   
-  //submit button
-  $edit_note_form['note_form']['Submit']= array(
-    '#type' => 'submit',
-    '#weight' => '1',
-    '#value' => t('Submit')
-  );
+  if (isset($_GET['object'])) {
+    //init
+    module_load_include('inc', 'islandora_workflow', 'islandora_workflow'); //for getting the current note state
+    $object_id=$_GET['object'];
+    $subject=islandora_workflow_get_object_note_subject($object_id);
+    $body=islandora_workflow_get_object_note_body($object_id);
+    $edit_note_form_state['storage']=array('object' => $object_id);
+    $edit_note_form['note_form']=array(    
+      '#type' => 'fieldset',
+      '#title' => t('Note'),
+      '#collapsible' => FALSE,
+      '#collapsed' => FALSE,
+      '#tree' => TRUE,
+      '#description' => t('Change the note attached to this this object.'),
+    );
+    
+    //submit button
+    $edit_note_form['note_form']['Subject']= array(
+      '#type' => 'textfield',
+      '#weight' => '1',
+      '#default_value' => $subject
+    );
+    
+    //submit button
+    $edit_note_form['note_form']['Body']= array(
+      '#type' => 'textarea',
+      '#weight' => '2',
+      '#default_value' => $body
+    );
+    
+    //submit button
+    $edit_note_form['note_form']['Submit']= array(
+      '#type' => 'submit',
+      '#weight' => '3',
+      '#value' => t('Submit')
+    );
+    //drupal made me do it
+    $edit_note_form['note_form']['object']=array(
+      '#type' => 'textfield',
+      '#default_value' => $object_id,
+      '#access' => FALSE
+    );
+  }
+  else {
+    $edit_note_form=array();
+  }
   
   return $edit_note_form;
 }
@@ -1082,5 +1114,11 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
  *   the form's state array
  */
 function islandora_workflow_edit_note_form_submit($edit_note_form, &$edit_note_form_state) {
-
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow'); //for setting the note value
+  dsm($edit_note_form_state);
+  $object_id=$edit_note_form_state['values']['note_form']['object'];
+  $subject=$edit_note_form_state['values']['note_form']['Subject'];
+  $body=$edit_note_form_state['values']['note_form']['Body'];
+  
+  islandora_workflow_set_object_note($object_id, $subject, $body);
 }
