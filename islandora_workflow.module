@@ -421,7 +421,8 @@ function islandora_workflow_menu() {
   $menuEntries['islandora_workflow_edit_note']=array(
     'title' => 'Edit Note',
     'description' => 'You may edit the note on this object',
-    'page callback' => 'islandora_workflow_edit_note',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('islandora_workflow_edit_note_form'),
     'access callback' => 'islandora_workflow_check_permissions',
     'access arguments' => array(array('islandora_workflow_Administrator', 'islandora_workflow_Editor', 'islandora_workflow_Manager', 'islandora_workflow_Submitter')),
     'type' => MENU_CALLBACK
@@ -430,12 +431,28 @@ function islandora_workflow_menu() {
 }
 
 /**
- * 
+ * This function is the hook_form for the islandora_workflow_edit_note callback for editing the note on an object
+ * @return array
+ *   The drupal form array for editing a note.
  */
-function islandora_workflow_edit_note() {
-  $output='asdfawrget';
+function islandora_workflow_edit_note_form() {
+  $edit_note_form['note_form']=array(    
+    '#type' => 'fieldset',
+    '#title' => t('Note'),
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,
+    '#tree' => TRUE,
+    '#description' => t('Change the note attached to this this object.'),
+  );
   
-  return $output;
+  //submit button
+  $edit_note_form['note_form']['Submit']= array(
+    '#type' => 'submit',
+    '#weight' => '1',
+    '#value' => t('Submit')
+  );
+  
+  return $edit_note_form;
 }
 
 
@@ -588,12 +605,14 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
     foreach ($collection_members as $member) {
       if (isset($vars['list'][$collection_id][$member])) { //The isset is here so that only populated items are rendered into HTML for display
         $vars['list'][$collection_id][$member]['state']=islandora_workflow_get_object_workflow_state($member);//current workflow state
-        //render each element
+        //render each object element
         $vars['list'][$collection_id][$member]['Edit']=drupal_render($vars['list'][$collection_id][$member]['Edit']);
         $vars['list'][$collection_id][$member]['Manage']=drupal_render($vars['list'][$collection_id][$member]['Manage']);
         $vars['list'][$collection_id][$member]['Selecter']=drupal_render($vars['list'][$collection_id][$member]['Selecter']);
         $vars['list'][$collection_id][$member]['Assign']=drupal_render($vars['list'][$collection_id][$member]['Assign']);
-        $vars['list'][$collection_id][$member]['note_subject']=l(islandora_workflow_get_object_note_subject($member),'/islandora_workflow_edit_note?object='.$member);
+        $vars['list'][$collection_id][$member]['note_subject']=
+          l(islandora_workflow_get_object_note_subject($member), 
+            'islandora_workflow_edit_note',  array('query' => 'object=' . $member));
       }
     }
   }
@@ -977,9 +996,9 @@ function islandora_workflow_user_permissions_form_submit($collection_user_permis
 
 /**
  * This function handles all of the possible submits from the workflow work form (overview and workflow)
-  * @param $work_form_form
+  * @param $work_form
   *   Holds all the data on the state  of the form submitted
-  * @param $work_form_state_form_state
+  * @param $work_form_state
   *   An easier to use version of $work_form_form
  */
 function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
@@ -1053,4 +1072,15 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
       islandora_workflow_assign_object($object_id, $assignees[$object_id]);
     }
   }
+}
+
+/**
+ * This function handles the submission of the note edit form
+ * @param $edit_note_form
+ *   Holds all the data on the state  of the form submitted
+ * @param $edit_note_form_state
+ *   the form's state array
+ */
+function islandora_workflow_edit_note_form_submit($edit_note_form, &$edit_note_form_state) {
+
 }
