@@ -214,7 +214,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
       foreach ($collection_members as $member) {
         $object_count++;//keeping track of objects to show
         if ($object_count > $object_lower_bound && $object_count <=$object_upper_bound) {
-          $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Edit']=array(
+          /*$workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Edit']=array(
             '#type' => 'submit',
             '#value' => t('Edit'),
             '#name' => $member
@@ -223,7 +223,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
             '#type' => 'submit',
             '#value' => t('Manage'),
             '#name' => $member
-          );
+          );*/
           $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selecter']=array(
             '#type' => 'checkbox',
             '#title' => t(''),
@@ -487,7 +487,6 @@ function islandora_workflow_edit_note_form() {
   return $edit_note_form;
 }
 
-
 /**
  * This function is the access callback used for access to the workflow/perm section of this module
  * @param $permission_array
@@ -638,8 +637,8 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
       if (isset($vars['list'][$collection_id][$member])) { //The isset is here so that only populated items are rendered into HTML for display
         $vars['list'][$collection_id][$member]['state']=islandora_workflow_get_object_workflow_state($member);//current workflow state
         //render each object element
-        $vars['list'][$collection_id][$member]['Edit']=drupal_render($vars['list'][$collection_id][$member]['Edit']);
-        $vars['list'][$collection_id][$member]['Manage']=drupal_render($vars['list'][$collection_id][$member]['Manage']);
+        //$vars['list'][$collection_id][$member]['Edit']=drupal_render($vars['list'][$collection_id][$member]['Edit']);
+        //$vars['list'][$collection_id][$member]['Manage']=drupal_render($vars['list'][$collection_id][$member]['Manage']);
         $vars['list'][$collection_id][$member]['Selecter']=drupal_render($vars['list'][$collection_id][$member]['Selecter']);
         $vars['list'][$collection_id][$member]['Assign']=drupal_render($vars['list'][$collection_id][$member]['Assign']);
         $vars['list'][$collection_id][$member]['note_subject']=
@@ -1069,6 +1068,7 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
   if ($clicked_button=='Edit') {
     $object_id=$work_form_state['clicked_button']['#parents'][array_search($clicked_button, $work_form_state['clicked_button']['#parents'])-1];
   }
+  /*
   elseif ($clicked_button=='Manage') {
     $object_id=$work_form_state['clicked_button']['#parents'][array_search($clicked_button, $work_form_state['clicked_button']['#parents'])-1];
   }
@@ -1077,6 +1077,7 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
       islandora_workflow_submit_object($object_id);
     }
   }
+  */
   elseif ($clicked_button=='Delete') {//this is not supposed to actualy delete anything, ??
     foreach ($selected_object_ids as $object_id) {
       islandora_workflow_delete_object($object_id);
