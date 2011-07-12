@@ -1074,10 +1074,12 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
     }
   }
   //handle buttons
-  if ($clicked_button=='Edit') {
-    $object_id=$work_form_state['clicked_button']['#parents'][array_search($clicked_button, $work_form_state['clicked_button']['#parents'])-1];
+  if ($clicked_button=='Submit') {
+    foreach ($selected_object_ids as $object_id) {
+      islandora_workflow_submit_object($object_id);
+    }
   }
-  elseif ($clicked_button=='Delete') {//this is not supposed to actualy delete anything, ??
+  elseif ($clicked_button=='Delete') {//this sets fedora state to D
     foreach ($selected_object_ids as $object_id) {
       islandora_workflow_delete_object($object_id);
     }
