@@ -37,9 +37,6 @@
         print('<TD>'. $list[$collection_id][$member]['Selecter'] .'</TD><TD>'.$list[$collection_id][$member]['object'].
         '</TD><TD>'.$collection_name.'</TD><TD>' . $list[$collection_id][$member]['state'] .
          '</TD><TD>' . $list[$collection_id][$member]['note_subject'] . '</TD><TD>'.$list[$collection_id][$member]['Assign'].'</TD>');//<TD>');
-        //print($list[$collection_id][$member]['Edit']);
-        //print($list[$collection_id][$member]['Manage']);
-        //print('</TD></TR>');
         print('</TR>');
       }
     }
