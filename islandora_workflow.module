@@ -1127,3 +1127,23 @@ function islandora_workflow_edit_note_form_submit($edit_note_form, &$edit_note_f
   
   islandora_workflow_set_object_note($object_id, $subject, $body);
 }
+
+/**
+ * This function is used to handle the outgoing mail for islandora_workflow
+ * 
+ * @param string $key
+ * 
+ * @param array $message
+ * 
+ * @param array $params
+ */
+function islandora_workflow_mail($key, &$message, $params) {
+  $language=$message['language'];
+  $variables=user_mail_tokens($params['account'], $language);
+  switch ($key) {
+    case 'assign':
+      $message['subject']= t('',$variables, $language->language);
+      $message['body'][]=t('',$variables, $language->language);
+      break;
+  }
+}
