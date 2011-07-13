@@ -684,7 +684,7 @@ function islandora_workflow_role_permissions_form() {
   }
   $collection_role_permissions_form['islandora_workflow_collection_permissions_table']['permissions_table']['collection_selector']=array(
     '#type' => 'select',
-    '#options'=>$my_collections_ids,
+    '#options' => $my_collections_ids,
     '#default_value' => array_search($_SESSION['workflow_permissions_page']['active_collection'], $my_collections_ids)
   );
   $collection_role_permissions_form['islandora_workflow_collection_permissions_table']['permissions_table']['collection_submit']=array(
@@ -880,7 +880,7 @@ function islandora_workflow_user_permissions_form() {
   }
   $collection_user_permissions_form['islandora_workflow_collection_permissions_table']['permissions_table']['collection_selector']=array(
     '#type' => 'select',
-    '#options'=>$my_collections_ids,
+    '#options' => $my_collections_ids,
     '#default_value' => array_search($_SESSION['workflow_permissions_page']['active_collection'], $my_collections_ids)
   );
   $collection_user_permissions_form['islandora_workflow_collection_permissions_table']['permissions_table']['collection_submit']=array(
@@ -1132,18 +1132,22 @@ function islandora_workflow_edit_note_form_submit($edit_note_form, &$edit_note_f
  * This function is used to handle the outgoing mail for islandora_workflow
  * 
  * @param string $key
- * 
+ *   Thes message template to use
  * @param array $message
- * 
+ *   The message to augment with the template
  * @param array $params
+ *   containst 'object_id' which is the object for which this email regards.
  */
 function islandora_workflow_mail($key, &$message, $params) {
-  $language=$message['language'];
-  $variables=user_mail_tokens($params['account'], $language);
   switch ($key) {
     case 'assign':
-      $message['subject']= t('',$variables, $language->language);
-      $message['body'][]=t('',$variables, $language->language);
-      break;
+      //init
+      $body=islandora_workflow_get_object_note_body($params['object_id']);
+      $subject=islandora_workflow_get_object_note_subject($params['object_id']);
+      //setup email
+      $message['subject']=$params['object_id'] .' Assigned: ' . $subject;
+      $message['body'][]= 'Object '. $params['object_id'] .' has been assigned to you.';
+      $message['body'][]= $body;
+    break;
   }
 }

@@ -1064,9 +1064,9 @@ function islandora_workflow_get_object_note_body($object_id) {
  * @return the response from drupal_mail()
  */
 function islandora_workflow_send_message($object_id, $user_name) {
-  /*
-   * 
-   */
-  $body=islandora_workflow_get_object_note_body($object_id);
-  $subject=islandora_workflow_get_object_note_subject($object_id);
+  $params=array('object_id' => $object_id);//optional parameters for mail hook
+  $recipient=user_load(array('name' => $user_name));
+  $address=$recipient->mail;//user email to send to
+  
+  drupal_mail('islandora_workflow', 'assign', $address, language_default(), $params);
 }
