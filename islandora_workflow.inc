@@ -575,7 +575,13 @@ function islandora_workflow_assign_object($object_id, $user_name) {
     drupal_set_message(t('The object '. $object_id .' could not be assigned, you do not have the necessary permissions.'));
     return FALSE;
   }
-  islandora_workflow_send_message($object_id, $user_name);
+  //send out email to assignee
+  $params=array('object_id' => $object_id);//optional parameters for mail hook
+  $recipient=user_load(array('name' => $user_name));
+  $address=$recipient->mail;//user email to send to
+  drupal_mail('islandora_workflow', 'assign', $address, language_default(), $params);
+  
+  //assign object
   return (islandora_workflow_set_object_relationship($object_id, 'assignee', $user_name));
 }
 
@@ -1052,21 +1058,4 @@ function islandora_workflow_get_object_note_body($object_id) {
   }
 
   return $body;
-}
-
-/**
- * This function will get the object's message body and subject, compose an email out of it and send the results to the indicated user
- * 
- * @param string $object_id
- *   the fedora pid of the object to send the message about
- * @param $user_id
- *   The user to send the message to
- * @return the response from drupal_mail()
- */
-function islandora_workflow_send_message($object_id, $user_name) {
-  $params=array('object_id' => $object_id);//optional parameters for mail hook
-  $recipient=user_load(array('name' => $user_name));
-  $address=$recipient->mail;//user email to send to
-  
-  drupal_mail('islandora_workflow', 'assign', $address, language_default(), $params);
 }
