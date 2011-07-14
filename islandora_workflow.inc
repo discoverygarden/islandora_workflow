@@ -452,7 +452,12 @@ function islandora_workflow_reject_object($object_id) {
     return FALSE;
   }
   
-  islandora_workflow_get_object_parent($object_id);
+  //send out email to creator
+  $user_name=islandora_workflow_get_object_creator($object_id);
+  $params=array('object_id' => $object_id);//optional parameters for mail hook
+  $recipient=user_load(array('name' => $user_name));
+  $address=$recipient->mail;//user email to send to
+  drupal_mail('islandora_workflow', 'assign', $address, language_default(), $params);
   
   $workflow_state=islandora_workflow_get_object_workflow_state($object_id);
   if ($workflow_state!='created' && $workflow_state!='rejected') {
@@ -486,10 +491,15 @@ function islandora_workflow_approve_object($object_id) {
   if ($workflow_state!='published' && $workflow_state!='approved') {
     return (islandora_workflow_set_object_workflow_state($object_id, 'approved'));
   }
-  else {
-    drupal_set_message(t('The object '. $object_id .' could not be approved, it was not in an aporopriate workflow state.'));
-    return FALSE;
-  }
+  
+  //send email to all editors
+ /* $params=array('object_id' => $object_id);//optional parameters for mail hook
+  $recipient=user_load(array('name' => $user_name));
+  $address=$recipient->mail;//user email to send to
+  drupal_mail('islandora_workflow', 'assign', $address, language_default(), $params);
+  */
+  drupal_set_message(t('The object '. $object_id .' could not be approved, it was not in an aporopriate workflow state.'));
+  return FALSE;
 } 
 
 /**
@@ -542,10 +552,15 @@ function islandora_workflow_submit_object($object_id) {
   if ($workflow_state=='created' || $workflow_state=='rejected') {
     return (islandora_workflow_set_object_workflow_state($object_id, 'submitted'));
   }
-  else {
-    drupal_set_message(t('The object '. $object_id .' could not be submitted, it was not in an aporopriate workflow state.'));
-    return FALSE;
-  }
+  
+  //send email to all editors
+ /* $params=array('object_id' => $object_id);//optional parameters for mail hook
+  $recipient=user_load(array('name' => $user_name));
+  $address=$recipient->mail;//user email to send to
+  drupal_mail('islandora_workflow', 'assign', $address, language_default(), $params);
+  */
+  drupal_set_message(t('The object '. $object_id .' could not be submitted, it was not in an aporopriate workflow state.'));
+  return FALSE;
 }
 
 /**

@@ -1149,5 +1149,32 @@ function islandora_workflow_mail($key, &$message, $params) {
       $message['body'][]= 'Object '. $params['object_id'] .' has been assigned to you.';
       $message['body'][]= $body;
     break;
+    case 'reject':
+      //init
+      $body=islandora_workflow_get_object_note_body($params['object_id']);
+      $subject=islandora_workflow_get_object_note_subject($params['object_id']);
+      //setup email
+      $message['subject']=$params['object_id'] .' Rejected: ' . $subject;
+      $message['body'][]= 'Object '. $params['object_id'] .' has been rejected to you.';
+      $message['body'][]= $body;
+    break;
+    case 'submit':
+      //init
+      $body=islandora_workflow_get_object_note_body($params['object_id']);
+      $subject=islandora_workflow_get_object_note_subject($params['object_id']);
+      //setup email
+      $message['subject']=$params['object_id'] .' Submited: ' . $subject;
+      $message['body'][]= 'Object '. $params['object_id'] .' has been submited for appoval.';
+      $message['body'][]= $body;
+    break;
+    case 'approve':
+      //init
+      $body=islandora_workflow_get_object_note_body($params['object_id']);
+      $subject=islandora_workflow_get_object_note_subject($params['object_id']);
+      //setup email
+      $message['subject']=$params['object_id'] .' Aproved: ' . $subject;
+      $message['body'][]= 'Object '. $params['object_id'] .' has been aproved and is awaiting publication.';
+      $message['body'][]= $body;
+    break;
   }
 }
