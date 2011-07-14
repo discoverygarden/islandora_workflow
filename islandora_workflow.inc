@@ -17,8 +17,6 @@
  * @return array $users
  *   an associative array of the indicated collections and all the drupal user names that 
  *   have permissions on them
- * @todo
- *   fix this function to only return resluts on collections that were specified
  */
 function islandora_workflow_get_all_users_with_collection_permissions($collections, $permission_level=NULL) {
   //init
@@ -505,11 +503,14 @@ function islandora_workflow_approve_object($object_id) {
   if ($workflow_state!='published' && $workflow_state!='approved') {
   
     //send email to all managers
-   /* $params=array('object_id' => $object_id);//optional parameters for mail hook
-    $recipient=user_load(array('name' => $user_name));
-    $address=$recipient->mail;//user email to send to
-    drupal_mail('islandora_workflow', 'approve', $address, language_default(), $params);
-    */
+    $collection=islandora_workflow_get_object_parent($object_id);
+    $manager_list=islandora_workflow_get_all_users_with_collection_permissions(
+      array($collection), $permission_level='islandora_workflow_Manager');
+    $emails=get_users_email_by_name($manager_list[$collection]);
+    $emails=format_email_array_to_string($emails);
+    $params=array('object_id' => $object_id);//optional parameters for mail hook
+    drupal_mail('islandora_workflow', 'approve', $emails, language_default(), $params);
+    
     return (islandora_workflow_set_object_workflow_state($object_id, 'approved'));
   }
   else {
@@ -571,13 +572,11 @@ function islandora_workflow_submit_object($object_id) {
     $collection=islandora_workflow_get_object_parent($object_id);
     $editor_list=islandora_workflow_get_all_users_with_collection_permissions(
       array($collection), $permission_level='islandora_workflow_Editor');
-    dsm($collection);
-    dsm($editor_list);
-   /* $params=array('object_id' => $object_id);//optional parameters for mail hook
-    $recipient=user_load(array('name' => $user_name));
-    $address=$recipient->mail;//user email to send to
-    drupal_mail('islandora_workflow', 'submit', $address, language_default(), $params);
-    */
+    $emails=get_users_email_by_name($editor_list[$collection]);
+    $emails=format_email_array_to_string($emails);
+    $params=array('object_id' => $object_id);//optional parameters for mail hook
+    drupal_mail('islandora_workflow', 'submit', $emails, language_default(), $params);
+    
     return (islandora_workflow_set_object_workflow_state($object_id, 'submitted'));
   }
   else {
@@ -1096,4 +1095,48 @@ function islandora_workflow_get_object_note_body($object_id) {
   }
 
   return $body;
+}
+
+/**
+ * This function will return the registed email for all the specified users
+ * @param array $users_names
+ *   an array containing all the users names to find emails for
+ * @return array $users_emails
+ *   An associative array of user_name=>user_email
+ */
+function get_users_email_by_name($users_names) {
+  $users_emails=array();
+  if (is_array($users_names)) {
+    foreach ($users_names as $user_name) {
+      $user_object=user_load(array('name' => $user_name));
+      $email=$user_object->mail;
+      $users_emails[$user_name]=$email;
+    }
+  }
+  return $users_emails;
+}
+
+/**
+ * This helper function will change an array of emails into something feedable to drupal_mail
+ * @param array $emails_arrray
+ *   The array of email strings to concatenate
+ * @param string $emails_string
+ *   The formated string containing all of the emails
+ */
+function format_email_array_to_string($emails_array) {
+  $emails_string='';
+  if (is_array($emails_array)) {
+    $is_first=TRUE;//for telling if this is the first iteration of the loop
+    
+    foreach ($emails_array as $key => $email) {
+      if ($is_first==TRUE) {
+        $emails_string=$email;//first email in list
+        $is_first=FALSE;
+      }
+      else {
+        $emails_string=$emails_string . ', '. $email; //emails get a comma delimiter
+      }
+    }
+  }
+  return $emails_string;
 }
