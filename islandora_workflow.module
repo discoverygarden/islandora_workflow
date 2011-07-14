@@ -113,7 +113,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
   //record the current $pager_page_array for comparison with the next time the page loads [to pick the tab to display]
   $_SESSION['workflow_page']['pager_page_array']=$pager_page_array;
   //populate an array of all users in relevent collections, to be used in the assign-to-user drop down
-  $users_collections_members=islandora_workflow_get_all_users_with_collection_permissions($users_collections);
+  $users_collections_members=islandora_workflow_get_all_users_with_collection_permissions(array_keys($users_collections));
  
   //submit_function declaration
   $workflow_tabs_form['#submit']=array('islandora_workflow_work_form_submit');
