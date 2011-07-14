@@ -8,13 +8,17 @@
  */
 
 /**
- * This function will get all the drupal users who have any level of access to the indicated collections
+ * This function will get all the drupal users who have the indicated or any level of access 
+ * if none is indicated to the indicated collections
  * @param array $collections 
  *   the collection(s) to get the permissions on
+ * @param string $permission_level
+ *   Defaults to NULL, the permission level users to return
  * @return array $users
- *   an associative array of the indicated collections and all the drupal user names that have permissions on them
+ *   an associative array of the indicated collections and all the drupal user names that 
+ *   have permissions on them
  */
-function islandora_workflow_get_all_users_with_collection_permissions($collections) {
+function islandora_workflow_get_all_users_with_collection_permissions($collections, $permission_level=NULL) {
   //init
   //all user perms
   $user_permissions=islandora_workflow_get_all_user_permissions();
@@ -26,7 +30,7 @@ function islandora_workflow_get_all_users_with_collection_permissions($collectio
   $users=array();
   $admins=user_access_list('islandora_workflow_Administrator');
   
-  //make sure those users with admin rights show up for every collection
+  //make sure those users with admin rights show up for every collection/perm level
   foreach ($collections as $collection_id => $collection_name) {
     $users[$collection_id]=array();
     //islandora_workflow_Administrator
@@ -38,43 +42,47 @@ function islandora_workflow_get_all_users_with_collection_permissions($collectio
   //from user perms
   foreach ($user_permissions as $user_id => $collection_permission) {
     foreach ($collection_permission as $collection_id => $permission) {
-      $user_name=user_load($user_id)->name;
-        //init the collection if it needs to be
-      if (!isset($users[$collection_id])) {
-        $users[$collection_id]=array();
-      }
-      if (!in_array($user_name, $users[$collection_id])) {
-        //add the user to the users array for the collection if they aren't in it
-        $users[$collection_id][]=$user_name;
+      if($permission_level==null || $permission==$permission_level) {
+        $user_name=user_load($user_id)->name;
+          //init the collection if it needs to be
+        if (!isset($users[$collection_id])) {
+          $users[$collection_id]=array();
+        }
+        if (!in_array($user_name, $users[$collection_id])) {
+          //add the user to the users array for the collection if they aren't in it
+          $users[$collection_id][]=$user_name;
+        }
       }
     }
   }
   //from role perms
   foreach ($role_permissions as $role_id => $collection_permission) {
     foreach ($collection_permission as $collection_id => $permission) {
-      //populate users per role
-      if (!isset($users_via_role[$role_id])) {
-        $users_via_role[$role_id]=array();
-        $users_query = "SELECT u.uid FROM {users} u, {users_roles} ur, {permission} p
-          WHERE        u.uid = ur.uid
-          AND          ur.rid = p.rid
-          AND          p.rid LIKE '%%%s%'
-          ";
-        $users_result = db_query($users_query, $role_id);
-        while ($row = db_fetch_object($users_result)) {
-          $users_via_role[$role_id][]=$row->uid;
+      if($permission_level==null || $permission==$permission_level) {
+        //populate users per role
+        if (!isset($users_via_role[$role_id])) {
+          $users_via_role[$role_id]=array();
+          $users_query = "SELECT u.uid FROM {users} u, {users_roles} ur, {permission} p
+            WHERE        u.uid = ur.uid
+            AND          ur.rid = p.rid
+            AND          p.rid LIKE '%%%s%'
+            ";
+          $users_result = db_query($users_query, $role_id);
+          while ($row = db_fetch_object($users_result)) {
+            $users_via_role[$role_id][]=$row->uid;
+          }
+        }
+        //add the user/collection relationships for each role to the $users list if they are not already on it
+        foreach ($users_via_role[$role_id] as $user_id) {
+          $user_name=user_load($user_id)->name;
+          if (!isset($users[$collection_id])) {
+            $users[$collection_id]=array();
+          }
+          if (!in_array($user_name, $users[$collection_id])) {
+            $users[$collection_id][]=$user_name;
+          }
         }
       }
-    //add the user/collection relationships for each role to the $users list if they are not already on it
-     foreach ($users_via_role[$role_id] as $user_id) {
-      $user_name=user_load($user_id)->name;
-      if (!isset($users[$collection_id])) {
-        $users[$collection_id]=array();
-      }
-      if (!in_array($user_name, $users[$collection_id])) {
-        $users[$collection_id][]=$user_name;
-      }
-     }
     }
   }
   return $users;
@@ -461,7 +469,7 @@ function islandora_workflow_reject_object($object_id) {
     drupal_mail('islandora_workflow', 'assign', $address, language_default(), $params);
   }
   else {
-    drupal_set_message(t('No Email sent for the rejection of: ' . $object_id));
+    drupal_set_message(t('No email sent for the rejection of: ' . $object_id));
   }
   
   $workflow_state=islandora_workflow_get_object_workflow_state($object_id);
