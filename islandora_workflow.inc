@@ -11,12 +11,16 @@
  * This function will get all the drupal users who have the indicated or any level of access 
  * if none is indicated to the indicated collections
  * @param array $collections 
- *   the collection(s) to get the permissions on
+ *   the collection(s) to get the permissions on uses collection_id as key not value
  * @param string $permission_level
  *   Defaults to NULL, the permission level users to return
  * @return array $users
  *   an associative array of the indicated collections and all the drupal user names that 
  *   have permissions on them
+ * @todo
+ *   fix this function to only return resluts on collections that were specified
+ * @todo
+ *   make function use $collection values rather than keys, refactor calls to this function for this
  */
 function islandora_workflow_get_all_users_with_collection_permissions($collections, $permission_level=NULL) {
   //init
@@ -502,7 +506,7 @@ function islandora_workflow_approve_object($object_id) {
   $workflow_state=islandora_workflow_get_object_workflow_state($object_id);
   if ($workflow_state!='published' && $workflow_state!='approved') {
   
-    //send email to all editors
+    //send email to all managers
    /* $params=array('object_id' => $object_id);//optional parameters for mail hook
     $recipient=user_load(array('name' => $user_name));
     $address=$recipient->mail;//user email to send to
@@ -565,17 +569,17 @@ function islandora_workflow_submit_object($object_id) {
   $workflow_state=islandora_workflow_get_object_workflow_state($object_id);
   if ($workflow_state=='created' || $workflow_state=='rejected') {
   
-  //send email to all editors
-  $collection=islandora_workflow_get_object_parent($object_id);
-  $editor_list=islandora_workflow_get_all_users_with_collection_permissions(
-    $collection, $permission_level='islandora_workflow_Editor');
-  dsm($collection);
-  dsm($editor_list);
- /* $params=array('object_id' => $object_id);//optional parameters for mail hook
-  $recipient=user_load(array('name' => $user_name));
-  $address=$recipient->mail;//user email to send to
-  drupal_mail('islandora_workflow', 'assign', $address, language_default(), $params);
-  */
+    //send email to all editors
+    $collection=islandora_workflow_get_object_parent($object_id);
+    $editor_list=islandora_workflow_get_all_users_with_collection_permissions(
+      array($collection => ' '), $permission_level='islandora_workflow_Editor');
+    dsm($collection);
+    dsm($editor_list);
+   /* $params=array('object_id' => $object_id);//optional parameters for mail hook
+    $recipient=user_load(array('name' => $user_name));
+    $address=$recipient->mail;//user email to send to
+    drupal_mail('islandora_workflow', 'assign', $address, language_default(), $params);
+    */
     return (islandora_workflow_set_object_workflow_state($object_id, 'submitted'));
   }
   else {
