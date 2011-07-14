@@ -454,10 +454,15 @@ function islandora_workflow_reject_object($object_id) {
   
   //send out email to creator
   $user_name=islandora_workflow_get_object_creator($object_id);
-  $params=array('object_id' => $object_id);//optional parameters for mail hook
-  $recipient=user_load(array('name' => $user_name));
-  $address=$recipient->mail;//user email to send to
-  drupal_mail('islandora_workflow', 'assign', $address, language_default(), $params);
+  if ($user_name) {//some objects may not have been created by a drupal user
+    $params=array('object_id' => $object_id);//optional parameters for mail hook
+    $recipient=user_load(array('name' => $user_name));
+    $address=$recipient->mail;//user email to send to
+    drupal_mail('islandora_workflow', 'assign', $address, language_default(), $params);
+  }
+  else {
+    drupal_set_message(t('No Email sent for the rejection of: ' . $object_id));
+  }
   
   $workflow_state=islandora_workflow_get_object_workflow_state($object_id);
   if ($workflow_state!='created' && $workflow_state!='rejected') {
