@@ -42,7 +42,7 @@ function islandora_workflow_get_all_users_with_collection_permissions($collectio
   //from user perms
   foreach ($user_permissions as $user_id => $collection_permission) {
     foreach ($collection_permission as $collection_id => $permission) {
-      if($permission_level==null || $permission==$permission_level) {
+      if ($permission_level==NULL || $permission==$permission_level) {
         $user_name=user_load($user_id)->name;
           //init the collection if it needs to be
         if (!isset($users[$collection_id])) {
@@ -58,7 +58,7 @@ function islandora_workflow_get_all_users_with_collection_permissions($collectio
   //from role perms
   foreach ($role_permissions as $role_id => $collection_permission) {
     foreach ($collection_permission as $collection_id => $permission) {
-      if($permission_level==null || $permission==$permission_level) {
+      if ($permission_level==NULL || $permission==$permission_level) {
         //populate users per role
         if (!isset($users_via_role[$role_id])) {
           $users_via_role[$role_id]=array();
