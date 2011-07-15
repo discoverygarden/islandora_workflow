@@ -1,9 +1,9 @@
 <?php
 /**
  * @file
- * @author: William Panting
- * @date: 17/05/2011
- * This module is intended to implement a generic Islandora workflow around the creation and publication of objects.
+ *   This module is intended to implement a generic Islandora workflow around the creation and publication of objects.
+ * @author 
+ *   William Panting
  * 
  * Two different techniqes are being used for generating similar tables in tabs here.  
  * 1. The work tabs use the same function but pass a parameter to change the content of the form because the only 

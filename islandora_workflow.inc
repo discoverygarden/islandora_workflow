@@ -1,10 +1,9 @@
 <?php
 /**
  * @file
- * @author: William Panting
- * @date: 02/06/2011
- * This is a collection of helper functions and such for the islandora_workflow module.
- * All the workflow wrapper functions are there so that in the future we can add specific error/permission reports and logic
+ *   This is a collection of helper functions and such for the islandora_workflow module.
+ * @author
+ *   William Panting
  */
 
 /**
@@ -328,6 +327,10 @@ function islandora_workflow_get_related_objects($itql_query) {
 
 /**
  *This function turns an itql result into a usefull array
+ * @author
+ *   Paul Pound
+ * @author
+ *   William Panting
  * @param string $query_results
  *   The ugly string version
  * @return array $list_of_objects
@@ -1099,6 +1102,8 @@ function islandora_workflow_get_object_note_body($object_id) {
 
 /**
  * This function will return the registed email for all the specified users
+ * @author
+ *   William Panting
  * @param array $users_names
  *   an array containing all the users names to find emails for
  * @return array $users_emails
@@ -1118,6 +1123,8 @@ function get_users_email_by_name($users_names) {
 
 /**
  * This helper function will change an array of emails into something feedable to drupal_mail
+ * @author
+ *   William Panting
  * @param array $emails_arrray
  *   The array of email strings to concatenate
  * @param string $emails_string
