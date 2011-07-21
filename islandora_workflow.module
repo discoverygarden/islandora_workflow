@@ -10,7 +10,6 @@
  * difference is some missing elements in the workflow tab vs the overview tab.
  * 
  * 2. The permission tabs use seperate functions because the have enough differences (especialy in the submit funciton) to make this easier to follow.
- * @todo: look at combining these
  */
 
 /**
@@ -354,13 +353,13 @@ function islandora_workflow_forms($form_id, $args) {
 
 /**
  * The menu entries for this module.
- * @return $menuEntries
+ * @return $menu_entries
  *   An arrray of the items to be added to the drupal menu
  */
 function islandora_workflow_menu() {
-  $menuEntries= array();
+  $menu_entries= array();
   //settings associated with islandora_workflow
-  $menuEntries['admin/settings/islandora_workflow_opts']=array(
+  $menu_entries['admin/settings/islandora_workflow_opts']=array(
     'title' => 'Islandora workflow settings',
     'description' => 'Here you can change various settings for the islandora_workflow module.',
     'page callback' => 'drupal_get_form',
@@ -369,7 +368,7 @@ function islandora_workflow_menu() {
     'type' => MENU_NORMAL_ITEM
   );
     //settings associated with islandora_workflow and collection permissions
-  $menuEntries['admin/settings/islandora_workflow_perms']=array(
+  $menu_entries['admin/settings/islandora_workflow_perms']=array(
     'title' => 'Islandora workflow permissions',
     'description' => 'Here you can assign permissions to roles on a collection by collection level.',
     'page callback' => 'islandora_workflow_collection_permissions',
@@ -378,7 +377,7 @@ function islandora_workflow_menu() {
     'type' => MENU_NORMAL_ITEM
   );
   //main working page for islandora_workflow
-  $menuEntries['islandora_workflow']=array(
+  $menu_entries['islandora_workflow']=array(
     'title' => 'My Islandora work',
     'description' => 'This is the main access point to islandora_workflow',
     'page callback' => 'islandora_workflow_work',
@@ -387,7 +386,7 @@ function islandora_workflow_menu() {
     'type' => MENU_NORMAL_ITEM
    );
   //main working page for islandora_workflow
-  $menuEntries['islandora_workflow_edit_note']=array(
+  $menu_entries['islandora_workflow_edit_note']=array(
     'title' => 'Edit Note',
     'description' => 'You may edit the note on this object',
     'page callback' => 'drupal_get_form',
@@ -396,7 +395,7 @@ function islandora_workflow_menu() {
     'access arguments' => array(array('islandora_workflow_Administrator', 'islandora_workflow_Editor', 'islandora_workflow_Manager', 'islandora_workflow_Submitter')),
     'type' => MENU_CALLBACK
    );
- return $menuEntries;
+ return $menu_entries;
 }
 
 /**
