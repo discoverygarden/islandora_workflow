@@ -802,8 +802,9 @@ function islandora_workflow_get_object_workflow_state($object_id) {
 
   $state_elements=$relationships_parser->getElementsByTagNameNS('info:islandora/islandora-system:def/islandora_workflow#', 'state');
 
-  foreach ($state_elements->item(0)->childNodes as $state_node) {
-    $state=$state_node->nodeValue;
+  $state=$state_elements->item(0)->firstChild;
+  if ($state) {
+    $state=$state->nodeValue;
     return $state;
   }
   
@@ -828,8 +829,9 @@ function islandora_workflow_get_object_assignee($object_id) {
 
   $assignee_elements=$relationships_parser->getElementsByTagNameNS('info:islandora/islandora-system:def/islandora_workflow#', 'assignee');
 
-  foreach ($assignee_elements->item(0)->childNodes as $assignee_node) {
-    $assignee=$assignee_node->nodeValue;
+  $assignee=$assignee_elements->item(0)->firstChild;
+  if ($assignee) {
+    $assignee=$assignee->nodeValue;
     return $assignee;
   }
   
