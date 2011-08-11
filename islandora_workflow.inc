@@ -306,10 +306,43 @@ function islandora_workflow_get_all_collections() {
   $query_file_handle=fopen($query_file_name, "r");
   $query_string=fread($query_file_handle, filesize($query_file_name));
   fclose($query_file_handle);
+  //make query
   $collection_list=islandora_workflow_get_related_objects($query_string);
+  //strip out non-applicable collections via namespace
+  $collection_list=islandora_workflow_limit_collections_by_namespace($collection_list);
   return $collection_list;
 }
  
+/**
+ * This function will reduce the results on a collection search down to those 
+ * applicable to this install of Islandora.
+ * @param array $existing_collections
+ *   The list of collections before modification
+ * @param array $pid_namespaces
+ *   The list of namespaces that are applicable to this Islandora install
+ * @return array $collections
+ *   The collections that exist in the indicated namespaces
+ */
+function islandora_workflow_limit_collections_by_namespace($existing_collections, $pid_namespaces=null){
+  //if no namespace list supplied get it from fedora_repository module's varaiables
+  if ($pid_namespaces==null) {
+    $pid_namespaces = array();
+    foreach (explode(' ', trim(variable_get('fedora_pids_allowed', 'default: demo: changeme: Islandora: ilives: ')))as $namespace) {
+      $pid_namespaces[$namespace] = $namespace;
+    }
+  }
+  
+  $collections = array();
+  foreach($existing_collections as $collection => $value){
+    foreach($pid_namespaces as $key => $namespace){
+      if(strpos($collection,$namespace)===0){
+        $collections[$collection]=$value;
+      }
+    }
+  }
+  return $collections;
+}
+
  /**
  *This function executes a query on Fedora's resource index
  * @param string $itql_query
