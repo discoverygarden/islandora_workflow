@@ -827,7 +827,14 @@ function islandora_workflow_get_object_workflow_state($object_id) {
   //init
   module_load_include('raw.inc', 'islandora_fedora_api'); //for getting an object
   $apim_object= new FedoraAPIM();
-  $relationships=$apim_object->getRelationships($object_id, 'info:islandora/islandora-system:def/islandora_workflow#state');
+  
+  try {
+    $relationships=$apim_object->getRelationships($object_id, 'info:islandora/islandora-system:def/islandora_workflow#state');
+  }
+  catch (FedoraAPIRestException $e) {
+    return FALSE;
+  }
+  
   $relationships_parser = new DOMDocument();
   $relationships_parser->loadXML($relationships->data);
 
@@ -854,7 +861,14 @@ function islandora_workflow_get_object_assignee($object_id) {
   //init
   module_load_include('raw.inc', 'islandora_fedora_api'); //for getting an object
   $apim_object= new FedoraAPIM();
-  $relationships=$apim_object->getRelationships($object_id, 'info:islandora/islandora-system:def/islandora_workflow#assignee');
+  
+  try {
+    $relationships=$apim_object->getRelationships($object_id, 'info:islandora/islandora-system:def/islandora_workflow#assignee');
+  }
+  catch (FedoraAPIRestException $e) {
+    return FALSE;
+  }
+  
   $relationships_parser = new DOMDocument();
   $relationships_parser->loadXML($relationships->data);
 
@@ -918,8 +932,14 @@ function islandora_workflow_get_object_parent($object_id) {
   $parent_relationship_namespace='info:fedora/fedora-system:def/relations-external#';
   module_load_include('raw.inc', 'islandora_fedora_api'); //for getting an object
   $apim_object= new FedoraAPIM();
-
-  $relationships=$apim_object->getRelationships($object_id, $parent_relationship_namespace . $parent_relationship);
+  
+  try {
+    $relationships=$apim_object->getRelationships($object_id, $parent_relationship_namespace . $parent_relationship);
+  }
+  catch (FedoraAPIRestException $e) {
+    return FALSE;
+  }
+  
   $relationships_parser = new DOMDocument();
   $relationships_parser->loadXML($relationships->data);
   $relationship_elements=$relationships_parser->getElementsByTagNameNS($parent_relationship_namespace, $parent_relationship);
