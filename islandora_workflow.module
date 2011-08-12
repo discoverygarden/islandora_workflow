@@ -603,6 +603,7 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
   $collection_members=islandora_workflow_get_all_members_of_collection($collection_id);
     foreach ($collection_members as $member) {
       if (isset($vars['list'][$collection_id][$member])) { //The isset is here so that only populated items are rendered into HTML for display
+      if ($vars['list'][$collection_id][$member]['Selecter']) { //make sure data is present too
         $vars['list'][$collection_id][$member]['state']=islandora_workflow_get_object_workflow_state($member);//current workflow state
         //render each object element
         $vars['list'][$collection_id][$member]['Selecter']=drupal_render($vars['list'][$collection_id][$member]['Selecter']);
