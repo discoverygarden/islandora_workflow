@@ -294,6 +294,8 @@ function islandora_workflow_get_current_users_user_permissions() {
 
  /**
  * This function is used to get a list containing all of the islandora collections in a Fedora repo
+ * @author
+ *   William Panting
  * @return $collection_list
  *   an associated array of collection pids and names
  */
@@ -312,10 +314,39 @@ function islandora_workflow_get_all_collections() {
   $collection_list=islandora_workflow_limit_collections_by_namespace($collection_list);
   return $collection_list;
 }
+
+/**
+ * This function gets all the members of a collection through the relationship of 'isMemberOf' 
+ * and 'isMemberOfCollection' the two relationships need to be checked because there is no
+ * Fedora enforced standard.
+ * @author
+ *   William Panting
+ * @param array $collection_id
+ *   The collection to get the members of.
+ * @return array $member_list_full
+ *   The array containing all the pids of members of the collection.
+ */
+function islandora_workflow_get_all_members_of_collection($collection_id) {
+  
+  module_load_include('inc', 'fedora_repository', 'api/fedora_collection'); 
+  
+  $member_list_full=array();
+  
+  $member_list1=get_related_items_as_array($collection_id, 'isMemberOf', 10000 , 0, FALSE);
+  $member_list2=get_related_items_as_array($collection_id, 'isMemberOfCollection', 10000 , 0, FALSE);
+  
+  $member_list_full=array_merge($member_list1, $member_list2);
+  
+  return $member_list_full;
+}
  
 /**
  * This function will reduce the results on a collection search down to those 
  * applicable to this install of Islandora.
+ * @author
+ *   Paul Pound
+ * @author
+ *   William Panting
  * @param array $existing_collections
  *   The list of collections before modification
  * @param array $pid_namespaces

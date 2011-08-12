@@ -188,7 +188,8 @@ function islandora_workflow_work_form(&$form_state, $tab) {
   if ($users_manager_collections) {
     foreach ($users_manager_collections as $collection_id => $collection_name) {
       //get all objects in collection
-      $collection_members=get_related_items_as_array($collection_id, 'isMemberOf', 10000 , 0, FALSE);
+      //$collection_members=get_related_items_as_array($collection_id, 'isMemberOf', 10000 , 0, FALSE);
+      $collection_members=islandora_workflow_get_all_members_of_collection($collection_id);
       //filter collection items if in workflow tab
       if ($tab=='workflow') {
         foreach ($collection_members as $member_key => $member) {
@@ -231,8 +232,8 @@ function islandora_workflow_work_form(&$form_state, $tab) {
     foreach ($users_editor_collections as $collection_id => $collection_name) {
       if (!isset($users_manager_collections[$collection_id])) {//exclude higher level permissions in the same collection
         //get all objects in collection
-        $collection_members=get_related_items_as_array($collection_id, 'isMemberOf', 10000 , 0, FALSE);
-        
+        //$collection_members=get_related_items_as_array($collection_id, 'isMemberOf', 10000 , 0, FALSE);
+        $collection_members=islandora_workflow_get_all_members_of_collection($collection_id);
         //filter collection items if in workflow tab
         if ($tab=='workflow') {
           foreach ($collection_members as $member_key => $member) {
@@ -278,8 +279,8 @@ function islandora_workflow_work_form(&$form_state, $tab) {
     foreach ($users_submitter_collections as $collection_id => $collection_name) {
       if ((!isset($users_manager_collections[$collection_id])) && (!isset($users_editor_collections[$collection_id]))) {//exclude higher level permissions in the same collection
         // get all objects in those collections that they are submitters (only) in collection
-        $collection_members=get_related_items_as_array($collection_id, 'isMemberOf', 10000 , 0, FALSE);
-
+        //$collection_members=get_related_items_as_array($collection_id, 'isMemberOf', 10000 , 0, FALSE);
+        $collection_members=islandora_workflow_get_all_members_of_collection($collection_id);
         //filter collection items if in workflow tab
         if ($tab=='workflow') {
           foreach ($collection_members as $member_key => $member) {
@@ -598,9 +599,12 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
   $vars['pager_index']=$vars['list']['tab']['#value'];//drupal made me do it
   
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
+  module_load_include('inc', 'fedora_repository', 'api/fedora_collection'); //for getting members of collections etc.
+  
   $vars['collections']=islandora_workflow_get_current_users_collections('all');
   foreach ($vars['collections'] as $collection_id => $collection_name) {
-  $collection_members=get_related_items_as_array($collection_id, 'isMemberOf', 10000 , 0, FALSE);
+  //$collection_members=get_related_items_as_array($collection_id, 'isMemberOf', 10000 , 0, FALSE);
+  $collection_members=islandora_workflow_get_all_members_of_collection($collection_id);
     foreach ($collection_members as $member) {
       if (isset($vars['list'][$collection_id][$member])) { //The isset is here so that only populated items are rendered into HTML for display
         $vars['list'][$collection_id][$member]['state']=islandora_workflow_get_object_workflow_state($member);//current workflow state
