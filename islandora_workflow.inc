@@ -1131,17 +1131,22 @@ function islandora_workflow_set_object_note($object_id, $subject, $body) {
 function islandora_workflow_get_object_note_subject($object_id) {
   //init
   module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
-  $object= new FedoraObject($object_id);
-  $workflow_parser = new DOMDocument();
-  global $user;
-  $object_datastreams=$object->get_datastreams();
-  if (!isset($object_datastreams['islandora_workflow'])) {
+  try {
+    $object= new FedoraObject($object_id);
+    $workflow_parser = new DOMDocument();
+    global $user;
+    $object_datastreams=$object->get_datastreams();
+    if (!isset($object_datastreams['islandora_workflow'])) {
+      return FALSE;
+    }
+    //get the DS xml in dom object
+    $workflow_datastream=$object_datastreams['islandora_workflow'];
+    $workflow_string=$workflow_datastream->__get('content');
+    $workflow_parser->loadXML($workflow_string);
+  }
+  catch (FedoraAPIRestException $e) {
     return FALSE;
   }
-  //get the DS xml in dom object
-  $workflow_datastream=$object_datastreams['islandora_workflow'];
-  $workflow_string=$workflow_datastream->__get('content');
-  $workflow_parser->loadXML($workflow_string);
   $subject='';
   
   $subject_node_list=$workflow_parser->getElementsByTagName('subject');
@@ -1162,16 +1167,23 @@ function islandora_workflow_get_object_note_subject($object_id) {
 function islandora_workflow_get_object_note_body($object_id) {
   //init
   module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
-  $object= new FedoraObject($object_id);
-  $workflow_parser = new DOMDocument();
-  global $user;
-  $object_datastreams=$object->get_datastreams();
-  if (!isset($object_datastreams['islandora_workflow'])) {
+  
+  try {
+    $object= new FedoraObject($object_id);
+    $workflow_parser = new DOMDocument();
+    global $user;
+    $object_datastreams=$object->get_datastreams();
+    if (!isset($object_datastreams['islandora_workflow'])) {
+      return FALSE;
+    }
+    //get the DS xml in dom object
+    $workflow_datastream=$object_datastreams['islandora_workflow'];
+    $workflow_string=$workflow_datastream->__get('content');
+  }
+  catch (FedoraAPIRestException $e) {
     return FALSE;
   }
-  //get the DS xml in dom object
-  $workflow_datastream=$object_datastreams['islandora_workflow'];
-  $workflow_string=$workflow_datastream->__get('content');
+  
   $workflow_parser->loadXML($workflow_string);
   
   $body='';
