@@ -354,9 +354,9 @@ function islandora_workflow_get_all_members_of_collection($collection_id) {
  * @return array $collections
  *   The collections that exist in the indicated namespaces
  */
-function islandora_workflow_limit_collections_by_namespace($existing_collections, $pid_namespaces=null){
+function islandora_workflow_limit_collections_by_namespace($existing_collections, $pid_namespaces=NULL) {
   //if no namespace list supplied get it from fedora_repository module's varaiables
-  if ($pid_namespaces==null) {
+  if ($pid_namespaces==NULL) {
     $pid_namespaces = array();
     foreach (explode(' ', trim(variable_get('fedora_pids_allowed', 'default: demo: changeme: Islandora: ilives: ')))as $namespace) {
       $pid_namespaces[$namespace] = $namespace;
@@ -364,9 +364,9 @@ function islandora_workflow_limit_collections_by_namespace($existing_collections
   }
   
   $collections = array();
-  foreach($existing_collections as $collection => $value){
-    foreach($pid_namespaces as $key => $namespace){
-      if(strpos($collection,$namespace)===0){
+  foreach ($existing_collections as $collection => $value) {
+    foreach ($pid_namespaces as $key => $namespace) {
+      if (strpos($collection, $namespace)===0) {
         $collections[$collection]=$value;
       }
     }
