@@ -599,6 +599,7 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_collection'); //for getting members of collections etc.
   
   $vars['collections']=islandora_workflow_get_current_users_collections('all');
+  dsm($vars['collections']);//debug, what if there is more than one instance of each collection returned
   foreach ($vars['collections'] as $collection_id => $collection_name) {
   $collection_members=islandora_workflow_get_all_members_of_collection($collection_id);
     foreach ($collection_members as $member) {
@@ -607,6 +608,7 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
         dd($member, $collection_id);//debug
         dd($vars['list'][$collection_id][$member], 'Selecter good');//debug
         $vars['list'][$collection_id][$member]['state']=islandora_workflow_get_object_workflow_state($member);//current workflow state
+
         //render each object element
         $vars['list'][$collection_id][$member]['Selecter']=drupal_render($vars['list'][$collection_id][$member]['Selecter']);
         $vars['list'][$collection_id][$member]['Assign']=drupal_render($vars['list'][$collection_id][$member]['Assign']);
