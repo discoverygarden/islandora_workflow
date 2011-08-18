@@ -34,17 +34,9 @@
     foreach($collection_members as $member) {
       if (isset($list[$collection_id][$member])) { //The isset is here so that only populated items are displayed on the workflow tab
         print('<TR>');
-        if(!$list[$collection_id][$member]['state']) {//not in workflow
-          print('<TD>'. '$list[$collection_id][$member][\'Selecter\']' .'</TD><TD>'.'$list[$collection_id][$member][\'object\']'.
-          '</TD><TD>'.'$collection_name'.'</TD><TD>' . '$list[$collection_id][$member][\'state\']' .
-           '</TD><TD>' . '$list[$collection_id][$member][\'note_subject\']'. '</TD><TD>'.'$list[$collection_id][$member][\'Assign\']'.'</TD>');//<TD>');
-        
-        }
-        else {//normal
-          print('<TD>'. $list[$collection_id][$member]['Selecter'] .'</TD><TD>'.$list[$collection_id][$member]['object'].
+        print('<TD>'. $list[$collection_id][$member]['Selecter'] .'</TD><TD>'.$list[$collection_id][$member]['object'].
           '</TD><TD>'.$collection_name.'</TD><TD>' . $list[$collection_id][$member]['state'] .
-           '</TD><TD>' . $list[$collection_id][$member]['note_subject'] . '</TD><TD>'.$list[$collection_id][$member]['Assign'].'</TD>');//<TD>');
-        }
+           '</TD><TD>' . $list[$collection_id][$member]['note_subject'] . '</TD><TD>'.$list[$collection_id][$member]['Assign'].'</TD>');
         print('</TR>');
       }
     }

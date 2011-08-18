@@ -604,24 +604,46 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
   $collection_members=islandora_workflow_get_all_members_of_collection($collection_id);
     foreach ($collection_members as $member) {
       if (isset($vars['list'][$collection_id][$member])) { //The isset is here so that only populated items are rendered into HTML for display
-      if ($vars['list'][$collection_id][$member]['Selecter']!=0) { //make sure data is present too
-        dd($member, $collection_id);//debug
-        dd($vars['list'][$collection_id][$member], 'Selecter good');//debug
-        $vars['list'][$collection_id][$member]['state']=islandora_workflow_get_object_workflow_state($member);//current workflow state
-
-        //render each object element
-        $vars['list'][$collection_id][$member]['Selecter']=drupal_render($vars['list'][$collection_id][$member]['Selecter']);
-        $vars['list'][$collection_id][$member]['Assign']=drupal_render($vars['list'][$collection_id][$member]['Assign']);
-        $vars['list'][$collection_id][$member]['note_subject']=
-          l(islandora_workflow_get_object_note_subject($member), 
-            'islandora_workflow_edit_note',  array('query' => 'object=' . $member));
-        $vars['list'][$collection_id][$member]['object']=
-          l($member, 
-            'fedora/repository/'. $member);
+        
+        $member_workflow_state=islandora_workflow_get_object_workflow_state($member);
+        
+        if ($member_workflow_state) { //make sure workflow data is present too
+          dd($member, $collection_id);//debug
+          dd($vars['list'][$collection_id][$member], 'In workflow');//debug
+          $vars['list'][$collection_id][$member]['state']=$member_workflow_state;//current workflow state
+          //render each object element
+          $vars['list'][$collection_id][$member]['Selecter']=drupal_render($vars['list'][$collection_id][$member]['Selecter']);
+          $vars['list'][$collection_id][$member]['Assign']=drupal_render($vars['list'][$collection_id][$member]['Assign']);
+          //if there is a note
+          $member_note_subject=islandora_workflow_get_object_note_subject($member);
+          if ($member_note_subject) {
+            $vars['list'][$collection_id][$member]['note_subject']=
+              l(islandora_workflow_get_object_note_subject($member), 
+                'islandora_workflow_edit_note',  array('query' => 'object=' . $member));
+          }
+          else {//if there is no note
+            $vars['list'][$collection_id][$member]['note_subject']=
+              l('Create Note', 
+                'islandora_workflow_edit_note',  array('query' => 'object=' . $member));
+          }
+          
+          $vars['list'][$collection_id][$member]['object']=
+            l($member, 
+              'fedora/repository/'. $member);
         }
         else {
           dd($member, $collection_id);//debug
-          dd($vars['list'][$collection_id][$member], 'Selector bad');//debug
+          dd($vars['list'][$collection_id][$member], 'NOT in workflow');//debug
+          
+          
+        $vars['list'][$collection_id][$member]['state']=$member_workflow_state;//current workflow state
+        //render each object element
+        $vars['list'][$collection_id][$member]['Selecter']='N/A';
+        $vars['list'][$collection_id][$member]['Assign']='N/A';
+        $vars['list'][$collection_id][$member]['note_subject']='N/A';
+        $vars['list'][$collection_id][$member]['object']=
+          l($member, 
+            'fedora/repository/'. $member);
         }
       }
     }
