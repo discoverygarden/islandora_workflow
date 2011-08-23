@@ -334,7 +334,7 @@ function islandora_workflow_get_all_members_of_collection($collection_id) {
   
   $member_list1=get_related_items_as_array($collection_id, 'isMemberOf', 10000 , 0, FALSE);
   $member_list2=get_related_items_as_array($collection_id, 'isMemberOfCollection', 10000 , 0, FALSE);
-  
+
   $member_list_full=array_merge($member_list1, $member_list2);
   
   return $member_list_full;
@@ -493,19 +493,16 @@ function islandora_workflow_get_users_with_module_permissions() {
  */
 function islandora_workflow_init_workflow($object_id) {
   //init
-  module_load_include('inc', 'fedora_repository', 'api/fedora_item'); //for getting an object
-  $object= new Fedora_Item($object_id);
+  module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
+  $object= new FedoraObject($object_id);
   $default_xml_file_name=drupal_get_path('module', 'islandora_workflow') . '/start_workflow.xml';
   $workflow_parser = new DOMDocument();
   $workflow_parser->load($default_xml_file_name);
-  global $user;
-  //get elements to populate dynamicaly
-  $last_modified_by_array=$workflow_parser->getElementsByTagName('last_modified_by');
-  $when_last_modified_array=$workflow_parser->getElementsByTagName('when_last_modified');
+  
+  $result=$object->addDatastream('islandora_workflow', NULL,  $workflow_parser->saveXML(), array('dsLabel' => 'workflow', 'mimeType' => 'text/xml', 'controlGroup' => 'X', 'logMessage' => 'Adding islandora_workflow datastream(editorial workflow tracking).'));
   
   islandora_workflow_set_object_workflow_state($object_id, 'created');
   
-  $result=$object->addDatastream('islandora_workflow', NULL,  $workflow_parser->saveXML(), array('dsLabel' => 'workflow', 'mimeType' => 'text/xml', 'controlGroup' => 'X', 'logMessage' => 'Adding islandora_workflow datastream(workflow tracking).'));
   return $result;
 }
 
@@ -761,6 +758,22 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
     $object->__set('state', 'I');
   }
   return (islandora_workflow_set_object_relationship($object_id, 'state', $state));
+}
+
+/**
+ *This function will get the label for the pid from fedora
+ *@param string $object_id
+ *  The object to get the label of
+ *@return string $label
+ *  The label of the object specified.
+ */
+function islandora_workflow_get_object_label($object_id) {
+    
+  module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
+  $object= new FedoraObject($object_id);
+  $label=$object->__get('label');
+  
+  return $label;
 }
 
 /**

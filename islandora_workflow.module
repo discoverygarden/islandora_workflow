@@ -554,7 +554,7 @@ function islandora_workflow_theme() {
   */
 function islandora_workflow_preprocess_permissions_user_table(&$vars) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
-  //$vars['collections']=islandora_workflow_get_current_users_collections();
+  
   $vars['users']=islandora_workflow_get_users_with_module_permissions();
   $vars['list']['collection_selector']=drupal_render($vars['list']['collection_selector']);
   $vars['list']['collection_submit']=drupal_render($vars['list']['collection_submit']);
@@ -608,8 +608,7 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
         $member_workflow_state=islandora_workflow_get_object_workflow_state($member);
         
         if ($member_workflow_state) { //make sure workflow data is present too
-          //dd($member, $collection_id);//debug
-          //dd($vars['list'][$collection_id][$member], 'In workflow');//debug
+          
           $vars['list'][$collection_id][$member]['state']=$member_workflow_state;//current workflow state
   
           //render each object element
@@ -630,20 +629,20 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
           }
           
           $vars['list'][$collection_id][$member]['object']=
-            l($member, 
+            l(islandora_workflow_get_object_label($member),//use the label 
               'fedora/repository/'. $member);
         }
         else {
-         // dd($member, $collection_id);//debug
-          //dd($vars['list'][$collection_id][$member], 'NOT in workflow');//debug
-         
+                   
           $vars['list'][$collection_id][$member]['state']='NOT IN WORKFLOW';//current workflow state
           //render each object element
-          $vars['list'][$collection_id][$member]['Selecter']='';
+          //$vars['list'][$collection_id][$member]['Selecter']='';
+          $vars['list'][$collection_id][$member]['Selecter']=drupal_render($vars['list'][$collection_id][$member]['Selecter']);//remove
+          
           $vars['list'][$collection_id][$member]['Assign']='N/A';
           $vars['list'][$collection_id][$member]['note_subject']='N/A';
           $vars['list'][$collection_id][$member]['object']=
-            l($member, 
+            l(islandora_workflow_get_object_label($member),//use the label 
               'fedora/repository/'. $member);
         }
       }
@@ -1128,7 +1127,8 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
   }
   elseif ($clicked_button=='Publish') {
     foreach ($selected_object_ids as $object_id) {
-      islandora_workflow_publish_object($object_id);
+      //islandora_workflow_publish_object($object_id);
+      islandora_workflow_init_workflow($object_id);//remove
     }
   }
   elseif ($clicked_button=='Claim') {
