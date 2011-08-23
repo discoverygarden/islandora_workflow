@@ -8,6 +8,8 @@
  * @todo
  *   Revert the changes that allow objects to be added to workflow by misapropriating the 'publish' button
  * @todo
+ *   Figure out why some objects are showing up more than once in the colorardo alliance test server's instance
+ * @todo
  *   Make the permissions page display collection labels if there is one rather than pid
  * @todo
  *   Fix bug with pager/tabs not working on first page change: the tab is not being remembered.
@@ -654,12 +656,25 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
                    
           $vars['list'][$collection_id][$member]['state']='NOT IN WORKFLOW';//current workflow state
           //render each object element
+          //this will be the final selecter
           //$vars['list'][$collection_id][$member]['Selecter']='';
+          /*//this didn't work but didn't create a white screen on colorado
           $tmp=array(
             '#type' => 'checkbox',
             '#title' => t(''),
             );
           $vars['list'][$collection_id][$member]['Selecter']=drupal_render($tmp);//remove
+          */
+          //this selecter works on local
+          if($vars['list'][$collection_id][$member]['Selecter']) {
+            dsm('Selecter');
+            dsm($vars['list'][$collection_id][$member]['Selecter']);
+          }
+          else {
+            dsm('Member');
+            dsm($vars['list'][$collection_id][$member]);
+          }
+          //$vars['list'][$collection_id][$member]['Selecter']=drupal_render($vars['list'][$collection_id][$member]['Selecter']);
           
           $vars['list'][$collection_id][$member]['Assign']='N/A';
           $vars['list'][$collection_id][$member]['note_subject']='N/A';
