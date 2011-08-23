@@ -610,9 +610,10 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_collection'); //for getting members of collections etc.
   
   $vars['collections']=islandora_workflow_get_current_users_collections('all');
+  dsm($vars['collections']);
   foreach ($vars['collections'] as $collection_id => $collection_name) {
     $collection_members=islandora_workflow_get_all_members_of_collection($collection_id);
-      
+    dsm($collection_members);
     foreach ($collection_members as $member) {
       if (isset($vars['list'][$collection_id][$member])) { //The isset is here so that only populated items are rendered into HTML for display
         
@@ -665,16 +666,17 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
             );
           $vars['list'][$collection_id][$member]['Selecter']=drupal_render($tmp);//remove
           */
-          //this selecter works on local
-          if($vars['list'][$collection_id][$member]['Selecter']) {
+          /*if($vars['list'][$collection_id][$member]['Selecter']) {
             dsm('Selecter');
             dsm($vars['list'][$collection_id][$member]['Selecter']);
           }
           else {
             dsm('Member');
             dsm($vars['list'][$collection_id][$member]);
-          }
-          //$vars['list'][$collection_id][$member]['Selecter']=drupal_render($vars['list'][$collection_id][$member]['Selecter']);
+          }*/
+          //this selecter works on local
+          $vars['list'][$collection_id][$member]['Selecter']=drupal_render($vars['list'][$collection_id][$member]['Selecter']);
+          
           
           $vars['list'][$collection_id][$member]['Assign']='N/A';
           $vars['list'][$collection_id][$member]['note_subject']='N/A';

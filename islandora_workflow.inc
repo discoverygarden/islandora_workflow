@@ -492,7 +492,6 @@ function islandora_workflow_get_users_with_module_permissions() {
  *   the return mesage from fedora
  */
 function islandora_workflow_init_workflow($object_id) {
-  dsm('init');
   //init
   module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
   $object= new FedoraObject($object_id);
