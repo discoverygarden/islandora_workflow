@@ -4,6 +4,17 @@
  *   This module is intended to implement a generic Islandora workflow around the creation and publication of objects.
  * @author 
  *   William Panting
+ *   
+ * @todo
+ *   on workflow page make the 'title' display a pid if there is no label
+ * @todo
+ *   Revert the changes that allow objects to be added to workflow by misapropriating the 'publish' button
+ * @todo
+ *   Make the permissions page display collection labels if there is one rather than pid
+ * @todo
+ *   Fix bug with pager/tabs not working on first page change: the tab is not being remembered.
+ * @todo
+ *   Handle an unassigned object better in the ui.
  * 
  * Two different techniqes are being used for generating similar tables in tabs here.  
  * 1. The work tabs use the same function but pass a parameter to change the content of the form because the only 
