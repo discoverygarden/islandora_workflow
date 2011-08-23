@@ -637,11 +637,11 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
           $vars['list'][$collection_id][$member]['state']='NOT IN WORKFLOW';//current workflow state
           //render each object element
           //$vars['list'][$collection_id][$member]['Selecter']='';
-          $vars['list'][$collection_id][$member]['Selecter']=drupal_render(array(
+          $tmp=array(
             '#type' => 'checkbox',
             '#title' => t(''),
-            )
-          );//remove
+            );
+          $vars['list'][$collection_id][$member]['Selecter']=drupal_render($tmp);//remove
           
           $vars['list'][$collection_id][$member]['Assign']='N/A';
           $vars['list'][$collection_id][$member]['note_subject']='N/A';
