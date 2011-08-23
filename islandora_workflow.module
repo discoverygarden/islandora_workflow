@@ -602,7 +602,7 @@ function islandora_workflow_preprocess_permissions_role_table(&$vars) {
   *   the list of variables (including the form) to send to the template
   * @return array $vars
   *   the modified list of variables to send to the template
- */
+  */
 function islandora_workflow_preprocess_workflow_table(&$vars) {
   $vars['pager_index']=$vars['list']['tab']['#value'];//drupal made me do it
   
@@ -639,9 +639,18 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
                 'islandora_workflow_edit_note',  array('query' => 'object=' . $member));
           }
           
-          $vars['list'][$collection_id][$member]['object']=
-            l(islandora_workflow_get_object_label($member),//use the label 
-              'fedora/repository/'. $member);
+          $member_label=islandora_workflow_get_object_label($member);
+          if($member_label) {//if there is a label
+            $vars['list'][$collection_id][$member]['object']=
+              l($member_label,//use the label 
+                'fedora/repository/'. $member);
+          }
+          else {//no label
+            $vars['list'][$collection_id][$member]['object']=
+              l($member,//use the pid
+                'fedora/repository/'. $member);
+          }
+          
         }
         else {
                    
@@ -656,9 +665,18 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
           
           $vars['list'][$collection_id][$member]['Assign']='N/A';
           $vars['list'][$collection_id][$member]['note_subject']='N/A';
-          $vars['list'][$collection_id][$member]['object']=
-            l(islandora_workflow_get_object_label($member),//use the label 
-              'fedora/repository/'. $member);
+          
+          $member_label=islandora_workflow_get_object_label($member);
+          if($member_label) {//if there is a label
+            $vars['list'][$collection_id][$member]['object']=
+              l($member_label,//use the label 
+                'fedora/repository/'. $member);
+          }
+          else {//no label
+            $vars['list'][$collection_id][$member]['object']=
+              l($member,//use the pid
+                'fedora/repository/'. $member);
+          }
         }
       }
     }
@@ -1084,12 +1102,12 @@ function islandora_workflow_user_permissions_form_submit($collection_user_permis
 }
 
 /**
- * This function handles all of the possible submits from the workflow work form (overview and workflow)
+  * This function handles all of the possible submits from the workflow work form (overview and workflow)
   * @param $work_form
   *   Holds all the data on the state  of the form submitted
   * @param $work_form_state
   *   An easier to use version of $work_form_form
- */
+  */
 function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
   //init
   $clicked_button = $work_form_state['clicked_button']['#value'];
