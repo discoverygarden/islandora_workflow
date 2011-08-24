@@ -767,13 +767,18 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
  *  The object to get the label of
  *@return string $label
  *  The label of the object specified.
+ *@return bool 
+ *  False if there is an exception in geting the label
  */
 function islandora_workflow_get_object_label($object_id) {
-    
-  module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
-  $object= new FedoraObject($object_id);
-  $label=$object->__get('label');
-  
+  try {  
+    module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
+    $object= new FedoraObject($object_id);
+    $label=$object->__get('label');
+  }
+  catch (FedoraAPIRestException $e) {
+    return FALSE;
+  }
   return $label;
 }
 
