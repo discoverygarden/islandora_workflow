@@ -335,7 +335,8 @@ function islandora_workflow_get_all_members_of_collection($collection_id) {
   $member_list1=get_related_items_as_array($collection_id, 'isMemberOf', 10000 , 0, FALSE);
   $member_list2=get_related_items_as_array($collection_id, 'isMemberOfCollection', 10000 , 0, FALSE);
 
-  $member_list_full=array_merge($member_list1, $member_list2);
+  //merge the arrays and remove duplicates that may appear because of a "BAD" islandora core issue
+  $member_list_full=array_unique(array_merge($member_list1, $member_list2));
   
   return $member_list_full;
 }
