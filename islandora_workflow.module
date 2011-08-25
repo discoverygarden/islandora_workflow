@@ -651,31 +651,14 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
           }
           
         }
-        else {
+        else {//if the object is not in workflow
                    
           $vars['list'][$collection_id][$member]['state']='NOT IN WORKFLOW';//current workflow state
-          //render each object element
-          //this will be the final selecter
-          //$vars['list'][$collection_id][$member]['Selecter']='';
-          /*//this didn't work but didn't create a white screen on colorado
-          $tmp=array(
-            '#type' => 'checkbox',
-            '#title' => t(''),
-            );
-          $vars['list'][$collection_id][$member]['Selecter']=drupal_render($tmp);//remove
-          */
-          /*if($vars['list'][$collection_id][$member]['Selecter']) {
-            dsm('Selecter');
-            dsm($vars['list'][$collection_id][$member]['Selecter']);
-          }
-          else {
-            dsm('Member');
-            dsm($vars['list'][$collection_id][$member]);
-          }*/
-          //this selecter works on local
-          $vars['list'][$collection_id][$member]['Selecter']=drupal_render($vars['list'][$collection_id][$member]['Selecter']);
+          $vars['list'][$collection_id][$member]['Selecter']='';
           
-          
+          //this is a test selector for adding things to workflow
+          //$vars['list'][$collection_id][$member]['Selecter']=drupal_render($vars['list'][$collection_id][$member]['Selecter']);
+
           $vars['list'][$collection_id][$member]['Assign']='N/A';
           $vars['list'][$collection_id][$member]['note_subject']='N/A';
           
@@ -1173,8 +1156,9 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
   }
   elseif ($clicked_button=='Publish') {
     foreach ($selected_object_ids as $object_id) {
-      //islandora_workflow_publish_object($object_id);
-      islandora_workflow_init_workflow($object_id);//remove
+      islandora_workflow_publish_object($object_id);
+      //this is a hack to get things into the workflow for testing
+      //islandora_workflow_init_workflow($object_id);//remove 
     }
   }
   elseif ($clicked_button=='Claim') {

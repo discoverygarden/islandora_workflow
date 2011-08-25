@@ -1,8 +1,8 @@
 <TABLE>
   <THEAD>
     <TR>
-    		<TH>
-    		</TH>
+      <TH>
+      </TH>
       <TH>
       Title
       </TH>
@@ -18,11 +18,8 @@
       <TH>
       Assignee
       </TH>
-      <!-- <TH>
-      Actions
-      </TH>-->
-    </TR>
-	</THEAD>
+  	</TR>
+  </THEAD>
 	
 	<TFOOT>
 	</TFOOT>
