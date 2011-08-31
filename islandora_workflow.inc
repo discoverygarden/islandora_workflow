@@ -812,8 +812,13 @@ function islandora_workflow_delete_object($object_id) {
 function islandora_workflow_get_object_creator($object_id) {
   //init
   module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
-  $object= new FedoraObject($object_id);
-  $creator=$object->__get('ownerId');
+  try {
+    $object= new FedoraObject($object_id);
+    $creator=$object->__get('ownerId');
+  }
+  catch (FedoraAPIRestException $e) {
+    return FALSE;
+  }
   return $creator;
 }
 
@@ -828,8 +833,14 @@ function islandora_workflow_get_object_creator($object_id) {
 function islandora_workflow_get_object_fedora_state($object_id) {
   //init
   module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
-  $object= new FedoraObject($object_id);
-  $state=$object->__get('state');
+  
+  try {
+    $object= new FedoraObject($object_id);
+    $state=$object->__get('state');
+  }
+  catch (FedoraAPIRestException $e) {
+    return FALSE;
+  }
   return $state;
 }
 
