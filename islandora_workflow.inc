@@ -962,21 +962,37 @@ function islandora_workflow_get_object_parent($object_id) {
   $parent_relationship_namespace='info:fedora/fedora-system:def/relations-external#';
   module_load_include('raw.inc', 'islandora_fedora_api'); //for getting an object
   $apim_object= new FedoraAPIM();
+  $relationships_parser = new DOMDocument();
+  $parent=FALSE;
   
+  //get relation ship data
   try {
     $relationships=$apim_object->getRelationships($object_id, $parent_relationship_namespace . $parent_relationship);
+    //grab realtionship
+    $relationships_parser->loadXML($relationships->data);
+    $relationship_elements=$relationships_parser->getElementsByTagNameNS($parent_relationship_namespace, $parent_relationship);
+    $relationship=$relationship_elements->item(0);
   }
   catch (FedoraAPIRestException $e) {
     return FALSE;
   }
   
-  $relationships_parser = new DOMDocument();
-  $relationships_parser->loadXML($relationships->data);
-  $relationship_elements=$relationships_parser->getElementsByTagNameNS($parent_relationship_namespace, $parent_relationship);
-
-  $parent=FALSE;
-  $relationship=$relationship_elements->item(0);
+  //handle second collecion memberships string if the first wasn't found
+  if (empty($relationship)) {
+    $parent_relationship='isMemberOfCollection';
+    try {
+      $relationships=$apim_object->getRelationships($object_id, $parent_relationship_namespace . $parent_relationship);
+      //grab realtionship 
+      $relationships_parser->loadXML($relationships->data);
+      $relationship_elements=$relationships_parser->getElementsByTagNameNS($parent_relationship_namespace, $parent_relationship);
+      $relationship=$relationship_elements->item(0);
+    }
+    catch (FedoraAPIRestException $e) {
+      return FALSE;
+    }
+  }
   
+  //handle relationship data
   if (!empty($relationship)) {
     $parent=$relationship->getAttributeNS('http://www.w3.org/1999/02/22-rdf-syntax-ns#', 'resource');
     //cut out 'info:fedora/'
