@@ -428,7 +428,7 @@ function islandora_workflow_edit_note_form() {
       '#collapsible' => FALSE,
       '#collapsed' => FALSE,
       '#tree' => TRUE,
-      '#description' => t('Change the note attached to this this object.'),
+      '#description' => t('Change the note attached to this object.'),
     );
     
     //submit button
