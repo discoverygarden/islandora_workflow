@@ -500,9 +500,9 @@ function islandora_workflow_init_workflow($object_id) {
   $workflow_parser = new DOMDocument();
   $workflow_parser->load($default_xml_file_name);
   
-  $result=$object->addDatastream('islandora_workflow', NULL,  $workflow_parser->saveXML(), array('dsLabel' => 'workflow', 'mimeType' => 'text/xml', 'controlGroup' => 'X', 'logMessage' => 'Adding islandora_workflow datastream(editorial workflow tracking).'));
+  $object->addDatastream('islandora_workflow', NULL,  $workflow_parser->saveXML(), array('dsLabel' => 'workflow', 'mimeType' => 'text/xml', 'controlGroup' => 'X', 'logMessage' => 'Adding islandora_workflow datastream(editorial workflow tracking).'));
   
-  islandora_workflow_set_object_workflow_state($object_id, 'created');
+  $result=islandora_workflow_set_object_workflow_state($object_id, 'created');
   
   return $result;
 }
