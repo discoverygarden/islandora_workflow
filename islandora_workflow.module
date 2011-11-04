@@ -6,17 +6,33 @@
  *   William Panting
  *   
  * @todo
- *   Revert the changes that allow objects to be added to workflow by misapropriating the 'publish' button
+ *   Alow for the sorting of columns: requires signifigent refactoring.
+ *   
+ * @todo
+ *   Alow collapsable columns.
+ *   
+ * @todo
+ *   Explore using icons for the workflow state.  
+ *   
  * @todo
  *   Figure out why some objects are showing up more than once in the colorardo alliance test server's instance
+ *   
  * @todo
  *   Make the permissions page display collection labels if there is one rather than pid
+ *   
  * @todo
- *   Fix bug with pager/tabs not working on first page change: the tab is not being remembered.
+ *   Fix bug with pager/tabs not working on first page change: the tab is not being remembered,
+ *   this may requre a refactor from doing this server side.
+ *   
  * @todo
- *   Handle an unassigned object better in the ui.
+ *   Handle an unassigned object better in the ui. what?
  * 
- * Two different techniqes are being used for generating similar tables in tabs here.  
+ * @todo
+ *   Fix performance issues by replacing as many rest calls as possible with resource index queries.
+ *   
+ * 
+ * Two different techniqes are being used for generating similar tables in tabs here:
+ *   
  * 1. The work tabs use the same function but pass a parameter to change the content of the form because the only 
  * difference is some missing elements in the workflow tab vs the overview tab.
  * 
@@ -620,11 +636,16 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
         
         if ($member_workflow_state) { //make sure workflow data is present too
           
-          $vars['list'][$collection_id][$member]['state']=$member_workflow_state;//current workflow state
+          $vars['list'][$collection_id][$member]['state'] = $member_workflow_state;//current workflow state
   
           //render each object element
-          $vars['list'][$collection_id][$member]['Selecter']=drupal_render($vars['list'][$collection_id][$member]['Selecter']);
-          $vars['list'][$collection_id][$member]['Assign']=drupal_render($vars['list'][$collection_id][$member]['Assign']);
+          $vars['list'][$collection_id][$member]['Selecter'] = drupal_render($vars['list'][$collection_id][$member]['Selecter']);
+          $vars['list'][$collection_id][$member]['Assign'] = drupal_render($vars['list'][$collection_id][$member]['Assign']);
+          
+          //get the dates and provide them
+          $times = get_object_time_stamps($member);
+          $vars['list'][$collection_id][$member]['workflow_started'] = $times['created'];
+          $vars['list'][$collection_id][$member]['last_workflow_progression'] = $times['modified'];
           
           //if there is a note
           $member_note_subject=islandora_workflow_get_object_note_subject($member);

@@ -1291,3 +1291,40 @@ function format_email_array_to_string($emails_array) {
   }
   return $emails_string;
 }
+
+/**
+ * This function is for getting the workflow associated times for an object.
+ * 
+ * @param string $pid
+ *   The pid of the object to return the timestamps for
+ * @return array $times
+ *   An array of the objects timestamps, the 'created' element is creation while the 'modified' is the last workflow progression.
+ */
+function get_object_time_stamps($object_id) {
+  
+  //init
+  $times = array();
+  
+  module_load_include('object.inc', 'islandora_fedora_api');
+  $object = new FedoraObject($object_id);
+  
+  $object_datastreams = $object->get_datastreams();
+  
+  if (isset($object_datastreams['islandora_workflow'])) {//build xml from DS
+    $workflow_parser = new DOMDocument();
+    $workflow_datastream = $object_datastreams['islandora_workflow'];
+    $workflow_string = $workflow_datastream->__get('content');
+    $workflow_parser->loadXML($workflow_string);
+    $when_last_modified_array = $workflow_parser->getElementsByTagName('when_last_modified');
+    
+    foreach ($when_last_modified_array as $when_last_modified_element) {
+      //get timestamp
+      $times['modified'] = $when_last_modified_element->nodeValue;
+    }
+  }
+  
+  $created_date_obj = $object->__get('createDate');
+  $times['created'] = $created_date_obj->format('c');
+  
+  return $times;
+}

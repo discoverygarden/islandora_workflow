@@ -13,6 +13,12 @@
       Status
       </TH>
       <TH>
+      Workflow Started
+      </TH>
+      <TH>
+      Last Workflow Progression
+      </TH>
+      <TH>
       Notes
       </TH>
       <TH>
@@ -34,6 +40,7 @@
         print('<TR>');
         print('<TD>'. $list[$collection_id][$member]['Selecter'] .'</TD><TD>'.$list[$collection_id][$member]['object'].
           '</TD><TD>'.$collection_name.'</TD><TD>' . $list[$collection_id][$member]['state'] .
+          '</TD><TD>' . $list[$collection_id][$member]['workflow_started'] . '</TD><TD>' . $list[$collection_id][$member]['last_workflow_progression'] .
            '</TD><TD>' . $list[$collection_id][$member]['note_subject'] . '</TD><TD>'.$list[$collection_id][$member]['Assign'].'</TD>');
         print('</TR>');
       }
