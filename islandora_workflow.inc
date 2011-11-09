@@ -1300,7 +1300,7 @@ function format_email_array_to_string($emails_array) {
  * @return array $times
  *   An array of the objects timestamps, the 'created' element is creation while the 'modified' is the last workflow progression.
  */
-function get_object_time_stamps($object_id) {
+function islandora_workflow_get_object_time_stamps($object_id) {
   
   //init
   $times = array();
@@ -1319,12 +1319,14 @@ function get_object_time_stamps($object_id) {
     
     foreach ($when_last_modified_array as $when_last_modified_element) {
       //get timestamp
-      $times['modified'] = $when_last_modified_element->nodeValue;
+      $times['islandora_workflow_modified'] = strtotime($when_last_modified_element->nodeValue);
+      $times['islandora_workflow_modified'] = format_date($times['islandora_workflow_modified'], $type='small');
     }
   }
   
   $created_date_obj = $object->__get('createDate');
-  $times['created'] = $created_date_obj->format('c');
+  $times['created'] = $created_date_obj->getTimestamp();
+  $times['created'] = format_date($times['created'], $type = 'small');
   
   return $times;
 }

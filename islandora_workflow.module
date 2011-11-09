@@ -643,12 +643,12 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
           $vars['list'][$collection_id][$member]['Assign'] = drupal_render($vars['list'][$collection_id][$member]['Assign']);
           
           //get the dates and provide them
-          $times = get_object_time_stamps($member);
+          $times = islandora_workflow_get_object_time_stamps($member);
           $vars['list'][$collection_id][$member]['workflow_started'] = $times['created'];
-          $vars['list'][$collection_id][$member]['last_workflow_progression'] = $times['modified'];
+          $vars['list'][$collection_id][$member]['last_workflow_progression'] = $times['islandora_workflow_modified'];
           
           //if there is a note
-          $member_note_subject=islandora_workflow_get_object_note_subject($member);
+          $member_note_subject = islandora_workflow_get_object_note_subject($member);
           if ($member_note_subject) {
             $vars['list'][$collection_id][$member]['note_subject']=
               l(islandora_workflow_get_object_note_subject($member), 
