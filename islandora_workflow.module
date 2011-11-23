@@ -232,10 +232,16 @@ function islandora_workflow_work_form(&$form_state, $tab) {
       //filter collection items if in overview tab
       if ($tab == 'overview') {
         foreach ($collection_members as $member_key => $member) {
+          //filter collection items if the user has manager level access to the collection
+          $workflow_state = islandora_workflow_get_object_workflow_state($member);
+          //remove everything not in a workflow state
+          if (!$workflow_state) {
+            unset($collection_members[$member_key]);
+          }
           //filter collection items if the user is not an admin
           if (!user_access('islandora_workflow_Administrator') && !user_access('administer')) {
             //show things not in published state
-            if (islandora_workflow_get_object_workflow_state($member) == 'published') {
+            if ($workflow_state == 'published') {
               unset($collection_members[$member_key]);
             }
           }
@@ -638,7 +644,7 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
     foreach ($collection_members as $member) {
       if (isset($vars['list'][$collection_id][$member])) { //The isset is here so that only populated items are rendered into HTML for display
         
-        $member_workflow_state=islandora_workflow_get_object_workflow_state($member);
+        $member_workflow_state = islandora_workflow_get_object_workflow_state($member);
         
         if ($member_workflow_state) { //make sure workflow data is present too
           
@@ -665,30 +671,6 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
               l('Create Note', 
                 'islandora_workflow_edit_note',  array('query' => 'object=' . $member));
           }
-          
-          $member_label=islandora_workflow_get_object_label($member);
-          if($member_label) {//if there is a label
-            $vars['list'][$collection_id][$member]['object']=
-              l($member_label,//use the label 
-                'fedora/repository/'. $member);
-          }
-          else {//no label
-            $vars['list'][$collection_id][$member]['object']=
-              l($member,//use the pid
-                'fedora/repository/'. $member);
-          }
-          
-        }
-        else {//if the object is not in workflow
-                   
-          $vars['list'][$collection_id][$member]['state']='NOT IN WORKFLOW';//current workflow state
-          $vars['list'][$collection_id][$member]['Selecter']='';
-          
-          //this is a test selector for adding things to workflow
-          //$vars['list'][$collection_id][$member]['Selecter']=drupal_render($vars['list'][$collection_id][$member]['Selecter']);
-
-          $vars['list'][$collection_id][$member]['Assign']='N/A';
-          $vars['list'][$collection_id][$member]['note_subject']='N/A';
           
           $member_label=islandora_workflow_get_object_label($member);
           if($member_label) {//if there is a label
