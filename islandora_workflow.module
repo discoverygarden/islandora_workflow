@@ -2,34 +2,37 @@
 /**
  * @file
  *   This module is intended to implement a generic Islandora workflow around the creation and publication of objects.
+ * 
  * @author 
  *   William Panting
  *   
  * @todo
- *   Alow for the sorting of columns: requires signifigent refactoring.
+ *   Alow for the sorting of columns: requires signifigent refactoring. Likely dump all data to JS? scaleable?
  *   
  * @todo
  *   Alow collapsable columns.
  *   
  * @todo
  *   Explore using icons for the workflow state.  
- *   
- * @todo
- *   Figure out why some objects are showing up more than once in the colorardo alliance test server's instance
- *   
+ *      
  * @todo
  *   Make the permissions page display collection labels if there is one rather than pid
  *   
  * @todo
  *   Fix bug with pager/tabs not working on first page change: the tab is not being remembered,
  *   this may requre a refactor from doing this server side.
- *   
- * @todo
- *   Handle an unassigned object better in the ui. what?
- * 
+ *    
  * @todo
  *   Fix performance issues by replacing as many rest calls as possible with resource index queries.
+ *   The call $collection_members=islandora_workflow_get_all_members_of_collection($collection_id); in workflow_table.tpl.php can be removed.
+ *   We just need to get the info from the pre-processsor.  There are probably other improovements similar that could be made.
+ *   The general thought though is to refactor as many fedora calls as possible to a SPARQL querry. Anything RELS-EXT can be gottent through SPARQL.
+ *   Would it be good to create a workflow fedora object that derives the islandora fedora api object? This COULD impact performance.
  *   
+ *  @todo
+ *    Address being able to add not-in-workflow objects and broken workflow objects to a workflow state.
+ *    The distinction between the two states.
+ *    I think this should be an integration piece: that the 'reject to workflow' should go in an object management UI.
  * 
  * Two different techniqes are being used for generating similar tables in tabs here:
  *   
@@ -115,38 +118,38 @@ function islandora_workflow_work_form(&$form_state, $tab) {
   //init
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow'); //for getting workflow info
   module_load_include('inc', 'fedora_repository', 'api/fedora_collection'); //for getting members of collections etc.
-  $users_manager_collections=islandora_workflow_get_current_users_collections();
-  $users_editor_collections=islandora_workflow_get_current_users_collections('islandora_workflow_Editor');
-  $users_submitter_collections=islandora_workflow_get_current_users_collections('islandora_workflow_Submitter');
-  $users_collections=islandora_workflow_get_current_users_collections('all');
+  $users_manager_collections = islandora_workflow_get_current_users_collections();
+  $users_editor_collections = islandora_workflow_get_current_users_collections('islandora_workflow_Editor');
+  $users_submitter_collections = islandora_workflow_get_current_users_collections('islandora_workflow_Submitter');
+  $users_collections = islandora_workflow_get_current_users_collections('all');
   //pager init stuff
   global $pager_page_array, $pager_total;
   //which pager applies to this tab
-  if ($tab=='workflow') {
-    $pager_index=0;
+  if ($tab == 'workflow') {
+    $pager_index = 0;
   }
   if ($tab=='overview') {
-    $pager_index=1;
+    $pager_index = 1;
   }
   //set the current page
   $page=isset($_GET['page']) ? $_GET['page'] : '';  
   $pager_page_array=explode(',', $page);
   //control the objects displayed on each page
-  $objects_per_page=10;
-  $object_count=0;
-  $object_lower_bound=$pager_page_array[$pager_index]*$objects_per_page;
-  $object_upper_bound=$object_lower_bound+$objects_per_page;
+  $objects_per_page = 10;
+  $object_count = 0;
+  $object_lower_bound = $pager_page_array[$pager_index]*$objects_per_page;
+  $object_upper_bound = $object_lower_bound+$objects_per_page;
   //record the current $pager_page_array for comparison with the next time the page loads [to pick the tab to display]
   //@todo: fix we should be re setting this session variable when the user changes tabs
-  $_SESSION['workflow_page']['pager_page_array']=$pager_page_array;
+  $_SESSION['workflow_page']['pager_page_array'] = $pager_page_array;
   //populate an array of all users in relevent collections, to be used in the assign-to-user drop down
-  $users_collections_members=islandora_workflow_get_all_users_with_collection_permissions(array_keys($users_collections));
+  $users_collections_members = islandora_workflow_get_all_users_with_collection_permissions(array_keys($users_collections));
  
   //submit_function declaration
-  $workflow_tabs_form['#submit']=array('islandora_workflow_work_form_submit');
+  $workflow_tabs_form['#submit'] = array('islandora_workflow_work_form_submit');
   
   //tab forms
-  $workflow_tabs_form['objects_form']=array(    
+  $workflow_tabs_form['objects_form'] = array(    
     '#type' => 'fieldset',
     '#title' => t('Workflow'),
     '#collapsible' => FALSE,
@@ -154,17 +157,17 @@ function islandora_workflow_work_form(&$form_state, $tab) {
     '#tree' => TRUE,
     '#description' => t('Perform work on objects you have access to.'),
   );
-  $workflow_tabs_form['objects_form']['objects_form_elems']=array('#theme' => 'workflow_table');
+  $workflow_tabs_form['objects_form']['objects_form_elems'] = array('#theme' => 'workflow_table');
   
   //submit button
-  $workflow_tabs_form['Submit']= array(
+  $workflow_tabs_form['Submit'] = array(
     '#type' => 'submit',
     '#weight' => '1',
     '#value' => t('Submit')
   );
     //approve button
   if (user_access('islandora_workflow_Administrator') || islandora_workflow_get_current_users_collections('islandora_workflow_Manager') || islandora_workflow_get_current_users_collections('islandora_workflow_Editor') || user_access('administer')) {
-    $workflow_tabs_form['Approve']= array(
+    $workflow_tabs_form['Approve'] = array(
       '#type' => 'submit',
       '#weight' => '2',
       '#value' => t('Approve')
@@ -172,7 +175,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
  }
     //publish button
   if (user_access('islandora_workflow_Administrator') || islandora_workflow_get_current_users_collections('islandora_workflow_Manager') || user_access('administer')) {  
-    $workflow_tabs_form['Publish']= array(
+    $workflow_tabs_form['Publish'] = array(
       '#type' => 'submit',
       '#weight' => '3',
       '#value' => t('Publish')
@@ -180,26 +183,26 @@ function islandora_workflow_work_form(&$form_state, $tab) {
   }
   //reject button
   if (user_access('islandora_workflow_Administrator') || islandora_workflow_get_current_users_collections('islandora_workflow_Manager') || islandora_workflow_get_current_users_collections('islandora_workflow_Editor') || user_access('administer')) {
-    $workflow_tabs_form['Reject']= array(
+    $workflow_tabs_form['Reject'] = array(
       '#type' => 'submit',
       '#weight' => '4',
       '#value' => t('Reject')
     );
   }
   //claim button
-  $workflow_tabs_form['Claim']= array(
+  $workflow_tabs_form['Claim'] = array(
     '#type' => 'submit',
     '#weight' => '5',
     '#value' => t('Claim')
   );
   //assign button
-  $workflow_tabs_form['Assign']= array(
+  $workflow_tabs_form['Assign'] = array(
     '#type' => 'submit',
     '#weight' => '6',
     '#value' => t('Assign')
   );
   //delete button
-  $workflow_tabs_form['Delete']= array(
+  $workflow_tabs_form['Delete'] = array(
     '#type' => 'submit',
     '#weight' => '7',
     '#value' => t('Delete')
@@ -216,23 +219,23 @@ function islandora_workflow_work_form(&$form_state, $tab) {
   if ($users_manager_collections) {
     foreach ($users_manager_collections as $collection_id => $collection_name) {
       //get all objects in collection
-      $collection_members=islandora_workflow_get_all_members_of_collection($collection_id);
+      $collection_members = islandora_workflow_get_all_members_of_collection($collection_id);
       //filter collection items if in workflow tab
-      if ($tab=='workflow') {
+      if ($tab == 'workflow') {
         foreach ($collection_members as $member_key => $member) {
           //show things in approved state
-          if (islandora_workflow_get_object_workflow_state($member)!='approved') {
+          if (islandora_workflow_get_object_workflow_state($member) != 'approved') {
             unset($collection_members[$member_key]);
           }
         }
       }
       //filter collection items if in overview tab
-      if ($tab=='overview') {
+      if ($tab == 'overview') {
         foreach ($collection_members as $member_key => $member) {
           //filter collection items if the user is not an admin
           if (!user_access('islandora_workflow_Administrator') && !user_access('administer')) {
             //show things not in published state
-            if (islandora_workflow_get_object_workflow_state($member)=='published') {
+            if (islandora_workflow_get_object_workflow_state($member) == 'published') {
               unset($collection_members[$member_key]);
             }
           }
@@ -240,8 +243,8 @@ function islandora_workflow_work_form(&$form_state, $tab) {
       }
       foreach ($collection_members as $member) {
         $object_count++;//keeping track of objects to show
-        if ($object_count > $object_lower_bound && $object_count <=$object_upper_bound) {
-          $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selecter']=array(
+        if ($object_count > $object_lower_bound && $object_count <= $object_upper_bound) {
+          $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selecter'] = array(
             '#type' => 'checkbox',
             '#title' => t(''),
           );
@@ -259,18 +262,18 @@ function islandora_workflow_work_form(&$form_state, $tab) {
     foreach ($users_editor_collections as $collection_id => $collection_name) {
       if (!isset($users_manager_collections[$collection_id])) {//exclude higher level permissions in the same collection
         //get all objects in collection
-        $collection_members=islandora_workflow_get_all_members_of_collection($collection_id);
+        $collection_members = islandora_workflow_get_all_members_of_collection($collection_id);
         //filter collection items if in workflow tab
-        if ($tab=='workflow') {
+        if ($tab == 'workflow') {
           foreach ($collection_members as $member_key => $member) {
             //show things in approved state
-            if (islandora_workflow_get_object_workflow_state($member)!='submitted') {
+            if (islandora_workflow_get_object_workflow_state($member) != 'submitted') {
               unset($collection_members[$member_key]);
             }
           }
         }
         //filter collection items if in overview tab
-        if ($tab=='overview') {
+        if ($tab == 'overview') {
           foreach ($collection_members as $member_key => $member) {
             //filter collection items if the user is not an admin
             if (!user_access('islandora_workflow_Administrator') && !user_access('administer')) {
@@ -311,7 +314,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
           foreach ($collection_members as $member_key => $member) {
             //show things in approved state
             global $user;
-            if (islandora_workflow_get_object_workflow_state($member)!='created' || islandora_workflow_get_object_creator($member)!=$user->name) {
+            if (islandora_workflow_get_object_workflow_state($member) != 'created' || islandora_workflow_get_object_creator($member) != $user->name) {
               unset($collection_members[$member_key]);
             }
           }
@@ -323,7 +326,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
             if (!user_access('islandora_workflow_Administrator') && !user_access('administer')) {
               //show things not in published state
               global $user;
-              if (islandora_workflow_get_object_creator($member)!=$user->name) {
+              if (islandora_workflow_get_object_creator($member) != $user->name) {
                 unset($collection_members[$member_key]);
               }
             }
@@ -331,8 +334,8 @@ function islandora_workflow_work_form(&$form_state, $tab) {
         }
         foreach ($collection_members as $member) {
           $object_count++;//keeping track of objects to show
-          if ($object_count > $object_lower_bound && $object_count <=$object_upper_bound) {
-            $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selecter']=array(
+          if ($object_count > $object_lower_bound && $object_count <= $object_upper_bound) {
+            $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selecter'] = array(
               '#type' => 'checkbox',
               '#title' => t(''),
             );
