@@ -316,7 +316,7 @@ function islandora_workflow_get_all_collections() {
 }
 
 /**
- * This function gets all the members of a collection through the relationship of 'isMemberOf' 
+ * This function gets all the members (with a workflow status) of a collection through the relationship of 'isMemberOf' 
  * and 'isMemberOfCollection' the two relationships need to be checked because there is no
  * Fedora enforced standard.
  * @author
@@ -324,21 +324,10 @@ function islandora_workflow_get_all_collections() {
  * @param array $collection_id
  *   The collection to get the members of.
  * @return array $member_list_full
- *   The array containing all the pids of members of the collection.
+ *   The array containing all the pids and relevent info from the RI.
  */
 function islandora_workflow_get_all_members_of_collection($collection_id) {
   
-  module_load_include('inc', 'fedora_repository', 'api/fedora_collection'); 
-  
-  $member_list_full=array();
-  
-  $member_list1=get_related_items_as_array($collection_id, 'isMemberOf', 10000 , 0, FALSE);
-  $member_list2=get_related_items_as_array($collection_id, 'isMemberOfCollection', 10000 , 0, FALSE);
-
-  //merge the arrays and remove duplicates that may appear because of a "BAD" islandora core issue
-  $member_list_full = array_unique(array_merge($member_list1, $member_list2));
-  
-  /*<EXPERIMENTAL>*/
   //get info for query
   $query_file_name = drupal_get_path('module', 'islandora_workflow') . '/member_query.txt';
   $query_file_handle = fopen($query_file_name, "r");
@@ -398,12 +387,9 @@ function islandora_workflow_get_all_members_of_collection($collection_id) {
     }
     
     dsm($member_data);
-    //return $member_data;
+    return $member_data;
   }
-  //return False;
-  /*</EXPERIMENTAL>*/
-  
-  return $member_list_full;
+  return False;
 }
  
 /**

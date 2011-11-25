@@ -23,14 +23,10 @@
  *   this may requre a refactor from doing this server side.
  *    
  * @todo
- *   Fix performance issues by replacing as many rest calls as possible with resource index queries.
- *   The call $collection_members=islandora_workflow_get_all_members_of_collection($collection_id); in workflow_table.tpl.php can be removed.
- *   We just need to get the info from the pre-processsor.  There are probably other improovements similar that could be made.
- *   The general thought though is to refactor as many fedora calls as possible to a SPARQL querry. Anything RELS-EXT can be gottent through SPARQL.
  *   Would it be good to create a workflow fedora object that derives the islandora fedora api object? This COULD impact performance.
  *   The new query will be able to get label, state, and assignee: refactor to use this data
  *   The new query will filter out not-in workflow objects
- *   The new query will need to be tested for duplications
+ *   A way to transfer this to the pre-processor func should be found so the ir queries are not being repeated.
  *   
  *  @todo
  *    Address being able to add not-in-workflow objects and broken workflow objects to a workflow state.
