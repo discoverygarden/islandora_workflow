@@ -531,11 +531,23 @@ function islandora_workflow_check_permissions($permission_array) {
 function islandora_workflow_admin() {
   $adminForm=array();
   //security setting ie. xacml enforced on/off
+
+  // check if the xacml api is enabled
+
+  $disabled = !module_exists('islandora_xacml_api');
+
+  if($disabled) {
+    $adminForm['info'] = array(
+      '#value' => 'The Islandora Xacml API module must be enabled to use this feature.',
+    );
+  }
+
   $adminForm['islandora_workflow_enforce_security']= array(
     '#type' => 'checkbox',
+    '#disabled' => $disabled,
     '#title' => t('Enforce Security'),
     '#default_value' => variable_get('islandora_workflow_enforce_security', 0),
-    '#description' => t("Wheather or not to use XACML to enforce workflow."),
+    '#description' => t("Whether or not to use XACML to enforce workflow."),
   );
   return system_settings_form($adminForm); 
 }
