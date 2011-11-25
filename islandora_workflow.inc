@@ -359,7 +359,7 @@ function islandora_workflow_get_all_members_of_collection($collection_id) {
   	$query_return_dom = DOMDocument::loadXML($query_return_string);
   }
   
-  
+ 
   //format query results for use (xml->array)
   $result_nodes = $query_return_dom->getElementsByTagName('result');
   $result_nodes_length = $result_nodes->length;
