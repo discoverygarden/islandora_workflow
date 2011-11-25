@@ -113,7 +113,7 @@ function islandora_workflow_get_current_users_collections($permission_level='isl
     $collection_list=islandora_workflow_get_all_collections();
     //figure out owned collections
     //role perms
-    $users_role_collection_permissions=islandora_workflow_get_current_users_role_permissions();
+    $users_role_collection_permissions = islandora_workflow_get_current_users_role_permissions();
     foreach ($users_role_collection_permissions as $role_id => $collections) {
       foreach ($collections as $collection_id => $permission) {
         if ($permission_level=='all') {//all available permissions
@@ -339,7 +339,7 @@ function islandora_workflow_get_all_members_of_collection($collection_id) {
   $query_url = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
   
   //inject collection value into the query
-  $query = preg_replace('/\$collection_object/', $collection_id, $query);
+  $query = preg_replace('/\$collection_object/', '<info:fedora/' . $collection_id . '>', $query);
   
   //run query
   $query_url .= "?type=tuples&flush=TRUE&format=Sparql" . (($limit > 0)?("&limit=$limit"):("")) . "&offset=$offset&lang=$type&query=" . urlencode($query);
@@ -382,7 +382,7 @@ function islandora_workflow_get_all_members_of_collection($collection_id) {
       }
       if ($state_element) {
         $state = $state_element->nodeValue;
-        $member_data[$member_object]['state_element'] = $state;
+        $member_data[$member_object]['state'] = $state;
       }
     }
     

@@ -6,12 +6,12 @@ SELECT $label $member_object $state $assignee
 FROM <#ri>
 WHERE {
 {
-$member_object fedora_relations:isMemberOf <info:fedora/$collection_object> .
+$member_object fedora_relations:isMemberOf $collection_object .
 $member_object workflow:state $state
 }
 UNION
 {
-$member_object fedora_relations:isMemberOfCollection <info:fedora/$collection_object> .
+$member_object fedora_relations:isMemberOfCollection $collection_object .
 $member_object workflow:state $state 
 }
 OPTIONAL

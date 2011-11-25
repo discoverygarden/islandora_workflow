@@ -1,6 +1,6 @@
 This is a drupal module to implement a generic workflow around Fedora objects.
 
-It uses an inline xml datastream to record the state of the workflow and notes associated with the workflow in workflow managed objects.
+It uses an inline xml datastream and rdf to record the state of the workflow and notes associated with the workflow in workflow managed objects.
 Acceptable state values: created, in_process(for machine workflow), submitted, approved, published, rejected.
 
 The module currently assumes that the 'islandora:collectionCModel' object acts as a parent for collection content models and not directly as a content model.
@@ -9,7 +9,7 @@ This can be changed via modifying 'collection_query.txt'.
 Machine level workflow will be handled via fedora microservices.
 Human level workflow will be handled through this drupal module.
 
-Workflow can [not implemented yet] be enforced through the use of XACML. There is a settings toggle for this.
+Workflow can [being implemented] be enforced through the use of XACML. There is a settings toggle for this.
 This toggle is volatile, it may cause many problems.  We highly recommend only changing it at install time.
 
 For a user to see the 'My Islandora Work' link they need module permissions and some collection level permission set.
