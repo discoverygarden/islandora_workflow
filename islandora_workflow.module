@@ -117,7 +117,6 @@ function islandora_workflow_work_form(&$form_state, $tab) {
   //init
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow'); //for getting workflow info
-  module_load_include('inc', 'fedora_repository', 'api/fedora_collection'); //for getting members of collections etc.
   $users_manager_collections = islandora_workflow_get_current_users_collections();
   $users_editor_collections = islandora_workflow_get_current_users_collections('islandora_workflow_Editor');
   $users_submitter_collections = islandora_workflow_get_current_users_collections('islandora_workflow_Submitter');
@@ -536,7 +535,7 @@ function islandora_workflow_admin() {
 
   $disabled = !module_exists('islandora_xacml_api');
 
-  if($disabled) {
+  if ($disabled) {
     $adminForm['info'] = array(
       '#value' => 'The Islandora Xacml API module must be enabled to use this feature.',
     );
