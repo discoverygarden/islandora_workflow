@@ -336,7 +336,72 @@ function islandora_workflow_get_all_members_of_collection($collection_id) {
   $member_list2=get_related_items_as_array($collection_id, 'isMemberOfCollection', 10000 , 0, FALSE);
 
   //merge the arrays and remove duplicates that may appear because of a "BAD" islandora core issue
-  $member_list_full=array_unique(array_merge($member_list1, $member_list2));
+  $member_list_full = array_unique(array_merge($member_list1, $member_list2));
+  
+  /*<EXPERIMENTAL>*/
+  //get info for query
+  $query_file_name = drupal_get_path('module', 'islandora_workflow') . '/member_query.txt';
+  $query_file_handle = fopen($query_file_name, "r");
+  $query = fread($query_file_handle, filesize($query_file_name));
+  fclose($query_file_handle);
+  $limit = -1;
+  $offset = 0 ;
+  $type = 'sparql';
+  $queryUrl = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
+  
+  //inject collection value into the query
+  $query = preg_replace('/\$collection_object/', $collection_id, $query);
+  
+  //run query
+  $queryUrl .= "?type=tuples&flush=TRUE&format=Sparql" . (($limit > 0)?("&limit=$limit"):("")) . "&offset=$offset&lang=$type&query=" . urlencode($query);
+  $query_return_string = do_curl($queryUrl);
+  if ($query_return_string) {
+  	$query_return_dom = DOMDocument::loadXML($query_return_string);
+  }
+  
+  
+  //format query results for use (xml->array)
+  $result_nodes = $query_return_dom->getElementsByTagName('result');
+  $result_nodes_length = $result_nodes->length;
+  if ($result_nodes_length > 0) {
+    for ($i=0; $i < $result_nodes_length; $i++) {
+      $result_node = $result_nodes->item($i);
+      $result_values = $result_node->childNodes;
+      
+      $label_element = $result_node->getElementsByTagName('label')->item(0);
+      $assignee_element = $result_node->getElementsByTagName('assignee')->item(0);
+      $state_element = $result_node->getElementsByTagName('state')->item(0);
+      $member_object_element = $result_node->getElementsByTagName('member_object')->item(0);
+      
+      $member_object = $member_object_element->getAttribute('uri');
+      //info:fedora/ is 12 chars
+      $member_object = substr($member_object, 12, strlen($member_object));//need to extract the pid
+  
+      $member_data[$member_object] = array();
+      
+      if($label_element) {
+        $label = $label_element->nodeValue;
+        if($label) {//the label may not be pupulated
+          $member_data[$member_object]['label'] = $label;
+        }
+      }
+      if($assignee_element) {
+        $assignee = $assignee_element->nodeValue;
+        if ($assignee) {//the assignee may not be populated
+          $member_data[$member_object]['assignee'] = $assignee;
+        }
+      }
+      if($state_element) {
+        $state = $state_element->nodeValue;
+        $member_data[$member_object]['state_element'] = $state;
+      }
+    }
+    
+    dsm($member_data);
+    //return $member_data;
+  }
+  //return False;
+  /*</EXPERIMENTAL>*/
   
   return $member_list_full;
 }
