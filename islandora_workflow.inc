@@ -304,7 +304,7 @@ function islandora_workflow_reject_object($object_id) {
     return (islandora_workflow_set_object_workflow_state($object_id, 'rejected'));
   }
   else {
-    drupal_set_message(t('The object '. $object_id .' could not be rejected, it was not in an aporopriate workflow state.'));
+    drupal_set_message(t('The object '. $object_id .' could not be rejected, it was not in an appropriate workflow state.'));
     return FALSE;
   }
 }
@@ -343,7 +343,7 @@ function islandora_workflow_approve_object($object_id) {
     return (islandora_workflow_set_object_workflow_state($object_id, 'approved'));
   }
   else {
-    drupal_set_message(t('The object '. $object_id .' could not be approved, it was not in an aporopriate workflow state.'));
+    drupal_set_message(t('The object '. $object_id .' could not be approved, it was not in an appropriate workflow state.'));
   }
   return FALSE;
 } 
@@ -374,7 +374,7 @@ function islandora_workflow_publish_object($object_id) {
     return ($object->__set('state', 'A'));
   }
   else {
-    drupal_set_message(t('The object '. $object_id .' could not be published, it was not in an aporopriate workflow state.'));
+    drupal_set_message(t('The object '. $object_id .' could not be published, it was not in an appropriate workflow state.'));
     return FALSE;
   }
 }
@@ -413,7 +413,7 @@ function islandora_workflow_submit_object($object_id) {
     return (islandora_workflow_set_object_workflow_state($object_id, 'submitted'));
   }
   else {
-    drupal_set_message(t('The object '. $object_id .' could not be submitted, it was not in an aporopriate workflow state.'));
+    drupal_set_message(t('The object '. $object_id .' could not be submitted, it was not in an appropriate workflow state.'));
   }
   return FALSE;
 }
