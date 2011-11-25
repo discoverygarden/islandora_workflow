@@ -115,6 +115,7 @@ function islandora_workflow_work() {
  */
 function islandora_workflow_work_form(&$form_state, $tab) {
   //init
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow'); //for getting workflow info
   module_load_include('inc', 'fedora_repository', 'api/fedora_collection'); //for getting members of collections etc.
   $users_manager_collections = islandora_workflow_get_current_users_collections();
@@ -600,7 +601,7 @@ function islandora_workflow_theme() {
   *   the modified list of variables to send to the template
   */
 function islandora_workflow_preprocess_permissions_user_table(&$vars) {
-  module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
   
   $vars['users']=islandora_workflow_get_users_with_module_permissions();
   $vars['list']['collection_selector']=drupal_render($vars['list']['collection_selector']);
@@ -620,7 +621,8 @@ function islandora_workflow_preprocess_permissions_user_table(&$vars) {
   *   the modified list of variables to send to the template
   */
 function islandora_workflow_preprocess_permissions_role_table(&$vars) {
-  module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
+  
   //$vars['collections']=islandora_workflow_get_current_users_collections();
   $vars['roles']=islandora_workflow_get_roles_with_module_permissions();
   $vars['list']['collection_selector']=drupal_render($vars['list']['collection_selector']);
@@ -735,6 +737,7 @@ function islandora_workflow_collection_permissions() {
  */
 function islandora_workflow_role_permissions_form() {
 //init
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow'); 
   $collection_role_permissions_form=array();
   $current_module_permissions=array();
@@ -835,6 +838,8 @@ function islandora_workflow_role_permissions_form() {
   *   An easier to use version of $collection_role_permissions_form
   */
 function islandora_workflow_role_permissions_form_submit($collection_role_permissions_form, &$collection_role_permissions_form_state) {
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
+  
   $clicked_button = $collection_role_permissions_form_state['clicked_button']['#value'];
   if ($clicked_button=='Update') {//handle updating the page
     //init
@@ -931,7 +936,8 @@ function islandora_workflow_role_permissions_form_submit($collection_role_permis
  */
 function islandora_workflow_user_permissions_form() {
 //init
-  module_load_include('inc', 'islandora_workflow', 'islandora_workflow'); 
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
   $collection_user_permissions_form=array();
   $current_module_permissions=array();
   
@@ -1031,6 +1037,7 @@ function islandora_workflow_user_permissions_form() {
   *   An easier to use version of $collection_user_permissions_form
   */
 function islandora_workflow_user_permissions_form_submit($collection_user_permissions_form, &$collection_user_permissions_form_state) {
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
   $clicked_button = $collection_user_permissions_form_state['clicked_button']['#value'];
   if ($clicked_button=='Update') {//handle updating the page
     //init
