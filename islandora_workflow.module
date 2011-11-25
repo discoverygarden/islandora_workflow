@@ -672,7 +672,7 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
           }
           
           $member_label=islandora_workflow_get_object_label($member);
-          if($member_label) {//if there is a label
+          if ($member_label) {//if there is a label
             $vars['list'][$collection_id][$member]['object']=
               l($member_label,//use the label 
                 'fedora/repository/'. $member);

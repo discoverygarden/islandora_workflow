@@ -336,16 +336,16 @@ function islandora_workflow_get_all_members_of_collection($collection_id) {
   $limit = -1;
   $offset = 0 ;
   $type = 'sparql';
-  $queryUrl = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
+  $query_url = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
   
   //inject collection value into the query
   $query = preg_replace('/\$collection_object/', $collection_id, $query);
   
   //run query
-  $queryUrl .= "?type=tuples&flush=TRUE&format=Sparql" . (($limit > 0)?("&limit=$limit"):("")) . "&offset=$offset&lang=$type&query=" . urlencode($query);
-  $query_return_string = do_curl($queryUrl);
+  $query_url .= "?type=tuples&flush=TRUE&format=Sparql" . (($limit > 0)?("&limit=$limit"):("")) . "&offset=$offset&lang=$type&query=" . urlencode($query);
+  $query_return_string = do_curl($query_url);
   if ($query_return_string) {
-  	$query_return_dom = DOMDocument::loadXML($query_return_string);
+    $query_return_dom = DOMDocument::loadXML($query_return_string);
   }
   
  
@@ -368,25 +368,24 @@ function islandora_workflow_get_all_members_of_collection($collection_id) {
   
       $member_data[$member_object] = array();
       
-      if($label_element) {
+      if ($label_element) {
         $label = $label_element->nodeValue;
-        if($label) {//the label may not be pupulated
+        if ($label) {//the label may not be pupulated
           $member_data[$member_object]['label'] = $label;
         }
       }
-      if($assignee_element) {
+      if ($assignee_element) {
         $assignee = $assignee_element->nodeValue;
         if ($assignee) {//the assignee may not be populated
           $member_data[$member_object]['assignee'] = $assignee;
         }
       }
-      if($state_element) {
+      if ($state_element) {
         $state = $state_element->nodeValue;
         $member_data[$member_object]['state_element'] = $state;
       }
     }
     
-    dsm($member_data);
     return $member_data;
   }
   return False;
