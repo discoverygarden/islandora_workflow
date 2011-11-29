@@ -1,8 +1,231 @@
 <?php
-/* 
+/**
  * @file This file contains all of the helper functions dealing with Permissions for
  * Islandora workflow.
  */
+
+/**
+ * This function queries the database to get information about the islandora workflow users table.
+ *
+ * @param $options
+ *   An associative array of options if no options are passed in then the function will
+ *   query for everything. The array contains the following elements:
+ *   - 'user': (int) the drupal uid to query for.
+ *   - 'collection': (string) the pid of the collection.
+ *   - 'permission': (string) the permission string.
+ *   - 'userinfo': (boolean) if TRUE a join is done to return the username as well as drupal user id.
+ *
+ * @return
+ *   indexed array containing all of the results returned. each individual result is a associative array
+ *   with the keys: user, collection, permission and optionally name.
+ */
+function islandora_workflow_get_user_permissions ( array $options = array() ) {
+  $user = isset($options['user']) ? $options['user'] : NULL;
+  $collection = isset($options['collection']) ? $options['collection'] : NULL;
+  $permission = isset($options['permission']) ? $options['permission'] : NULL;
+  $userinfo = isset($options['userinfo']) ? $options['userinfo'] : FALSE;
+
+  $and = FALSE;
+  $where = FALSE;
+
+  $results = array();
+  $args = array();
+
+  if($userinfo) {
+    $query = 'SELECT user, name, collection, permission FROM {islandora_workflow_user_permissions} iw, ' .
+    '{users} u WHERE iw.user = u.uid';
+    $and = TRUE;
+    $where = TRUE;
+  }
+  else {
+    $query = 'SELECT user, collection, permission FROM {islandora_workflow_user_permissions} iw';
+  }
+
+  if($user) {
+    if(!$where) {
+      $query .= ' WHERE';
+      $where = TRUE;
+    }
+    if($and)
+      $query .= ' AND';
+    else
+      $and = TRUE;
+    $query .= " iw.user = %d";
+    $args[] = $user;
+  }
+
+  if($collection) {
+    if(!$where) {
+      $query .= ' WHERE';
+      $where = TRUE;
+    }
+    if($and)
+      $query .= ' AND';
+    else
+      $and = TRUE;
+    $query .= " iw.collection = '%s'";
+    $args[] = $collection;
+  }
+
+  if($permission) {
+    if(!$where) {
+      $query .= ' WHERE';
+      $where = TRUE;
+    }
+    if($and)
+      $query .= ' AND';
+    else
+      $and = TRUE;
+    $query .= " iw.permission = '%s'";
+    $args[] = $permission;
+  }
+
+  array_unshift($args, $query);
+
+  $resource = call_user_func_array('db_query', $args);
+
+  //build return array
+  while ($row=db_fetch_array($resource)) {
+    $results[] = $row;
+  }
+
+  return $results;
+}
+
+/**
+ * This function queries the database to get information about the islandora workflow roles table.
+ *
+ * @param $options
+ *   An associative array of options if no options are passed in then the function will
+ *   query for everything. The array contains the following elements:
+ *   - 'roles': (array) an array of drupal rid to query for.
+ *   - 'collection': (string) the pid of the collection.
+ *   - 'permission': (string) the permission string.
+ *   - 'userinfo': (boolean) if TRUE a join is done to return the role name as well as drupal role id.
+ *
+ * @return
+ *   indexed array containing all of the results returned. each individual result is a associative array
+ *   with the keys: role, collection, permission and optionally name.
+ */
+function islandora_workflow_get_role_permissions( array $options = array() ) {
+  $roles = isset($options['roles']) ? $options['roles'] : array();
+  $collection = isset($options['collection']) ? $options['collection'] : NULL;
+  $permission = isset($options['permission']) ? $options['permission'] : NULL;
+  $roleinfo = isset($options['roleinfo']) ? $options['roleinfo'] : FALSE;
+
+  $and = FALSE;
+  $where = FALSE;
+
+  $results = array();
+  $args = array();
+
+  if($roleinfo) {
+    $query = 'SELECT role, name, collection, permission FROM {islandora_workflow_role_permissions} iw, ' .
+    '{roles} r WHERE iw.role = r.rid';
+    $and = TRUE;
+    $where = TRUE;
+  }
+  else {
+    $query = 'SELECT role, collection, permission FROM {islandora_workflow_role_permissions} iw';
+  }
+
+  if($roles) {
+    if(!$where) {
+      $query .= ' WHERE';
+      $where = TRUE;
+    }
+    if($and)
+      $query .= ' AND';
+    else
+      $and = TRUE;
+    $or = FALSE;
+    $query .= '(';
+    foreach ($roles as $role) {
+      if($or)
+        $query .= ' OR';
+      $query .= " iw.role = %d";
+      $args[] = $role;
+    }
+    $query .= ')';
+  }
+
+  if($collection) {
+    if(!$where) {
+      $query .= ' WHERE';
+      $where = TRUE;
+    }
+    if($and)
+      $query .= ' AND';
+    else
+      $and = TRUE;
+    $query .= " iw.collection = '%s'";
+    $args[] = $collection;
+  }
+
+  if($permission) {
+    if(!$where) {
+      $query .= ' WHERE';
+      $where = TRUE;
+    }
+    if($and)
+      $query .= ' AND';
+    else
+      $and = TRUE;
+    $query .= " iw.permission = '%s'";
+    $args[] = $permission;
+  }
+
+  array_unshift($args, $query);
+
+  $resource = call_user_func_array('db_query', $args);
+
+  //build return array
+  while ($row=db_fetch_array($resource)) {
+    $results[] = $row;
+  }
+
+  return $results;
+}
+
+/**
+ * This function query's drupal's DB for all the collection permission entries by role
+ * used when displaying the current state for the permission page.
+ *
+ * @return array $perm_list
+ *   list of permissions that roles have with the form $perm_list[$role_id][$collection_id]=perms
+ */
+function islandora_workflow_get_all_role_permissions() {
+  $perm_list=array();
+
+  $results = islandora_workflow_get_role_permissions();
+
+  //build return array
+  foreach($results as $row) {
+    $perm_list[$row['role']][$row['collection']]=$row['permission'];
+  }
+
+  return $perm_list;
+}
+
+
+/**
+ * This function query's drupal's DB for all the collection permission entries for users
+ * Used when displaying the current state for the permission page
+ * @return array $perm_list
+ *   list of all permisions that users have  with the form  $perm_list[$user_id][$collection_id][1...4]=perms
+ */
+function islandora_workflow_get_all_user_permissions() {
+  $perm_list=array();
+
+  $results = islandora_workflow_get_user_permissions();
+
+  //build return array
+  foreach($results as $row) {
+    $perm_list[$row['user']][$row['collection']]=$row['permission'];
+  }
+
+  return $perm_list;
+}
 
 /**
  * This function will get all the drupal users who have the indicated or any level of access
@@ -86,48 +309,6 @@ function islandora_workflow_get_all_users_with_collection_permissions($collectio
 }
 
 /**
- * This function query's drupal's DB for all the collection permission entries by role
- * Used when displaying the current state for the permission page
- * @return array $perm_list
- *   list of permissions that roles have with the form $perm_list[$role_id][$collection_id][1...4]=perms
- */
-function islandora_workflow_get_all_role_permissions() {
-  $perm_list=array();
-
-  //build query
-  $query='SELECT role, collection, permission FROM {islandora_workflow_role_permissions}';
-  $results=db_query($query);
-
-  //build return array
-  while ($row=db_fetch_array($results)) {
-    $perm_list[$row['role']][$row['collection']]=$row['permission'];
-  }
-
-  return $perm_list;
-}
-
-/**
- * This function query's drupal's DB for all the collection permission entries for users
- * Used when displaying the current state for the permission page
- * @return array $perm_list
- *   list of all permisions that users have  with the form  $perm_list[$user_id][$collection_id][1...4]=perms
- */
-function islandora_workflow_get_all_user_permissions() {
-  $perm_list=array();
-
-  //build query
-  $query='SELECT user, collection, permission FROM {islandora_workflow_user_permissions}';
-  $results=db_query($query);
-
-  //build return array
-  while ($row=db_fetch_array($results)) {
-    $perm_list[$row['user']][$row['collection']]=$row['permission'];
-  }
-
-  return $perm_list;
-}
-
-/**
  * This is a helper function that will search the drupal core database for all users with a specified permission
  * @param string $perm
  *   the permission to search for
@@ -174,31 +355,23 @@ function user_access_list($perm = NULL) {
  * This function query's drupal's DB for all the collection permission entries related to the current user
  * Most usefull for building the work portal, and also used for getting user's owned collections
  * @return array $perm_list
- *   list of permissions the current user has with the indicated $perm_list[$role_id][$collection_id][1...4]=perms
+ *   list of permissions the current user has with the indicated $perm_list[$role_id][$collection_id]=perms
  */
 function islandora_workflow_get_current_users_role_permissions() {
   //do islandora_workflow_get_all_role_permissions with restrictions on the roles to the list of roles the current user has
   $perm_list=array();
-  global $user;//use $user->roles to get an array $roles[$role_id][$role_name]  $role_id is int
+  global $user;//use $user->roles to get an array $roles[$role_id]=[$role_name]  $role_id is int
 
-  //build query
-  $query='SELECT role, collection, permission FROM {islandora_workflow_role_permissions}';
-  $user_roles=$user->roles;
-
-  $loop_count=0;
-  foreach ($user_roles as $role_pid => $role_name) {
-    if ($loop_count==0) {//if on the first role user the where clause
-      $query=$query . ' WHERE role="' . $role_pid . '"';
-    }
-    else {
-      $query=$query . ' OR role="' . $role_pid . '"';
-    }
-    $loop_count++;
+  $roles = array();
+  foreach ($user->roles as $rid => $name) {
+    $roles[] = $rid;
   }
-  $results=db_query($query);
+  
+  //build query
+  $results = islandora_workflow_get_role_permissions(array('roles' => $roles));
 
   //build return array
-  while ($row=db_fetch_array($results)) {
+  foreach ($results as $row) {
     $perm_list[$row['role']][$row['collection']] = $row['permission'];
   }
   return $perm_list;
@@ -208,21 +381,18 @@ function islandora_workflow_get_current_users_role_permissions() {
 * This function query's drupal's DB for all the collection permission entries related to the current user
  * Most usefull for building the work portal, and also used for getting user's owned collections
  * @return array $perm_list
- *   list of permissions the current user has with the indicated $perm_list[$role_id][$collection_id][1...4]=perms
+ *   list of permissions the current user has with the indicated $perm_list[$role_id][$collection_id]=perms
  */
 function islandora_workflow_get_current_users_user_permissions() {
   //do islandora_workflow_get_all_role_permissions with restrictions on the roles to the list of roles the current user has
   $perm_list=array();
-  global $user;//use $user->roles to get an array $roles[$role_id][$role_name]  $role_id is int
+  global $user;
 
   //build query
-  $query='SELECT user, collection, permission FROM {islandora_workflow_user_permissions}';
-  $user_id=$user->uid;
-  $query=$query . ' WHERE user="' . $user_id . '"';
-  $results=db_query($query);
+  $results = islandora_workflow_get_user_permissions(array('user' => $user->name));
 
   //build return array
-  while ($row=db_fetch_array($results)) {
+  foreach ($results as $row) {
     $perm_list[$row['user']][$row['collection']] = $row['permission'];
   }
   return $perm_list;
