@@ -16,7 +16,10 @@ $member_object workflow:state $state
 }
 OPTIONAL
 {
-$member_object fedora_model:label $label.
 $member_object workflow:assignee $assignee
+}
+OPTIONAL
+{
+$member_object fedora_model:label $label
 }
 }
