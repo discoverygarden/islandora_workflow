@@ -258,12 +258,14 @@ function islandora_workflow_init_workflow($object_id) {
   //init
   module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
   $object= new FedoraObject($object_id);
+
+  // attach default workflow
   $default_xml_file_name=drupal_get_path('module', 'islandora_workflow') . '/start_workflow.xml';
   $workflow_parser = new DOMDocument();
   $workflow_parser->load($default_xml_file_name);
-  
   $object->addDatastream('islandora_workflow', NULL,  $workflow_parser->saveXML(), array('dsLabel' => 'workflow', 'mimeType' => 'text/xml', 'controlGroup' => 'X', 'logMessage' => 'Adding islandora_workflow datastream(editorial workflow tracking).'));
-  
+
+  // set state
   $result=islandora_workflow_set_object_workflow_state($object_id, 'created');
   
   return $result;
@@ -279,7 +281,7 @@ function islandora_workflow_init_workflow($object_id) {
  *   false if the rejection was not attempted
  */
 function islandora_workflow_reject_object($object_id) {
-  module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
+  module_load_include('permissions.inc', 'islandora_workflow');
 
   //permission check
   $tmp=islandora_workflow_user_object_permission_check($object_id);
@@ -287,9 +289,21 @@ function islandora_workflow_reject_object($object_id) {
     drupal_set_message(t('The object '. $object_id .' could not be rejected, you do not have the necessary permissions.'));
     return FALSE;
   }
-  
+
   $workflow_state=islandora_workflow_get_object_workflow_state($object_id);
   if ($workflow_state!='created' && $workflow_state!='rejected') {
+    // if workflow state is published and xacml is enabled you might not be able to
+    // reject due to XACML.
+    global $user;
+    if($workflow_state == 'published' && module_exists('islandora_xacml_api') && $user->uid != 1) {
+      module_load_include('inc', 'islandora_xacml_api', 'Xacml');
+      $xacml = Xacml::constructFromPid($object_id);
+      if(!$xacml->managementRule->hasPermission($user->name, $user->roles)) {
+        drupal_set_message(t('The object '. $object_id .' could not be rejected, you do not have XACML access to object.'));
+        return FALSE;
+      }
+    }
+
     //send out email to creator
     $user_name=islandora_workflow_get_object_creator($object_id);
     if ($user_name) {//some objects may not have been created by a drupal user
@@ -470,17 +484,71 @@ function islandora_workflow_assign_object($object_id, $user_name) {
 function islandora_workflow_set_object_workflow_state($object_id, $state) {
   //init
   module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
+  module_load_include('inc', 'islandora_fedora_api', 'islandora_fedora_api.exception');
   $object= new FedoraObject($object_id);
   $workflow_parser = new DOMDocument();
   global $user;
   $object_datastreams=$object->get_datastreams();
+
+  // get the collection of this object
+  $collection = islandora_workflow_get_object_parent($object_id);
+
+  // make sure there is an appropriate XACML datastream if there should be
+  if(variable_get('islandora_workflow_enforce_security', 0) && module_exists('islandora_xacml_api') && $state != 'published') {
+    module_load_include('inc', 'islandora_xacml_api', 'Xacml');
+    module_load_include('permissions.inc', 'islandora_workflow');
+
+    $xacml = new Xacml();
+
+    //get users and roles
+    $creator = islandora_workflow_get_object_creator($object_id);
+
+    $perms = islandora_workflow_get_permission_state($collection, $state);
+    $perms['users'][] = $creator;
+
+    $xacml->managementRule->addRole($perms['roles']);
+    $xacml->viewingRule->addRole($perms['roles']);
+    $xacml->managementRule->addUser($perms['users']);
+    $xacml->viewingRule->addUser($perms['users']);
+    
+    if(isset($object_datastreams['POLICY'])) {
+      $object_datastreams['POLICY']->content = $xacml->getXmlString();
+    }
+    else {
+      $object->addDatastream('POLICY', NULL, $xacml->getXmlString(), array('mimeType' => 'text/xml', 'controlGroup' => 'X'));
+    }
+  }
+  else {
+    try {
+      // xacml is disabled. delete the xacml datastream if it exists before it starts causing problems.
+      if(isset($object_datastreams['POLICY'])) {
+          $object_datastreams['POLICY']->purge();
+      }
+      $collectionObject = new FedoraObject($collection);
+      $collectionDS = $collectionObject->get_datastreams();
+
+      if(isset($collectionDS['CHILD_SECURITY'])) {
+        $object->addDatastream('POLICY', NULL, $collectionDS['CHILD_SECURITY']->content, array('dsLabel' => 'security policy', 'mimeType' => 'text/xml', 'controlGroup' => 'X', 'logMessage' => 'Adding policy datastream.'));
+      }
+    }
+    catch (FedoraAPIRestException $e) {
+      if($e->http->code == 401) {
+        // it has a policy but we can't delete it
+        drupal_set_message('This object has a policy datastream preventing it from being modified.', 'error');
+        return FALSE;
+      }
+      else {
+        throw $e;
+      }
+    }
+  }
   
   //update last modified user/time
   if (isset($object_datastreams['islandora_workflow'])) {//build xml from DS
     $workflow_datastream=$object_datastreams['islandora_workflow'];
     $workflow_string=$workflow_datastream->__get('content');
     $workflow_parser->loadXML($workflow_string);
-  //get elements to populate dynamicaly
+    //get elements to populate dynamicaly
     $last_modified_by_array=$workflow_parser->getElementsByTagName('last_modified_by');
     $when_last_modified_array=$workflow_parser->getElementsByTagName('when_last_modified');
     //workflow DS
