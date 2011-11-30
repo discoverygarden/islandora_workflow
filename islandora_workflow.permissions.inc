@@ -206,6 +206,18 @@ function islandora_workflow_get_role_permissions( array $options = array() ) {
   return $results;
 }
 
+/**
+ * This will get all of the users and roles that should have access to a particular collection given a state.
+ * It is used when making XACML policies.
+ *
+ * @param $collection
+ *   Collection PID.
+ * @param $state
+ *   Workflow state.
+ * @return array()
+ *   An associtiative array containing 'roles' and 'users'. Each of those is an indexed array containing the
+ *   usernames and rolenames.
+ */
 function islandora_workflow_get_permission_state($collection, $state) {
   $permission = array();
   $users = array();
