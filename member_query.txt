@@ -2,7 +2,7 @@ PREFIX dc: <http://purl.org/dc/elements/1.1/>
 PREFIX workflow: <info:islandora/islandora-system:def/islandora_workflow#>
 PREFIX fedora_relations: <info:fedora/fedora-system:def/relations-external#>
 PREFIX fedora_model: <info:fedora/fedora-system:def/model#>
-SELECT $label $member_object $state $assignee
+SELECT $label $member_object $state $assignee $created_date $owner
 FROM <#ri>
 WHERE {
 {
@@ -21,5 +21,13 @@ $member_object workflow:assignee $assignee
 OPTIONAL
 {
 $member_object fedora_model:label $label
+}
+OPTIONAL
+{
+$member_object fedora_model:createdDate $created_date
+}
+OPTIONAL
+{
+$member_object fedora_model:owner $owner
 }
 }

@@ -9,21 +9,21 @@
 /**
  * This function uses the get_all_collections() function in the case of an admin user
  * but otherwise will use the supplied permission string to search
- * the drupal database table 'islandora_workflow_permissions' to compile a list of 
- * collections that the user has the supplied permission to 
+ * the drupal database table 'islandora_workflow_permissions' to compile a list of
+ * collections that the user has the supplied permission to
  * This is also handy to determin if the user has any permissions at that lvl:
  * if (islandora_workflow_get_current_users_collections($perm)!=FALSE) {}
  * if (islandora_workflow_get_current_users_collections()) {}
  * @param string $permission_level
  *   the permission level we are looking for if it is the string 'all' it will get all collections the user has any access to
  * @return $collection_list
- *   an associated array of collection pids and names, 
+ *   an associated array of collection pids and names,
  * @return boolean
  *   a false boolean if they don't have the indicated perms
  */
 function islandora_workflow_get_current_users_collections($permission_level='islandora_workflow_Manager') {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
-  
+
   //init
   $permitted_collections=array();
   $collection_list=array();
@@ -67,7 +67,7 @@ function islandora_workflow_get_current_users_collections($permission_level='isl
   else {
     return FALSE;
   }
-  return $collection_list; 
+  return $collection_list;
 }
 
  /**
@@ -78,9 +78,9 @@ function islandora_workflow_get_current_users_collections($permission_level='isl
  *   an associated array of collection pids and names
  */
 function islandora_workflow_get_all_collections() {
-  
+
   $collection_list=array();
-  
+
   //read in the itql query for getting collections
   $query_file_name=drupal_get_path('module', 'islandora_workflow') . '/collection_query.txt';
   $query_file_handle=fopen($query_file_name, "r");
@@ -94,7 +94,7 @@ function islandora_workflow_get_all_collections() {
 }
 
 /**
- * This function gets all the members (with a workflow status) of a collection through the relationship of 'isMemberOf' 
+ * This function gets all the members (with a workflow status) of a collection through the relationship of 'isMemberOf'
  * and 'isMemberOfCollection' the two relationships need to be checked because there is no
  * Fedora enforced standard.
  * @author
@@ -105,7 +105,7 @@ function islandora_workflow_get_all_collections() {
  *   The array containing all the pids and relevent info from the RI.
  */
 function islandora_workflow_get_all_members_of_collection($collection_id) {
-  
+
   //get info for query
   $query_file_name = drupal_get_path('module', 'islandora_workflow') . '/member_query.txt';
   $query_file_handle = fopen($query_file_name, "r");
@@ -115,18 +115,18 @@ function islandora_workflow_get_all_members_of_collection($collection_id) {
   $offset = 0 ;
   $type = 'sparql';
   $query_url = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
-  
+
   //inject collection value into the query
   $query = preg_replace('/\$collection_object/', '<info:fedora/' . $collection_id . '>', $query);
-  
+
   //run query
   $query_url .= "?type=tuples&flush=TRUE&format=Sparql" . (($limit > 0)?("&limit=$limit"):("")) . "&offset=$offset&lang=$type&query=" . urlencode($query);
   $query_return_string = do_curl($query_url);
   if ($query_return_string) {
     $query_return_dom = DOMDocument::loadXML($query_return_string);
   }
-  
- 
+
+
   //format query results for use (xml->array)
   $result_nodes = $query_return_dom->getElementsByTagName('result');
   $result_nodes_length = $result_nodes->length;
@@ -134,18 +134,20 @@ function islandora_workflow_get_all_members_of_collection($collection_id) {
     for ($i=0; $i < $result_nodes_length; $i++) {
       $result_node = $result_nodes->item($i);
       $result_values = $result_node->childNodes;
-      
+
       $label_element = $result_node->getElementsByTagName('label')->item(0);
       $assignee_element = $result_node->getElementsByTagName('assignee')->item(0);
       $state_element = $result_node->getElementsByTagName('state')->item(0);
       $member_object_element = $result_node->getElementsByTagName('member_object')->item(0);
-      
+      $created_date_element = $result_node->getElementsByTagName('created_date')->item(0);
+      $owner_element = $result_node->getElementsByTagName('owner')->item(0);
+
       $member_object = $member_object_element->getAttribute('uri');
       //info:fedora/ is 12 chars
       $member_object = substr($member_object, 12, strlen($member_object));//need to extract the pid
-  
+
       $member_data[$member_object] = array();
-      
+
       if ($label_element) {
         $label = $label_element->nodeValue;
         if ($label) {//the label may not be pupulated
@@ -162,15 +164,23 @@ function islandora_workflow_get_all_members_of_collection($collection_id) {
         $state = $state_element->nodeValue;
         $member_data[$member_object]['state'] = $state;
       }
+      if ($created_date_element) {
+        $created_date = $created_date_element->nodeValue;
+        $member_data[$member_object]['created_date'] = $created_date;
+      }
+      if ($owner_element) {
+        $owner = $owner_element->nodeValue;
+        $member_data[$member_object]['owner'] = $owner;
+      }
     }
-    
+    dsm($member_data);
     return $member_data;
   }
   return False;
 }
- 
+
 /**
- * This function will reduce the results on a collection search down to those 
+ * This function will reduce the results on a collection search down to those
  * applicable to this install of Islandora.
  * @author
  *   Paul Pound
@@ -191,7 +201,7 @@ function islandora_workflow_limit_collections_by_namespace($existing_collections
       $pid_namespaces[$namespace] = $namespace;
     }
   }
-  
+
   $collections = array();
   foreach ($existing_collections as $collection => $value) {
     foreach ($pid_namespaces as $key => $namespace) {
@@ -267,7 +277,7 @@ function islandora_workflow_init_workflow($object_id) {
 
   // set state
   $result=islandora_workflow_set_object_workflow_state($object_id, 'created');
-  
+
   return $result;
 }
 
@@ -334,17 +344,17 @@ function islandora_workflow_reject_object($object_id) {
  */
 function islandora_workflow_approve_object($object_id) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
-  
+
   //permission check
   $tmp=islandora_workflow_user_object_permission_check($object_id);
   if ($tmp!='islandora_workflow_Editor' && $tmp!='islandora_workflow_Manager') {
     drupal_set_message(t('The object '. $object_id .' could not be approved, you do not have the necessary permissions.'));
     return FALSE;
   }
-  
+
   $workflow_state=islandora_workflow_get_object_workflow_state($object_id);
   if ($workflow_state!='published' && $workflow_state!='approved') {
-  
+
     //send email to all managers
     $collection=islandora_workflow_get_object_parent($object_id);
     $manager_list=islandora_workflow_get_all_users_with_collection_permissions(
@@ -353,14 +363,14 @@ function islandora_workflow_approve_object($object_id) {
     $emails=format_email_array_to_string($emails);
     $params=array('object_id' => $object_id);//optional parameters for mail hook
     drupal_mail('islandora_workflow', 'approve', $emails, language_default(), $params);
-    
+
     return (islandora_workflow_set_object_workflow_state($object_id, 'approved'));
   }
   else {
     drupal_set_message(t('The object '. $object_id .' could not be approved, it was not in an appropriate workflow state.'));
   }
   return FALSE;
-} 
+}
 
 /**
  * This function will move a fedora object to the published state
@@ -373,13 +383,13 @@ function islandora_workflow_approve_object($object_id) {
  */
 function islandora_workflow_publish_object($object_id) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
-  
+
   //permission check
   if (islandora_workflow_user_object_permission_check($object_id)!='islandora_workflow_Manager') {
     drupal_set_message(t('The object '. $object_id .' could not be published, you do not have the necessary permissions.'));
     return FALSE;
   }
-  
+
   if (islandora_workflow_get_object_workflow_state($object_id)!='published') {
     islandora_workflow_set_object_workflow_state($object_id, 'published');
     //make the object viewable
@@ -405,16 +415,16 @@ function islandora_workflow_publish_object($object_id) {
  */
 function islandora_workflow_submit_object($object_id) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
-  
+
   //permission check
   if (!islandora_workflow_user_object_permission_check($object_id)) {
     drupal_set_message(t('The object '. $object_id .' could not be submitted, you do not have the necessary permissions.'));
     return FALSE;
   }
-  
+
   $workflow_state=islandora_workflow_get_object_workflow_state($object_id);
   if ($workflow_state=='created' || $workflow_state=='rejected') {
-  
+
     //send email to all editors
     $collection=islandora_workflow_get_object_parent($object_id);
     $editor_list=islandora_workflow_get_all_users_with_collection_permissions(
@@ -423,7 +433,7 @@ function islandora_workflow_submit_object($object_id) {
     $emails=format_email_array_to_string($emails);
     $params=array('object_id' => $object_id);//optional parameters for mail hook
     drupal_mail('islandora_workflow', 'submit', $emails, language_default(), $params);
-    
+
     return (islandora_workflow_set_object_workflow_state($object_id, 'submitted'));
   }
   else {
@@ -455,7 +465,7 @@ function islandora_workflow_claim_object($object_id) {
  */
 function islandora_workflow_assign_object($object_id, $user_name) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
-  
+
   //permission check
   if (!islandora_workflow_user_object_permission_check($object_id)) {
     drupal_set_message(t('The object '. $object_id .' could not be assigned, you do not have the necessary permissions.'));
@@ -466,7 +476,7 @@ function islandora_workflow_assign_object($object_id, $user_name) {
   $recipient=user_load(array('name' => $user_name));
   $address=$recipient->mail;//user email to send to
   drupal_mail('islandora_workflow', 'assign', $address, language_default(), $params);
-  
+
   //assign object
   return (islandora_workflow_set_object_relationship($object_id, 'assignee', $user_name));
 }
@@ -510,7 +520,7 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
     $xacml->viewingRule->addRole($perms['roles']);
     $xacml->managementRule->addUser($perms['users']);
     $xacml->viewingRule->addUser($perms['users']);
-    
+
     if(isset($object_datastreams['POLICY'])) {
       $object_datastreams['POLICY']->content = $xacml->getXmlString();
     }
@@ -542,7 +552,7 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
       }
     }
   }
-  
+
   //update last modified user/time
   if (isset($object_datastreams['islandora_workflow'])) {//build xml from DS
     $workflow_datastream=$object_datastreams['islandora_workflow'];
@@ -568,7 +578,7 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
     }
     $workflow_datastream->__set('content', $workflow_parser->saveXML());
   }
-  
+
   else {//build xml from default if there is no DS present
     $default_xml_file_name=drupal_get_path('module', 'islandora_workflow') . '/start_workflow.xml';
     $workflow_parser = new DOMDocument();
@@ -591,7 +601,7 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
     }
     $object->addDatastream('islandora_workflow', NULL,  $workflow_parser->saveXML(), array('dsLabel' => 'workflow', 'mimeType' => 'text/xml', 'controlGroup' => 'X', 'logMessage' => 'Adding islandora_workflow datastream(workflow tracking).'));
   }
-  
+
   //make sure that the object's fedora state is going to be set to I if the object is still in workflow
   if ($state!='published' && islandora_workflow_get_object_fedora_state($object_id)!='I') {
     $object->__set('state', 'I');
@@ -605,11 +615,11 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
  *  The object to get the label of
  *@return string $label
  *  The label of the object specified.
- *@return bool 
+ *@return bool
  *  False if there is an exception in geting the label
  */
 function islandora_workflow_get_object_label($object_id) {
-  try {  
+  try {
     module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
     $object= new FedoraObject($object_id);
     $label=$object->__get('label');
@@ -629,13 +639,13 @@ function islandora_workflow_get_object_label($object_id) {
  */
 function islandora_workflow_delete_object($object_id) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
-  
+
   //permission check
   if (!islandora_workflow_user_object_permission_check($object_id)) {
     drupal_set_message(t('The object '. $object_id .' could not be deleted, you do not have the necessary permissions.'));
     return FALSE;
   }
-  
+
   module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
   $object= new FedoraObject($object_id);
   return ($object->__set('state', 'D'));
@@ -673,7 +683,7 @@ function islandora_workflow_get_object_creator($object_id) {
 function islandora_workflow_get_object_fedora_state($object_id) {
   //init
   module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
-  
+
   try {
     $object= new FedoraObject($object_id);
     $state=$object->__get('state');
@@ -690,21 +700,21 @@ function islandora_workflow_get_object_fedora_state($object_id) {
  * @param string $object_id
  *   the fedora pid of the object to check the status of
  * @return $state
- *   The string reperesenting the state of the object in the workflow 
+ *   The string reperesenting the state of the object in the workflow
  * 	  or a boolean FALSE if it has not ben set
  */
 function islandora_workflow_get_object_workflow_state($object_id) {
   //init
   module_load_include('raw.inc', 'islandora_fedora_api'); //for getting an object
   $apim_object= new FedoraAPIM();
-  
+
   try {
     $relationships=$apim_object->getRelationships($object_id, 'info:islandora/islandora-system:def/islandora_workflow#state');
   }
   catch (FedoraAPIRestException $e) {
     return FALSE;
   }
-  
+
   $relationships_parser = new DOMDocument();
   $relationships_parser->loadXML($relationships->data);
 
@@ -715,7 +725,7 @@ function islandora_workflow_get_object_workflow_state($object_id) {
     $state=$state->nodeValue;
     return $state;
   }
-  
+
   return FALSE;
 }
 
@@ -731,14 +741,14 @@ function islandora_workflow_get_object_assignee($object_id) {
   //init
   module_load_include('raw.inc', 'islandora_fedora_api'); //for getting an object
   $apim_object= new FedoraAPIM();
-  
+
   try {
     $relationships=$apim_object->getRelationships($object_id, 'info:islandora/islandora-system:def/islandora_workflow#assignee');
   }
   catch (FedoraAPIRestException $e) {
     return FALSE;
   }
-  
+
   $relationships_parser = new DOMDocument();
   $relationships_parser->loadXML($relationships->data);
 
@@ -749,12 +759,12 @@ function islandora_workflow_get_object_assignee($object_id) {
     $assignee=$assignee->nodeValue;
     return $assignee;
   }
-  
+
   return FALSE;
 }
 
 /**
- * This function will set the indicated relationship on the indicated object.  
+ * This function will set the indicated relationship on the indicated object.
  * It will create or replace the relationship  as apropriate.
  * @param $object_id
  *   the fedora pid of the object whos rels-ext will be modified
@@ -770,7 +780,7 @@ function islandora_workflow_set_object_relationship($object_id, $relationship_in
   $islandora_workflow_namespace='info:islandora/islandora-system:def/islandora_workflow#';
   module_load_include('raw.inc', 'islandora_fedora_api'); //for getting an object
   $apim_object= new FedoraAPIM();
-  
+
   //get existing relationshp
   $relationships=$apim_object->getRelationships($object_id, $islandora_workflow_namespace . $relationship_in);
   $relationships_parser = new DOMDocument();
@@ -804,7 +814,7 @@ function islandora_workflow_get_object_parent($object_id) {
   $apim_object= new FedoraAPIM();
   $relationships_parser = new DOMDocument();
   $parent=FALSE;
-  
+
   //get relation ship data
   try {
     $relationships=$apim_object->getRelationships($object_id, $parent_relationship_namespace . $parent_relationship);
@@ -816,13 +826,13 @@ function islandora_workflow_get_object_parent($object_id) {
   catch (FedoraAPIRestException $e) {
     return FALSE;
   }
-  
+
   //handle second collecion memberships string if the first wasn't found
   if (empty($relationship)) {
     $parent_relationship='isMemberOfCollection';
     try {
       $relationships=$apim_object->getRelationships($object_id, $parent_relationship_namespace . $parent_relationship);
-      //grab realtionship 
+      //grab realtionship
       $relationships_parser->loadXML($relationships->data);
       $relationship_elements=$relationships_parser->getElementsByTagNameNS($parent_relationship_namespace, $parent_relationship);
       $relationship=$relationship_elements->item(0);
@@ -831,7 +841,7 @@ function islandora_workflow_get_object_parent($object_id) {
       return FALSE;
     }
   }
-  
+
   //handle relationship data
   if (!empty($relationship)) {
     $parent=$relationship->getAttributeNS('http://www.w3.org/1999/02/22-rdf-syntax-ns#', 'resource');
@@ -869,7 +879,7 @@ function islandora_workflow_set_object_note($object_id, $subject, $body) {
   $workflow_datastream=$object_datastreams['islandora_workflow'];
   $workflow_string=$workflow_datastream->__get('content');
   $workflow_parser->loadXML($workflow_string);
-  
+
   //modify DS xml
   //get elements to populate dynamicaly, these lists are dynamic so no need to update later
   $from_node_list=$workflow_parser->getElementsByTagName('from');
@@ -878,20 +888,20 @@ function islandora_workflow_set_object_note($object_id, $subject, $body) {
   $body_node_list=$workflow_parser->getElementsByTagName('body');
   $note_node_list=$workflow_parser->getElementsByTagName('note');
   $notes_node_list=$workflow_parser->getElementsByTagName('notes');
-  
+
   //@todo: put in logic to add the element(s) if it doesn't exist
   //make sure that the notes and note elements are present and add them if they are not
   if (!$notes_node_list->item(0)) {
     $notes=$workflow_parser->createElement('notes');
     $workflow_node_list=$workflow_parser->getElementsByTagName('workflow');
     $workflow_node_list->item(0)->appendChild($notes);
-    
+
   }
   if (!$note_node_list->item(0)) {
     $note=$workflow_parser->createElement('note');
     $notes_node_list->item(0)->appendChild($note);
   }
-  
+
   //create from node
   $from=$workflow_parser->createElement('from');
   $from->appendChild($workflow_parser->createTextNode($user->name));
@@ -903,7 +913,7 @@ function islandora_workflow_set_object_note($object_id, $subject, $body) {
   else {
     $note_node_list->item(0)->appendChild($from);
   }
-  
+
   //create timestamp
   $timestamp=$workflow_parser->createElement('timestamp');
   $timestamp->appendChild($workflow_parser->createTextNode(date('c')));
@@ -916,7 +926,7 @@ function islandora_workflow_set_object_note($object_id, $subject, $body) {
   else {
     $note_node_list->item(0)->appendChild($timestamp);
   }
-  
+
   //create subject node
   $subject_new_element=$workflow_parser->createElement('subject');
   $subject_new_element->appendChild($workflow_parser->createTextNode($subject));
@@ -929,8 +939,8 @@ function islandora_workflow_set_object_note($object_id, $subject, $body) {
   else {
     $note_node_list->item(0)->appendChild($subject_new_element);
   }
-  
-  
+
+
   //create body node
   $body_new_element=$workflow_parser->createElement('body');
   $body_new_element->appendChild($workflow_parser->createTextNode($body));
@@ -943,7 +953,7 @@ function islandora_workflow_set_object_note($object_id, $subject, $body) {
   else {
     $note_node_list->item(0)->appendChild($body_new_element);
   }
-  
+
   //set the new DS content
   return ($workflow_datastream->__set('content', $workflow_parser->saveXML()));
 }
@@ -975,7 +985,7 @@ function islandora_workflow_get_object_note_subject($object_id) {
     return FALSE;
   }
   $subject='';
-  
+
   $subject_node_list=$workflow_parser->getElementsByTagName('subject');
   foreach ($subject_node_list as $subject_element) {
     //get the text
@@ -994,7 +1004,7 @@ function islandora_workflow_get_object_note_subject($object_id) {
 function islandora_workflow_get_object_note_body($object_id) {
   //init
   module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
-  
+
   try {
     $object= new FedoraObject($object_id);
     $workflow_parser = new DOMDocument();
@@ -1010,13 +1020,13 @@ function islandora_workflow_get_object_note_body($object_id) {
   catch (FedoraAPIRestException $e) {
     return FALSE;
   }
-  
+
   $workflow_parser->loadXML($workflow_string);
-  
+
   $body='';
-  
+
   $body_node_list=$workflow_parser->getElementsByTagName('body');
-  
+
   foreach ($body_node_list as $body_element) {
     //get the text
     $body=$body_element->nodeValue;
@@ -1059,7 +1069,7 @@ function format_email_array_to_string($emails_array) {
   $emails_string='';
   if (is_array($emails_array)) {
     $is_first=TRUE;//for telling if this is the first iteration of the loop
-    
+
     foreach ($emails_array as $key => $email) {
       if ($is_first==TRUE) {
         $emails_string=$email;//first email in list
@@ -1075,39 +1085,35 @@ function format_email_array_to_string($emails_array) {
 
 /**
  * This function is for getting the workflow associated times for an object.
- * 
+ *
  * @param string $pid
  *   The pid of the object to return the timestamps for
  * @return array $times
  *   An array of the objects timestamps, the 'created' element is creation while the 'modified' is the last workflow progression.
  */
-function islandora_workflow_get_object_time_stamps($object_id) {
-  
+function islandora_workflow_get_object_state_time_stamp($object_id) {
+
   //init
   $times = array();
-  
+
   module_load_include('object.inc', 'islandora_fedora_api');
   $object = new FedoraObject($object_id);
-  
+
   $object_datastreams = $object->get_datastreams();
-  
+
   if (isset($object_datastreams['islandora_workflow'])) {//build xml from DS
     $workflow_parser = new DOMDocument();
     $workflow_datastream = $object_datastreams['islandora_workflow'];
     $workflow_string = $workflow_datastream->__get('content');
     $workflow_parser->loadXML($workflow_string);
     $when_last_modified_array = $workflow_parser->getElementsByTagName('when_last_modified');
-    
+
     foreach ($when_last_modified_array as $when_last_modified_element) {
       //get timestamp
       $times['islandora_workflow_modified'] = strtotime($when_last_modified_element->nodeValue);
       $times['islandora_workflow_modified'] = format_date($times['islandora_workflow_modified'], $type='small');
     }
   }
-  
-  $created_date_obj = $object->__get('createDate');
-  $times['created'] = $created_date_obj->getTimestamp();
-  $times['created'] = format_date($times['created'], $type = 'small');
-  
+
   return $times;
 }
