@@ -173,7 +173,6 @@ function islandora_workflow_get_all_members_of_collection($collection_id) {
         $member_data[$member_object]['owner'] = $owner;
       }
     }
-    dsm($member_data);
     return $member_data;
   }
   return False;
