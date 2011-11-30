@@ -1003,10 +1003,12 @@ function islandora_workflow_role_permissions_form_submit($collection_role_permis
       $members = islandora_workflow_get_all_members_of_collection($collection_pid);
     }
 
-    // remove any published collection members
-    foreach($members as $pid => $member) {
-      if ($member['state'] == 'published') {
-        unset($members[$pid]);
+    if($members) {
+      // remove any published collection members
+      foreach($members as $pid => $member) {
+        if ($member['state'] == 'published') {
+          unset($members[$pid]);
+        }
       }
     }
 
@@ -1233,10 +1235,12 @@ function islandora_workflow_user_permissions_form_submit($collection_user_permis
       $members = islandora_workflow_get_all_members_of_collection($collection_pid);
     }
 
-    // remove any published collection members
-    foreach($members as $pid => $member) {
-      if ($member['state'] == 'published') {
-        unset($members[$pid]);
+    if($members) {
+      // remove any published collection members
+      foreach($members as $pid => $member) {
+        if ($member['state'] == 'published') {
+          unset($members[$pid]);
+        }
       }
     }
 
