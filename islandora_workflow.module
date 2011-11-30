@@ -744,7 +744,7 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
             
             //get the dates and provide them
             $times = islandora_workflow_get_object_time_stamps($member);
-            $vars['list'][$collection_id][$member]['workflow_started'] = $times['created'];
+            $vars['list'][$collection_id][$member]['when_created'] = $times['created'];
             $vars['list'][$collection_id][$member]['last_workflow_progression'] = $times['islandora_workflow_modified'];
             
             //if there is a note
