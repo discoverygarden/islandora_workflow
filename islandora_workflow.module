@@ -24,7 +24,6 @@
  *
  * @todo
  *   Would it be good to create a workflow fedora object that derives the islandora fedora api object? This COULD impact performance.
- *   The new query gets owner (creator): refactor to use this data
  *   A way to transfer this to the pre-processor func should be found so the ir queries are not being repeated.
  *   The schema will be changing so that the last modified date and current note subject will be in the rels-int, large refactor here.
  *
@@ -39,6 +38,8 @@
  * difference is some missing elements in the workflow tab vs the overview tab.
  *
  * 2. The permission tabs use seperate functions because the have enough differences (especialy in the submit funciton) to make this easier to follow.
+ *
+ * This module treates the object owner as the creator for its purposes.
  */
 
 /**
@@ -326,7 +327,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
             foreach ($collection_members as $member => $member_attibutes) {
               //show things in approved state
               global $user;
-              if ($member_attibutes['state'] != 'created' || islandora_workflow_get_object_creator($member) != $user->name) {
+              if ($member_attibutes['state'] != 'created' || $member_attibutes['owner'] != $user->name) {
                 unset($collection_members[$member]);
               }
             }
@@ -338,7 +339,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
               if (!user_access('islandora_workflow_Administrator') && !user_access('administer')) {
                 //show things not in published state
                 global $user;
-                if (islandora_workflow_get_object_creator($member) != $user->name) {
+                if ($member_attibutes['owner'] != $user->name) {
                   unset($collection_members[$member]);
                 }
               }
