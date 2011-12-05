@@ -314,10 +314,10 @@ function islandora_workflow_reject_object($object_id) {
     // if workflow state is published and xacml is enabled you might not be able to
     // reject due to XACML.
     global $user;
-    if($workflow_state == 'published' && module_exists('islandora_xacml_api') && $user->uid != 1) {
+    if ($workflow_state == 'published' && module_exists('islandora_xacml_api') && $user->uid != 1) {
       module_load_include('inc', 'islandora_xacml_api', 'Xacml');
       $xacml = Xacml::constructFromPid($object_id);
-      if(!$xacml->managementRule->hasPermission($user->name, $user->roles)) {
+      if (!$xacml->managementRule->hasPermission($user->name, $user->roles)) {
         drupal_set_message(t('The object '. $object_id .' could not be rejected, you do not have XACML access to object.'));
         return FALSE;
       }
@@ -513,7 +513,7 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
   $collection = islandora_workflow_get_object_parent($object_id);
 
   // make sure there is an appropriate XACML datastream if there should be
-  if(variable_get('islandora_workflow_enforce_security', 0) && module_exists('islandora_xacml_api') && $state != 'published') {
+  if (variable_get('islandora_workflow_enforce_security', 0) && module_exists('islandora_xacml_api') && $state != 'published') {
     module_load_include('inc', 'islandora_xacml_api', 'Xacml');
     module_load_include('permissions.inc', 'islandora_workflow');
 
@@ -530,7 +530,7 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
     $xacml->managementRule->addUser($perms['users']);
     $xacml->viewingRule->addUser($perms['users']);
 
-    if(isset($object_datastreams['POLICY'])) {
+    if (isset($object_datastreams['POLICY'])) {
       $object_datastreams['POLICY']->content = $xacml->getXmlString();
     }
     else {
@@ -540,20 +540,20 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
   else {
     try {
       // xacml is disabled. delete the xacml datastream if it exists before it starts causing problems.
-      if(isset($object_datastreams['POLICY'])) {
+      if (isset($object_datastreams['POLICY'])) {
           $object_datastreams['POLICY']->purge();
       }
-      $collectionObject = new FedoraObject($collection);
-      $collectionDS = $collectionObject->get_datastreams();
+      $collection_object = new FedoraObject($collection);
+      $collection_datastreams = $collection_object->get_datastreams();
 
-      if(isset($collectionDS['CHILD_SECURITY'])) {
-        $object->addDatastream('POLICY', NULL, $collectionDS['CHILD_SECURITY']->content, array('dsLabel' => 'security policy', 'mimeType' => 'text/xml', 'controlGroup' => 'X', 'logMessage' => 'Adding policy datastream.'));
+      if (isset($collection_datastreams['CHILD_SECURITY'])) {
+        $object->addDatastream('POLICY', NULL, $collection_datastreams['CHILD_SECURITY']->content, array('dsLabel' => 'security policy', 'mimeType' => 'text/xml', 'controlGroup' => 'X', 'logMessage' => 'Adding policy datastream.'));
       }
     }
     catch (FedoraAPIRestException $e) {
-      if($e->http->code == 401) {
+      if ($e->http->code == 401) {
         // it has a policy but we can't delete it
-        drupal_set_message('This object has a policy datastream preventing it from being modified.', 'error');
+        drupal_set_message(t('This object has a policy datastream preventing it from being modified.'), 'error');
         return FALSE;
       }
       else {
@@ -811,11 +811,11 @@ function islandora_workflow_set_object_relationship($object_id, $relationship_in
     foreach ($relationship->childNodes as $relationship_text_node) {
       $current_relationship = $relationship_text_node->nodeValue;
       //clear current relationship
-      $apim_object->purgeRelationship($object_id, $islandora_workflow_namespace . $relationship_in, $current_relationship, array('isLiteral' => 'true', 'subject'=>$subject));
+      $apim_object->purgeRelationship($object_id, $islandora_workflow_namespace . $relationship_in, $current_relationship, array('isLiteral' => 'true', 'subject' => $subject));
     }
   }
   //set new relationship
-  $apim_object->addRelationship($object_id, $islandora_workflow_namespace . $relationship_in, $target, array('isLiteral' => 'true', 'subject'=>$subject));
+  $apim_object->addRelationship($object_id, $islandora_workflow_namespace . $relationship_in, $target, array('isLiteral' => 'true', 'subject' => $subject));
 }
 
 /**

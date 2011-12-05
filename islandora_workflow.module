@@ -571,26 +571,26 @@ function islandora_workflow_admin_submit($form, &$form_state) {
   drupal_set_message(t('Your settings have been updated.'));
 
   // if the setting changed
-  if($form_state['values']['islandora_workflow_enforce_security'] != variable_get('islandora_workflow_enforce_security', 0)) {
+  if ($form_state['values']['islandora_workflow_enforce_security'] != variable_get('islandora_workflow_enforce_security', 0)) {
 
     // update the drupal variable
     variable_set('islandora_workflow_enforce_security', $form_state['values']['islandora_workflow_enforce_security']);
 
     // get the list of collections with members that need to be updated
     $collection_list = islandora_workflow_get_all_collections();
-    foreach($collection_list as $collection_pid => $collection_name) {
+    foreach ($collection_list as $collection_pid => $collection_name) {
       $members = islandora_workflow_get_all_members_of_collection($collection_pid);
-      if($members) {
+      if ($members) {
         $collection_list[$collection_pid] = $members;
         // delete everything in a published state
-        foreach($members as $pid => $data) {
-          if($data['state'] == 'published') {
+        foreach ($members as $pid => $data) {
+          if ($data['state'] == 'published') {
             unset($members[$pid]);
           }
         }
       }
 
-      if($members) {
+      if ($members) {
         $collection_list[$collection_pid] = $members;
       }
       else {
@@ -598,11 +598,11 @@ function islandora_workflow_admin_submit($form, &$form_state) {
       }
     }
 
-    if($collection_list) {
+    if ($collection_list) {
       $operations = array();
       $delete = !variable_get('islandora_workflow_enforce_security', 0);
 
-      foreach($collection_list as $collection_pid => $members) {
+      foreach ($collection_list as $collection_pid => $members) {
         $operations[] = array('islandora_workflow_batch_function', array($collection_pid, $members, $delete));
       }
 
@@ -998,14 +998,14 @@ function islandora_workflow_role_permissions_form_submit($collection_role_permis
     $collection_pid = $_SESSION['workflow_permissions_page']['active_collection'];
 
     // check if the collection is empty
-    if(variable_get('islandora_workflow_enforce_security', 0) && module_exists('islandora_xacml_api')) {
+    if (variable_get('islandora_workflow_enforce_security', 0) && module_exists('islandora_xacml_api')) {
       module_load_include('inc', 'islandora_workflow');
       $members = islandora_workflow_get_all_members_of_collection($collection_pid);
     }
 
-    if($members) {
+    if ($members) {
       // remove any published collection members
-      foreach($members as $pid => $member) {
+      foreach ($members as $pid => $member) {
         if ($member['state'] == 'published') {
           unset($members[$pid]);
         }
@@ -1013,7 +1013,7 @@ function islandora_workflow_role_permissions_form_submit($collection_role_permis
     }
 
     // If Xacml is used, then we need to update every single member of a collection in a batch
-    if(variable_get('islandora_workflow_enforce_security', 0) && module_exists('islandora_xacml_api') && $members) {
+    if (variable_get('islandora_workflow_enforce_security', 0) && module_exists('islandora_xacml_api') && $members) {
       // arrrr... tis batch time billy
       $batch = array(
         'title' => t('Updating XACML Policies'),
@@ -1230,14 +1230,14 @@ function islandora_workflow_user_permissions_form_submit($collection_user_permis
     $collection_pid = $_SESSION['workflow_permissions_page']['active_collection'];
 
     // check if the collection is empty
-    if(variable_get('islandora_workflow_enforce_security', 0) && module_exists('islandora_xacml_api')) {
+    if (variable_get('islandora_workflow_enforce_security', 0) && module_exists('islandora_xacml_api')) {
       module_load_include('inc', 'islandora_workflow');
       $members = islandora_workflow_get_all_members_of_collection($collection_pid);
     }
 
-    if($members) {
+    if ($members) {
       // remove any published collection members
-      foreach($members as $pid => $member) {
+      foreach ($members as $pid => $member) {
         if ($member['state'] == 'published') {
           unset($members[$pid]);
         }
@@ -1245,7 +1245,7 @@ function islandora_workflow_user_permissions_form_submit($collection_user_permis
     }
 
     // If Xacml is used, then we need to update every single member of a collection in a batch
-    if(variable_get('islandora_workflow_enforce_security', 0) && module_exists('islandora_xacml_api') && $members) {
+    if (variable_get('islandora_workflow_enforce_security', 0) && module_exists('islandora_xacml_api') && $members) {
       // arrrr... tis batch time billy
       $batch = array(
         'title' => t('Updating XACML Policies'),
@@ -1297,10 +1297,10 @@ function islandora_workflow_batch_function($collection_pid, $members, $delete, &
     $context['sandbox']['progress'] = 0;
     $context['sandbox']['members'] = $members;
     $context['sandbox']['items'] = count($members);
-    if(!isset($context['results']['success'])) {
+    if (!isset($context['results']['success'])) {
       $context['results']['success'] = array();
     }
-    if(!isset($context['results']['fail'])) {
+    if (!isset($context['results']['fail'])) {
       $context['results']['fail'] = array();
     }
   }
@@ -1314,7 +1314,7 @@ function islandora_workflow_batch_function($collection_pid, $members, $delete, &
     $object = new FedoraObject($pid);
     $datastreams = $object->get_datastreams();
 
-    if(!$delete) {
+    if (!$delete) {
       $xacml = new Xacml();
       //get users and roles
       $creator = islandora_workflow_get_object_creator($pid);
@@ -1326,7 +1326,7 @@ function islandora_workflow_batch_function($collection_pid, $members, $delete, &
       $xacml->managementRule->addUser($perms['users']);
       $xacml->viewingRule->addUser($perms['users']);
 
-      if(isset($datastreams['POLICY'])) {
+      if (isset($datastreams['POLICY'])) {
         $datastreams['POLICY']->content = $xacml->getXmlString();
       }
       else {
@@ -1335,13 +1335,13 @@ function islandora_workflow_batch_function($collection_pid, $members, $delete, &
     }
     else {
       // xacml is disabled. delete the xacml datastream if it exists before it starts causing problems.
-      if(isset($datastreams['POLICY'])) {
+      if (isset($datastreams['POLICY'])) {
           $datastreams['POLICY']->purge();
       }
       $collectionObject = new FedoraObject($collection_pid);
       $collectionDS = $collectionObject->get_datastreams();
 
-      if(isset($collectionDS['CHILD_SECURITY'])) {
+      if (isset($collectionDS['CHILD_SECURITY'])) {
         $object->addDatastream('POLICY', NULL, $collectionDS['CHILD_SECURITY']->content, array('dsLabel' => 'security policy', 'mimeType' => 'text/xml', 'controlGroup' => 'X', 'logMessage' => 'Adding policy datastream.'));
       }
     }
@@ -1373,8 +1373,8 @@ function islandora_workflow_batch_finished($success, $results, $operations) {
     $message = t('Finished with an error.');
   }
 
-  if($results['fail']) {
-    foreach($results['fail'] as $fail) {
+  if ($results['fail']) {
+    foreach ($results['fail'] as $fail) {
       drupal_set_message("Failed to update: $fail", 'error');
     }
   }

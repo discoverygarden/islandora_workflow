@@ -19,7 +19,7 @@
  *   indexed array containing all of the results returned. each individual result is a associative array
  *   with the keys: user, collection, permission and optionally name.
  */
-function islandora_workflow_get_user_permissions ( array $options = array() ) {
+function islandora_workflow_get_user_permissions(array $options = array() ) {
   $user = isset($options['user']) ? $options['user'] : NULL;
   $collection = isset($options['collection']) ? $options['collection'] : NULL;
   $permissions = isset($options['permissions']) ? $options['permissions'] : NULL;
@@ -31,7 +31,7 @@ function islandora_workflow_get_user_permissions ( array $options = array() ) {
   $results = array();
   $args = array();
 
-  if($userinfo) {
+  if ($userinfo) {
     $query = 'SELECT user, name, collection, permission FROM {islandora_workflow_user_permissions} iw, ' .
     '{users} u WHERE iw.user = u.uid';
     $and = TRUE;
@@ -41,12 +41,12 @@ function islandora_workflow_get_user_permissions ( array $options = array() ) {
     $query = 'SELECT user, collection, permission FROM {islandora_workflow_user_permissions} iw';
   }
 
-  if($user) {
-    if(!$where) {
+  if ($user) {
+    if (!$where) {
       $query .= ' WHERE';
       $where = TRUE;
     }
-    if($and)
+    if ($and)
       $query .= ' AND';
     else
       $and = TRUE;
@@ -54,12 +54,12 @@ function islandora_workflow_get_user_permissions ( array $options = array() ) {
     $args[] = $user;
   }
 
-  if($collection) {
-    if(!$where) {
+  if ($collection) {
+    if (!$where) {
       $query .= ' WHERE';
       $where = TRUE;
     }
-    if($and)
+    if ($and)
       $query .= ' AND';
     else
       $and = TRUE;
@@ -67,12 +67,12 @@ function islandora_workflow_get_user_permissions ( array $options = array() ) {
     $args[] = $collection;
   }
 
-  if($permissions) {
-    if(!$where) {
+  if ($permissions) {
+    if (!$where) {
       $query .= ' WHERE';
       $where = TRUE;
     }
-    if($and)
+    if ($and)
       $query .= ' AND';
     else
       $and = TRUE;
@@ -80,7 +80,7 @@ function islandora_workflow_get_user_permissions ( array $options = array() ) {
     $or = FALSE;
     $query .= ' (';
     foreach ($permissions as $permission) {
-      if($or)
+      if ($or)
         $query .= ' OR';
       $query .= " iw.permission = '%s'";
       $args[] = $permission;
@@ -128,7 +128,7 @@ function islandora_workflow_get_role_permissions( array $options = array() ) {
   $results = array();
   $args = array();
 
-  if($roleinfo) {
+  if ($roleinfo) {
     $query = 'SELECT role, name, collection, permission FROM {islandora_workflow_role_permissions} iw, ' .
     '{role} r WHERE iw.role = r.rid';
     $and = TRUE;
@@ -138,19 +138,19 @@ function islandora_workflow_get_role_permissions( array $options = array() ) {
     $query = 'SELECT role, collection, permission FROM {islandora_workflow_role_permissions} iw';
   }
 
-  if($roles) {
-    if(!$where) {
+  if ($roles) {
+    if (!$where) {
       $query .= ' WHERE';
       $where = TRUE;
     }
-    if($and)
+    if ($and)
       $query .= ' AND';
     else
       $and = TRUE;
     $or = FALSE;
     $query .= ' (';
     foreach ($roles as $role) {
-      if($or)
+      if ($or)
         $query .= ' OR';
       $query .= " iw.role = %d";
       $args[] = $role;
@@ -159,12 +159,12 @@ function islandora_workflow_get_role_permissions( array $options = array() ) {
     $query .= ' )';
   }
 
-  if($collection) {
-    if(!$where) {
+  if ($collection) {
+    if (!$where) {
       $query .= ' WHERE';
       $where = TRUE;
     }
-    if($and)
+    if ($and)
       $query .= ' AND';
     else
       $and = TRUE;
@@ -172,12 +172,12 @@ function islandora_workflow_get_role_permissions( array $options = array() ) {
     $args[] = $collection;
   }
 
-  if($permissions) {
-    if(!$where) {
+  if ($permissions) {
+    if (!$where) {
       $query .= ' WHERE';
       $where = TRUE;
     }
-    if($and)
+    if ($and)
       $query .= ' AND';
     else
       $and = TRUE;
@@ -185,7 +185,7 @@ function islandora_workflow_get_role_permissions( array $options = array() ) {
     $or = FALSE;
     $query .= '(';
     foreach ($permissions as $permission) {
-      if($or)
+      if ($or)
         $query .= ' OR';
       $query .= " iw.permission = '%s'";
       $args[] = $permission;
@@ -223,7 +223,7 @@ function islandora_workflow_get_permission_state($collection, $state) {
   $users = array();
   $roles = array();
 
-  switch($state) {
+  switch ($state) {
     case 'created':
     case 'rejected':
       $permission[] = 'islandora_workflow_Submitter';
@@ -264,7 +264,7 @@ function islandora_workflow_get_all_role_permissions() {
   $results = islandora_workflow_get_role_permissions();
 
   //build return array
-  foreach($results as $row) {
+  foreach ($results as $row) {
     $perm_list[$row['role']][$row['collection']]=$row['permission'];
   }
 
@@ -284,7 +284,7 @@ function islandora_workflow_get_all_user_permissions() {
   $results = islandora_workflow_get_user_permissions();
 
   //build return array
-  foreach($results as $row) {
+  foreach ($results as $row) {
     $perm_list[$row['user']][$row['collection']]=$row['permission'];
   }
 
@@ -430,7 +430,7 @@ function islandora_workflow_get_current_users_role_permissions() {
   foreach ($user->roles as $rid => $name) {
     $roles[] = $rid;
   }
-  
+
   //build query
   $results = islandora_workflow_get_role_permissions(array('roles' => $roles));
 
@@ -548,7 +548,7 @@ function islandora_workflow_get_users_with_module_permissions() {
  */
 function islandora_workflow_user_object_permission_check($object_id, $user_in=NULL) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
-  
+
   //init
   $manager_permissions=islandora_workflow_get_current_users_collections('islandora_workflow_Manager');
   $parent=islandora_workflow_get_object_parent($object_id);
