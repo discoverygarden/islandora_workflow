@@ -542,7 +542,7 @@ function islandora_workflow_admin(&$form_state) {
 
   // give warning about roles if they do not have the administrator role or are not UID = 1
   global $user;
-  if(!($user->uid == 1 || in_array('administrator',$user->roles)) && !$disabled) {
+  if (!($user->uid == 1 || in_array('administrator', $user->roles)) && !$disabled) {
     $admin_form['warning'] = array(
       '#value' => 'WARNING: It is recommended that you be "User 1" or have the role "administrator" when enabling or '
       . 'disabling XACML security. You need to have access to EVERY object in the repository because they all '
@@ -568,7 +568,7 @@ function islandora_workflow_admin(&$form_state) {
 
 function islandora_workflow_admin_submit($form, &$form_state) {
   module_load_include('inc', 'islandora_workflow');
-  drupal_set_message('Your settings have been updated.');
+  drupal_set_message(t('Your settings have been updated.'));
 
   // if the setting changed
   if($form_state['values']['islandora_workflow_enforce_security'] != variable_get('islandora_workflow_enforce_security', 0)) {
@@ -744,12 +744,11 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
             $vars['list'][$collection_id][$member]['Assign'] = drupal_render($vars['list'][$collection_id][$member]['Assign']);
 
             //get the dates and provide them
-            $times = islandora_workflow_get_object_state_time_stamp($member);
             $vars['list'][$collection_id][$member]['when_created'] = format_date($member_attibutes['created_date'], $type = 'small');
-            $vars['list'][$collection_id][$member]['last_workflow_progression'] = $times['islandora_workflow_modified'];
+            $vars['list'][$collection_id][$member]['last_workflow_progression'] = format_date($member_attibutes['islandora_workflow_modified'], $type = 'small');
 
             //if there is a note
-            $member_note_subject = islandora_workflow_get_object_note_subject($member);
+            $member_note_subject = $member_attibutes['subject'];
             if ($member_note_subject) {
               $vars['list'][$collection_id][$member]['note_subject']=
                 l($member_note_subject,

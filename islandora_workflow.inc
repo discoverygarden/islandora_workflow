@@ -141,6 +141,8 @@ function islandora_workflow_get_all_members_of_collection($collection_id) {
       $member_object_element = $result_node->getElementsByTagName('member_object')->item(0);
       $created_date_element = $result_node->getElementsByTagName('created_date')->item(0);
       $owner_element = $result_node->getElementsByTagName('owner')->item(0);
+      $subject_element = $result_node->getElementsByTagName('subject')->item(0);
+      $timestamp_element = $result_node->getElementsByTagName('timestamp')->item(0);
 
       $member_object = $member_object_element->getAttribute('uri');
       //info:fedora/ is 12 chars
@@ -171,6 +173,14 @@ function islandora_workflow_get_all_members_of_collection($collection_id) {
       if ($owner_element) {
         $owner = $owner_element->nodeValue;
         $member_data[$member_object]['owner'] = $owner;
+      }
+      if ($timestamp_element) {
+        $timestamp = $timestamp_element->nodeValue;
+        $member_data[$member_object]['islandora_workflow_modified'] = $timestamp;
+      }
+      if ($subject_element) {
+        $subject = $subject_element->nodeValue;
+        $member_data[$member_object]['subject'] = $subject;
       }
     }
     return $member_data;
@@ -497,7 +507,7 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
   $object= new FedoraObject($object_id);
   $workflow_parser = new DOMDocument();
   global $user;
-  $object_datastreams=$object->get_datastreams();
+  $object_datastreams = $object->get_datastreams();
 
   // get the collection of this object
   $collection = islandora_workflow_get_object_parent($object_id);
@@ -705,7 +715,7 @@ function islandora_workflow_get_object_fedora_state($object_id) {
 function islandora_workflow_get_object_workflow_state($object_id) {
   //init
   module_load_include('raw.inc', 'islandora_fedora_api'); //for getting an object
-  $apim_object= new FedoraAPIM();
+  $apim_object = new FedoraAPIM();
 
   try {
     $relationships=$apim_object->getRelationships($object_id, 'info:islandora/islandora-system:def/islandora_workflow#state');
@@ -717,11 +727,11 @@ function islandora_workflow_get_object_workflow_state($object_id) {
   $relationships_parser = new DOMDocument();
   $relationships_parser->loadXML($relationships->data);
 
-  $state_elements=$relationships_parser->getElementsByTagNameNS('info:islandora/islandora-system:def/islandora_workflow#', 'state');
+  $state_elements = $relationships_parser->getElementsByTagNameNS('info:islandora/islandora-system:def/islandora_workflow#', 'state');
 
-  $state=$state_elements->item(0)->firstChild;
+  $state = $state_elements->item(0)->firstChild;
   if ($state) {
-    $state=$state->nodeValue;
+    $state = $state->nodeValue;
     return $state;
   }
 
@@ -765,37 +775,47 @@ function islandora_workflow_get_object_assignee($object_id) {
 /**
  * This function will set the indicated relationship on the indicated object.
  * It will create or replace the relationship  as apropriate.
+ * The
  * @param $object_id
  *   the fedora pid of the object whos rels-ext will be modified
  * @param string $relationship
  *   the relationship to set
  * @param string $target
- *   a litteral or fedora pid string
+ *   a litteral or fedora pid string (object of the relationship)
+ * @param string $subject
+ *   This defaults to the object's pid in the REST interface, only specify if a datastream
  * @return
  *   the response from fedora for adding/modifying the relationship
+ * @todo
+ *   Update to use subject and object so it will work with rels-int
  */
-function islandora_workflow_set_object_relationship($object_id, $relationship_in, $target) {
+function islandora_workflow_set_object_relationship($object_id, $relationship_in, $target, $subject = NULL) {
   //init
   $islandora_workflow_namespace='info:islandora/islandora-system:def/islandora_workflow#';
   module_load_include('raw.inc', 'islandora_fedora_api'); //for getting an object
   $apim_object= new FedoraAPIM();
 
   //get existing relationshp
-  $relationships=$apim_object->getRelationships($object_id, $islandora_workflow_namespace . $relationship_in);
+  $relationships = $apim_object->getRelationships($object_id, $islandora_workflow_namespace . $relationship_in, $subject);
+
+
+  dsm($relationships);
+
   $relationships_parser = new DOMDocument();
   $relationships_parser->loadXML($relationships->data);
-  $relationship_elements=$relationships_parser->getElementsByTagNameNS($islandora_workflow_namespace, $relationship_in);
-  $current_relationship=NULL;
-  $relationship=$relationship_elements->item(0);
+  $relationship_elements = $relationships_parser->getElementsByTagNameNS($islandora_workflow_namespace, $relationship_in);
+  $current_relationship = NULL;
+  $relationship = $relationship_elements->item(0);
+
   if (!empty($relationship)) {
     foreach ($relationship->childNodes as $relationship_text_node) {
-      $current_relationship=$relationship_text_node->nodeValue;
+      $current_relationship = $relationship_text_node->nodeValue;
       //clear current relationship
-      $apim_object->purgeRelationship($object_id, $islandora_workflow_namespace . $relationship_in, $current_relationship, array('isLiteral' => 'true'));
+      $apim_object->purgeRelationship($object_id, $islandora_workflow_namespace . $relationship_in, $current_relationship, array('isLiteral' => 'true', 'subject'=>$subject));
     }
   }
   //set new relationship
-  $apim_object->addRelationship($object_id, $islandora_workflow_namespace . $relationship_in, $target, array('isLiteral' => 'true'));
+  $apim_object->addRelationship($object_id, $islandora_workflow_namespace . $relationship_in, $target, array('isLiteral' => 'true', 'subject'=>$subject));
 }
 
 /**
@@ -952,6 +972,8 @@ function islandora_workflow_set_object_note($object_id, $subject, $body) {
   else {
     $note_node_list->item(0)->appendChild($body_new_element);
   }
+  dsm($subject);
+  islandora_workflow_set_object_relationship($object_id, 'has_note_subject', $subject, 'islandora_workflow');
 
   //set the new DS content
   return ($workflow_datastream->__set('content', $workflow_parser->saveXML()));
