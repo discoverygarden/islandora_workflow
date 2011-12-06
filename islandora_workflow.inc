@@ -799,8 +799,6 @@ function islandora_workflow_set_object_relationship($object_id, $relationship_in
   $relationships = $apim_object->getRelationships($object_id, $islandora_workflow_namespace . $relationship_in, $subject);
 
 
-  dsm($relationships);
-
   $relationships_parser = new DOMDocument();
   $relationships_parser->loadXML($relationships->data);
   $relationship_elements = $relationships_parser->getElementsByTagNameNS($islandora_workflow_namespace, $relationship_in);
@@ -811,7 +809,7 @@ function islandora_workflow_set_object_relationship($object_id, $relationship_in
     foreach ($relationship->childNodes as $relationship_text_node) {
       $current_relationship = $relationship_text_node->nodeValue;
       //clear current relationship
-      $apim_object->purgeRelationship($object_id, $islandora_workflow_namespace . $relationship_in, $current_relationship, array('isLiteral' => 'true', 'subject' => $subject));
+      $purge_response = $apim_object->purgeRelationship($object_id, $islandora_workflow_namespace . $relationship_in, $current_relationship, array('isLiteral' => 'true', 'subject' => $subject));
     }
   }
   //set new relationship
@@ -972,8 +970,8 @@ function islandora_workflow_set_object_note($object_id, $subject, $body) {
   else {
     $note_node_list->item(0)->appendChild($body_new_element);
   }
-  dsm($subject);
-  islandora_workflow_set_object_relationship($object_id, 'has_note_subject', $subject, 'islandora_workflow');
+
+  islandora_workflow_set_object_relationship($object_id, 'has_note_subject', $subject, 'info:fedora/' . $object_id . '/islandora_workflow');
 
   //set the new DS content
   return ($workflow_datastream->__set('content', $workflow_parser->saveXML()));
