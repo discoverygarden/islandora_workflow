@@ -744,6 +744,7 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
             $vars['list'][$collection_id][$member]['Assign'] = drupal_render($vars['list'][$collection_id][$member]['Assign']);
 
             //get the dates and provide them
+            dsm('CREATED:  ' . $member_attibutes['created_date']. '   MODIFIED:  ' .$member_attibutes['islandora_workflow_modified'] );
             $vars['list'][$collection_id][$member]['when_created'] = format_date($member_attibutes['created_date'], $type = 'small');
             $vars['list'][$collection_id][$member]['last_workflow_progression'] = format_date($member_attibutes['islandora_workflow_modified'], $type = 'small');
 

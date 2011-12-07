@@ -285,7 +285,7 @@ function islandora_workflow_init_workflow($object_id) {
   $object->addDatastream('islandora_workflow', NULL,  $workflow_parser->saveXML(), array('dsLabel' => 'workflow', 'mimeType' => 'text/xml', 'controlGroup' => 'X', 'logMessage' => 'Adding islandora_workflow datastream(editorial workflow tracking).'));
 
   // set state
-  $result=islandora_workflow_set_object_workflow_state($object_id, 'created');
+  $result = islandora_workflow_set_object_workflow_state($object_id, 'created');
 
   return $result;
 }
@@ -610,6 +610,9 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
     }
     $object->addDatastream('islandora_workflow', NULL,  $workflow_parser->saveXML(), array('dsLabel' => 'workflow', 'mimeType' => 'text/xml', 'controlGroup' => 'X', 'logMessage' => 'Adding islandora_workflow datastream(workflow tracking).'));
   }
+
+  //change the rels-int
+  islandora_workflow_set_object_relationship($object_id, 'has_workflow_timestamp', date('c'), 'info:fedora/' . $object_id . '/islandora_workflow');
 
   //make sure that the object's fedora state is going to be set to I if the object is still in workflow
   if ($state!='published' && islandora_workflow_get_object_fedora_state($object_id)!='I') {
