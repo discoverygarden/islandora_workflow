@@ -9,6 +9,17 @@ The changes are:
 @todo: add more logging
 @todo: add more error checking
 
+
+
+@fixme:
+    timestamp_list = workflow_etree.xpath('//timestamp')
+    subject_list = workflow_etree.xpath('//subject')
+    
+    For some broken objects these lists may not be populated.  Script then crashes.
+    I should check to see if an object is well formed and if it is not fix it.
+    For objects without a subject this can happen as well, it should be handled.
+    Jon had the issue. Colorado might.
+    
 '''
 
 import logging
