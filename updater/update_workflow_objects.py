@@ -17,7 +17,6 @@ The changes are:
     
     For some broken objects these lists may not be populated.  Script then crashes.
     I should check to see if an object is well formed and if it is not fix it: nice-to-have
-    For objects without a subject this can happen as well: bug
     
 '''
 
@@ -95,8 +94,15 @@ def get_workflow_info(fcrepo_object):
     timestamp_list = workflow_etree.xpath('//timestamp')
     subject_list = workflow_etree.xpath('//subject')
     
-    object_workflow_attributes = {'timestamp':timestamp_list[0].text, 'subject':subject_list[0].text}
+    if subject_list:
+        if subject_list[0].text:
+            object_workflow_attributes = {'timestamp':timestamp_list[0].text, 'subject':subject_list[0].text}
+        else:
+            object_workflow_attributes = {'timestamp':timestamp_list[0].text}
+    else:
+        object_workflow_attributes = {'timestamp':timestamp_list[0].text}
     
+    print (object_workflow_attributes)
     return object_workflow_attributes
 
 def update_object(fcrepo_object, object_workflow_attributes):
@@ -108,7 +114,8 @@ def update_object(fcrepo_object, object_workflow_attributes):
     
     islandora_workflow_namespace = fedora_relationships.rels_namespace('islandora_workflow','info:islandora/islandora-system:def/islandora_workflow#')
     object_RELS_INT = fedora_relationships.rels_int(fcrepo_object, islandora_workflow_namespace, 'islandora_workflow')
-    object_RELS_INT.addRelationship('islandora_workflow','has_note_subject', [object_workflow_attributes['subject'], 'literal'])
+    if 'subject' in object_workflow_attributes:
+        object_RELS_INT.addRelationship('islandora_workflow','has_note_subject', [object_workflow_attributes['subject'], 'literal'])
     object_RELS_INT.addRelationship('islandora_workflow','has_workflow_timestamp', [object_workflow_attributes['timestamp'], 'literal'])
     object_RELS_INT.update()
 
