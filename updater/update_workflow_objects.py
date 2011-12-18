@@ -91,7 +91,7 @@ def get_workflow_info(fcrepo_object):
     workflow_datastream = fcrepo_object['islandora_workflow']
     workflow_string = workflow_datastream.getContent().read()
     workflow_etree = etree.fromstring(workflow_string)
-    timestamp_list = workflow_etree.xpath('//timestamp')
+    timestamp_list = workflow_etree.xpath('//when_last_modified')
     subject_list = workflow_etree.xpath('//subject')
     
     if subject_list:
