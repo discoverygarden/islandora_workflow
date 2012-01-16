@@ -79,17 +79,17 @@ function islandora_workflow_get_current_users_collections($permission_level='isl
  */
 function islandora_workflow_get_all_collections() {
 
-  $collection_list=array();
+  $collection_list = array();
 
   //read in the itql query for getting collections
-  $query_file_name=drupal_get_path('module', 'islandora_workflow') . '/collection_query.txt';
-  $query_file_handle=fopen($query_file_name, "r");
-  $query_string=fread($query_file_handle, filesize($query_file_name));
+  $query_file_name = drupal_get_path('module', 'islandora_workflow') . '/collection_query.txt';
+  $query_file_handle = fopen($query_file_name, "r");
+  $query_string = fread($query_file_handle, filesize($query_file_name));
   fclose($query_file_handle);
   //make query
-  $collection_list=islandora_workflow_get_related_objects($query_string);
+  $collection_list = islandora_workflow_get_related_objects($query_string);
   //strip out non-applicable collections via namespace
-  $collection_list=islandora_workflow_limit_collections_by_namespace($collection_list);
+  $collection_list = islandora_workflow_limit_collections_by_namespace($collection_list);
   return $collection_list;
 }
 
@@ -204,22 +204,27 @@ function islandora_workflow_get_all_members_of_collection($collection_id) {
  */
 function islandora_workflow_limit_collections_by_namespace($existing_collections, $pid_namespaces=NULL) {
   //if no namespace list supplied get it from fedora_repository module's varaiables
-  if ($pid_namespaces==NULL) {
-    $pid_namespaces = array();
-    foreach (explode(' ', trim(variable_get('fedora_pids_allowed', 'default: demo: changeme: Islandora: ilives: ')))as $namespace) {
-      $pid_namespaces[$namespace] = $namespace;
-    }
-  }
-
-  $collections = array();
-  foreach ($existing_collections as $collection => $value) {
-    foreach ($pid_namespaces as $key => $namespace) {
-      if (strpos($collection, $namespace)===0) {
-        $collections[$collection]=$value;
+  if (variable_get('fedora_namespace_restriction_enforced', TRUE)) {
+    if ($pid_namespaces == NULL) {
+      $pid_namespaces = array();
+      foreach (explode(' ', trim(variable_get('fedora_pids_allowed', 'default: demo: changeme: Islandora: ilives: ')))as $namespace) {
+        $pid_namespaces[$namespace] = $namespace;
       }
     }
+
+    $collections = array();
+    foreach ($existing_collections as $collection => $value) {
+      foreach ($pid_namespaces as $key => $namespace) {
+        if (strpos($collection, $namespace)===0) {
+          $collections[$collection] = $value;
+        }
+      }
+    }
+    return $collections;
   }
-  return $collections;
+  else {
+    return $existing_collections;
+  }
 }
 
  /**
@@ -891,7 +896,7 @@ function islandora_workflow_set_object_note($object_id, $subject, $body) {
   $object= new FedoraObject($object_id);
   $workflow_parser = new DOMDocument();
   global $user;
-  $object_datastreams=$object->get_datastreams();
+  $object_datastreams = $object->get_datastreams();
   if (!isset($object_datastreams['islandora_workflow'])) {
     return FALSE;
   }

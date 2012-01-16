@@ -1466,9 +1466,9 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
 function islandora_workflow_edit_note_form_submit($edit_note_form, &$edit_note_form_state) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow'); //for setting the note value
 
-  $object_id=$edit_note_form_state['values']['note_form']['object'];
-  $subject=$edit_note_form_state['values']['note_form']['Subject'];
-  $body=$edit_note_form_state['values']['note_form']['Body'];
+  $object_id = $edit_note_form_state['values']['note_form']['object'];
+  $subject = $edit_note_form_state['values']['note_form']['Subject'];
+  $body = $edit_note_form_state['values']['note_form']['Body'];
 
   islandora_workflow_set_object_note($object_id, $subject, $body);
 }
