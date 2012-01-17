@@ -1,3 +1,7 @@
+DO NOT DOWNLOAD AND USE THIS MODULE, UNTIL THIS NOTICE DISAPEARS. 
+IT MAY CORRUPT FEDORA RELATIONSHIPS WITH NAMESPACES THAT DO NOT END IN THE FRAGMENT IDENTIFIER BY USING THE FEDORA REST API.
+
+
 This is a drupal module to implement a generic workflow around Fedora objects.
 
 It uses an inline xml datastream and rdf to record the state of the workflow and notes associated with the workflow in workflow managed objects.
