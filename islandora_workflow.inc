@@ -440,12 +440,12 @@ function islandora_workflow_submit_object($object_id) {
   if ($workflow_state=='created' || $workflow_state=='rejected') {
 
     //send email to all editors
-    $collection=islandora_workflow_get_object_parent($object_id);
-    $editor_list=islandora_workflow_get_all_users_with_collection_permissions(
+    $collection = islandora_workflow_get_object_parent($object_id);
+    $editor_list = islandora_workflow_get_all_users_with_collection_permissions(
       array($collection), $permission_level='islandora_workflow_Editor');
-    $emails=get_users_email_by_name($editor_list[$collection]);
-    $emails=format_email_array_to_string($emails);
-    $params=array('object_id' => $object_id);//optional parameters for mail hook
+    $emails = get_users_email_by_name($editor_list[$collection]);
+    $emails = format_email_array_to_string($emails);
+    $params = array('object_id' => $object_id);//optional parameters for mail hook
     drupal_mail('islandora_workflow', 'submit', $emails, language_default(), $params);
 
     return (islandora_workflow_set_object_workflow_state($object_id, 'submitted'));
@@ -509,7 +509,7 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
   //init
   module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
   module_load_include('inc', 'islandora_fedora_api', 'islandora_fedora_api.exception');
-  $object= new FedoraObject($object_id);
+  $object = new FedoraObject($object_id);
   $workflow_parser = new DOMDocument();
   global $user;
   $object_datastreams = $object->get_datastreams();
@@ -569,16 +569,16 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
 
   //update last modified user/time
   if (isset($object_datastreams['islandora_workflow'])) {//build xml from DS
-    $workflow_datastream=$object_datastreams['islandora_workflow'];
-    $workflow_string=$workflow_datastream->__get('content');
+    $workflow_datastream = $object_datastreams['islandora_workflow'];
+    $workflow_string = $workflow_datastream->__get('content');
     $workflow_parser->loadXML($workflow_string);
     //get elements to populate dynamicaly
-    $last_modified_by_array=$workflow_parser->getElementsByTagName('last_modified_by');
-    $when_last_modified_array=$workflow_parser->getElementsByTagName('when_last_modified');
+    $last_modified_by_array = $workflow_parser->getElementsByTagName('last_modified_by');
+    $when_last_modified_array = $workflow_parser->getElementsByTagName('when_last_modified');
     //workflow DS
     foreach ($last_modified_by_array as $last_modified_by_element) {
       //create text node
-      $last_modified_by=$workflow_parser->createElement('last_modified_by');
+      $last_modified_by = $workflow_parser->createElement('last_modified_by');
       $last_modified_by->appendChild($workflow_parser->createTextNode($user->name));
       //insert text node
       $last_modified_by_element->parentNode->replaceChild($last_modified_by, $last_modified_by_element);
@@ -592,14 +592,13 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
     }
     $workflow_datastream->__set('content', $workflow_parser->saveXML());
   }
-
   else {//build xml from default if there is no DS present
     $default_xml_file_name=drupal_get_path('module', 'islandora_workflow') . '/start_workflow.xml';
     $workflow_parser = new DOMDocument();
     $workflow_parser->load($default_xml_file_name);
     //get elements to populate dynamicaly
-    $last_modified_by_array=$workflow_parser->getElementsByTagName('last_modified_by');
-    $when_last_modified_array=$workflow_parser->getElementsByTagName('when_last_modified');
+    $last_modified_by_array = $workflow_parser->getElementsByTagName('last_modified_by');
+    $when_last_modified_array = $workflow_parser->getElementsByTagName('when_last_modified');
     //workflow DS
     foreach ($last_modified_by_array as $last_modified_by_element) {
       //create text node
@@ -609,7 +608,7 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
     }
     foreach ($when_last_modified_array as $when_last_modified_element) {
       //create text node
-      $when_last_modified=$workflow_parser->createTextNode(date('c'));//date('c') is supposed to give back an xml friendly string
+      $when_last_modified = $workflow_parser->createTextNode(date('c'));//date('c') is supposed to give back an xml friendly string
       //insert text node
       $when_last_modified_element->appendChild($when_last_modified);
     }
@@ -726,7 +725,7 @@ function islandora_workflow_get_object_workflow_state($object_id) {
   $apim_object = new FedoraAPIM();
 
   try {
-    $relationships=$apim_object->getRelationships($object_id, 'info:islandora/islandora-system:def/islandora_workflow#state');
+    $relationships = $apim_object->getRelationships($object_id, 'info:islandora/islandora-system:def/islandora_workflow#state');
   }
   catch (FedoraAPIRestException $e) {
     return FALSE;
@@ -901,24 +900,24 @@ function islandora_workflow_set_object_note($object_id, $subject, $body) {
     return FALSE;
   }
   //get the DS xml in dom object
-  $workflow_datastream=$object_datastreams['islandora_workflow'];
-  $workflow_string=$workflow_datastream->__get('content');
+  $workflow_datastream = $object_datastreams['islandora_workflow'];
+  $workflow_string = $workflow_datastream->__get('content');
   $workflow_parser->loadXML($workflow_string);
 
   //modify DS xml
   //get elements to populate dynamicaly, these lists are dynamic so no need to update later
-  $from_node_list=$workflow_parser->getElementsByTagName('from');
-  $timestamp_node_list=$workflow_parser->getElementsByTagName('timestamp');
-  $subject_node_list=$workflow_parser->getElementsByTagName('subject');
-  $body_node_list=$workflow_parser->getElementsByTagName('body');
-  $note_node_list=$workflow_parser->getElementsByTagName('note');
-  $notes_node_list=$workflow_parser->getElementsByTagName('notes');
+  $from_node_list = $workflow_parser->getElementsByTagName('from');
+  $timestamp_node_list = $workflow_parser->getElementsByTagName('timestamp');
+  $subject_node_list = $workflow_parser->getElementsByTagName('subject');
+  $body_node_list = $workflow_parser->getElementsByTagName('body');
+  $note_node_list = $workflow_parser->getElementsByTagName('note');
+  $notes_node_list = $workflow_parser->getElementsByTagName('notes');
 
   //@todo: put in logic to add the element(s) if it doesn't exist
   //make sure that the notes and note elements are present and add them if they are not
   if (!$notes_node_list->item(0)) {
-    $notes=$workflow_parser->createElement('notes');
-    $workflow_node_list=$workflow_parser->getElementsByTagName('workflow');
+    $notes = $workflow_parser->createElement('notes');
+    $workflow_node_list = $workflow_parser->getElementsByTagName('workflow');
     $workflow_node_list->item(0)->appendChild($notes);
 
   }
