@@ -411,13 +411,22 @@ function islandora_workflow_menu() {
     'access arguments' => array('islandora_workflow_Administrator'),
     'type' => MENU_NORMAL_ITEM
   );
-    //settings associated with islandora_workflow and collection permissions
+  //settings associated with islandora_workflow and collection permissions
   $menu_entries['admin/settings/islandora_workflow_perms']=array(
     'title' => 'Islandora workflow permissions',
-    'description' => 'Here you can assign permissions to roles on a collection by collection level.',
+    'description' => 'Here you can assign permissions to roles and users on a collection by collection level.',
     'page callback' => 'islandora_workflow_collection_permissions',
     'access callback' => 'islandora_workflow_check_permissions',
     'access arguments' => array(array('islandora_workflow_Administrator', 'islandora_workflow_Manager')),
+    'type' => MENU_NORMAL_ITEM
+  );
+  //settings associated with islandora_workflow and individual collections (whether or not to consider them 'in workflow')
+  $menu_entries['admin/settings/islandora_workflow_collections']=array(
+    'title' => 'Islandora workflow collections',
+    'description' => 'Here you can set what collections to track via workflow.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('islandora_workflow_collections'),
+    'access arguments' => array('islandora_workflow_Administrator'),
     'type' => MENU_NORMAL_ITEM
   );
   //main working page for islandora_workflow
@@ -529,7 +538,7 @@ function islandora_workflow_check_permissions($permission_array) {
  *   the form for edditing islandora_workflow settings.
  */
 function islandora_workflow_admin(&$form_state) {
-  $admin_form=array();
+  $admin_form = array();
 
   // check if the xacml api is enabled
   $disabled = !module_exists('islandora_xacml_api');
@@ -566,6 +575,12 @@ function islandora_workflow_admin(&$form_state) {
   return $admin_form;
 }
 
+/**
+ * This form submit handles the workflow admin form.
+ * It can run batch jobs on XACML when it is enabled/disabled.
+ * @param unknown_type $form
+ * @param unknown_type $form_state
+ */
 function islandora_workflow_admin_submit($form, &$form_state) {
   module_load_include('inc', 'islandora_workflow');
   drupal_set_message(t('Your settings have been updated.'));
@@ -618,6 +633,45 @@ function islandora_workflow_admin_submit($form, &$form_state) {
 }
 
 /**
+ * This function returns the form that will allow an administrator to
+ * track collections in the workflow.
+ * @param array $form
+ */
+function islandora_workflow_collections(&$form_state) {
+  module_load_include('inc', 'islandora_workflow');
+  $workflow_collection_form = array();
+  $collections = islandora_workflow_get_all_collections();
+
+  //theme
+  $workflow_collection_form['#theme'] = 'workflow_collections';
+
+  foreach ($collections as $collection_pid => $collection_label) {
+    $workflow_collection_form[$collection_pid] = array(
+    '#type' => 'checkbox',
+    '#title' => ($collection_label) ? $collection_label : $collection_pid,
+    );
+  }
+
+  $workflow_collection_form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save collection configuration'),
+  );
+
+  return $workflow_collection_form;
+}
+
+/**
+ * This function handles the submission of the form
+ * that will allow an administrator to track collections in the workflow.
+ *
+ * @param array $form
+ * @param &$form_state
+ */
+function islandora_workflow_collections_submit($form, &$form_state) {
+  dsm($form_state);
+}
+
+/**
  * drupal permission hook
  * The list of avaialble permissions for this module.
  * @return array
@@ -639,9 +693,11 @@ function islandora_workflow_help($path, $arg) {
 
   switch ($path) {
     case 'admin/modules#description' :
-    $help= t('A generic workflow module for Fedora objects.');
+      $help = t('A generic workflow module for Fedora objects.');
     case 'admin/settings/islandora_workflow_opts' :
-    $help= t('If the repository is full of objects this operation could take awhile. Every object needs to be updated. Use this with care.');
+      $help = t('If the repository is full of objects this operation could take awhile. Every object needs to be updated. Use this with care.');
+    case 'admin/settings/islandora_workflow_collections':
+      $help = t('Here you can set what collections have new members ingested into a workflow state.  Managers and Admins can bypass the setting set here during ingest.');
   }
 
   return $help;
@@ -666,7 +722,29 @@ function islandora_workflow_theme() {
    'arguments' => array('list' => NULL, 'form' => NULL),
    'template' => 'workflow_table'
     );
+   $themes['workflow_collections']=array(//both workflow and overview tabs should be able to use this template
+   'arguments' => array('list' => NULL, 'form' => NULL),
+   'template' => 'workflow_collections'
+    );
    return $themes;
+ }
+
+ /**
+ * This function handles making variables available to the theme template for
+ * the islandora_workflow_collection_permissions page (user tab)
+ * @param array ref $vars
+ *   the list of variables (including the form) to send to the template
+ * @return array $vars
+ *   the modified list of variables to send to the template
+ */
+function islandora_workflow_preprocess_workflow_collections(&$vars) {
+  dsm('in preprocess');
+  /*module_load_include('inc', 'islandora_workflow');
+  $collections = islandora_workflow_get_all_collections();
+  //render each form element
+  foreach ($collections as $collection_pid => $collection_label) {
+    $vars['list'][$user_id][$_SESSION['workflow_permissions_page']['active_collection']] = drupal_render($vars['list'][$user_id][$_SESSION['workflow_permissions_page']['active_collection']]);
+  }*/
  }
 
  /**
@@ -681,11 +759,11 @@ function islandora_workflow_preprocess_permissions_user_table(&$vars) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
 
   $vars['users']=islandora_workflow_get_users_with_module_permissions();
-  $vars['list']['collection_selector']=drupal_render($vars['list']['collection_selector']);
-  $vars['list']['collection_submit']=drupal_render($vars['list']['collection_submit']);
+  $vars['list']['collection_selector'] = drupal_render($vars['list']['collection_selector']);
+  $vars['list']['collection_submit'] = drupal_render($vars['list']['collection_submit']);
   //render each form element
   foreach ($vars['users'] as $user_id => $user_name) {
-    $vars['list'][$user_id][$_SESSION['workflow_permissions_page']['active_collection']]=drupal_render($vars['list'][$user_id][$_SESSION['workflow_permissions_page']['active_collection']]);
+    $vars['list'][$user_id][$_SESSION['workflow_permissions_page']['active_collection']] = drupal_render($vars['list'][$user_id][$_SESSION['workflow_permissions_page']['active_collection']]);
   }
 }
 
