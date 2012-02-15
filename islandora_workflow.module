@@ -697,7 +697,7 @@ function islandora_workflow_help($path, $arg) {
     case 'admin/settings/islandora_workflow_opts' :
       $help = t('If the repository is full of objects this operation could take awhile. Every object needs to be updated. Use this with care.');
     case 'admin/settings/islandora_workflow_collections':
-      $help = t('Here you can set what collections have new members ingested into a workflow state.  Managers and Admins can bypass the setting set here during ingest.');
+      $help = t('Here you can set what collections have new members ingested into a workflow state.  Managers and Admins can bypass a positive setting set here during ingest.');
   }
 
   return $help;
@@ -731,20 +731,22 @@ function islandora_workflow_theme() {
 
  /**
  * This function handles making variables available to the theme template for
- * the islandora_workflow_collection_permissions page (user tab)
+ * the islandora_workflow_collections page
  * @param array ref $vars
  *   the list of variables (including the form) to send to the template
  * @return array $vars
  *   the modified list of variables to send to the template
  */
 function islandora_workflow_preprocess_workflow_collections(&$vars) {
-  dsm('in preprocess');
-  /*module_load_include('inc', 'islandora_workflow');
+  module_load_include('inc', 'islandora_workflow');
   $collections = islandora_workflow_get_all_collections();
+
+  $vars['collections'] = $collections;
+  $vars['submit'] = drupal_render($vars['list']['submit']);
   //render each form element
   foreach ($collections as $collection_pid => $collection_label) {
-    $vars['list'][$user_id][$_SESSION['workflow_permissions_page']['active_collection']] = drupal_render($vars['list'][$user_id][$_SESSION['workflow_permissions_page']['active_collection']]);
-  }*/
+    $vars['collection_checkboxes'][$collection_pid] = drupal_render($vars['list'][$collection_pid]);
+  }
  }
 
  /**
@@ -758,7 +760,7 @@ function islandora_workflow_preprocess_workflow_collections(&$vars) {
 function islandora_workflow_preprocess_permissions_user_table(&$vars) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
 
-  $vars['users']=islandora_workflow_get_users_with_module_permissions();
+  $vars['users'] = islandora_workflow_get_users_with_module_permissions();
   $vars['list']['collection_selector'] = drupal_render($vars['list']['collection_selector']);
   $vars['list']['collection_submit'] = drupal_render($vars['list']['collection_submit']);
   //render each form element

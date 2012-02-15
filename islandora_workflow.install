@@ -83,26 +83,6 @@ function islandora_workflow_schema() {
   'primary key' => array('uid')
   );
 
-  $workflow_schema['islandora_workflow_collections'] = array(
-    'description' => 'The collection level user based permissions for workflow users.',
-    'fields' => array(
-        'uid' => array(
-        'description' => 'The primary identifier for an instance of a workflow tracked collection.',
-        'type' => 'serial',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        ),
-        'collection' => array(
-          'description' => 'The Fedora collection that is tracked in workflow.',
-          'type' => 'varchar',
-          'length' => 255,
-          'not null' => TRUE,
-          'default' => ''
-        )
-    ),
-  'primary key' => array('uid')
-  );
-
   return $workflow_schema;
 }
 
