@@ -636,6 +636,7 @@ function islandora_workflow_admin_submit($form, &$form_state) {
  * This function returns the form that will allow an administrator to
  * track collections in the workflow.
  * @param array $form
+ * @todo: populate with current state
  */
 function islandora_workflow_collections(&$form_state) {
   module_load_include('inc', 'islandora_workflow');
@@ -664,11 +665,16 @@ function islandora_workflow_collections(&$form_state) {
  * This function handles the submission of the form
  * that will allow an administrator to track collections in the workflow.
  *
+ * we only want to hit the objects that require changing... so we need the initial state to compare
  * @param array $form
  * @param &$form_state
  */
 function islandora_workflow_collections_submit($form, &$form_state) {
-  dsm($form_state);
+  module_load_include('inc', 'islandora_workflow');
+  $collections = islandora_workflow_get_all_collections();
+  foreach ($collections as $collection_pid => $collection_label) {
+    dsm($form_state['values'][$collection_pid]);
+  }
 }
 
 /**
@@ -742,10 +748,10 @@ function islandora_workflow_preprocess_workflow_collections(&$vars) {
   $collections = islandora_workflow_get_all_collections();
 
   $vars['collections'] = $collections;
-  $vars['submit'] = drupal_render($vars['list']['submit']);
+  $vars['list']['submit'] = drupal_render($vars['list']['submit']);
   //render each form element
   foreach ($collections as $collection_pid => $collection_label) {
-    $vars['collection_checkboxes'][$collection_pid] = drupal_render($vars['list'][$collection_pid]);
+    $vars['list']['collection_checkboxes'][$collection_pid] = drupal_render($vars['list'][$collection_pid]);
   }
  }
 
@@ -782,8 +788,8 @@ function islandora_workflow_preprocess_permissions_role_table(&$vars) {
 
   //$vars['collections']=islandora_workflow_get_current_users_collections();
   $vars['roles']=islandora_workflow_get_roles_with_module_permissions();
-  $vars['list']['collection_selector']=drupal_render($vars['list']['collection_selector']);
-  $vars['list']['collection_submit']=drupal_render($vars['list']['collection_submit']);
+  $vars['list']['collection_selector'] = drupal_render($vars['list']['collection_selector']);
+  $vars['list']['collection_submit'] = drupal_render($vars['list']['collection_submit']);
   //render each form element
   foreach ($vars['roles'] as $role_id => $role_name) {
     $vars['list'][$role_id][$_SESSION['workflow_permissions_page']['active_collection']]=drupal_render($vars['list'][$role_id][$_SESSION['workflow_permissions_page']['active_collection']]);

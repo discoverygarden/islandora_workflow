@@ -4,7 +4,7 @@
  *   This template displays the form for collection workflow state.
  */
   foreach ($collections as $collection_pid => $collection_label) {
-    print($collection_checkboxes[$collection_pid]);
+    print($vars['list']['collection_checkboxes'][$collection_pid]);
   }
-  print($submit);
+  print($vars['list']['submit']);
 ?>
