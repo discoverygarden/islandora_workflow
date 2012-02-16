@@ -4,7 +4,7 @@ It uses an inline xml datastream and rdf to record the state of the workflow and
 Acceptable state values: created, in_process(for machine workflow), submitted, approved, published, rejected.
 
 Wheather or not to treat collections as being workflow tracked during ingest is handled in a RESL-EXT relationship:
-@todo put relationship here
+@todo put relationship here... FALSE and not set will initialy(at least) be functionaly equivalent.
 
 The module currently assumes that the 'islandora:collectionCModel' object acts as a parent for collection content models and not directly as a content model.
 This can be changed via modifying 'collection_query.txt'.

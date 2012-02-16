@@ -496,6 +496,31 @@ function islandora_workflow_assign_object($object_id, $user_name) {
 }
 
 /**
+ * Set the RELS-EXT relationship on a collection for
+ * workflow tracking to TRUE
+ * @param $object_pid
+ *   The object to set the relationship on
+ * @return
+ *   fedora http response
+ * @todo test
+ */
+function islandora_workflow_track_collection_in_workflow($object_pid) {
+  return(islandora_workflow_set_object_relationship($object_pid, 'is_tracked_by_workflow', 'TRUE'));
+}
+
+/**
+ * Set the RELS-EXT relationship on a collection for
+ * workflow tracking to FALSE
+ *   The object to set the relationship on
+ * @return
+ *   fedora http response
+ *   * @todo test
+ */
+function islandora_workflow_stop_tracking_collection_in_workflow($object_pid) {
+  return(islandora_workflow_set_object_relationship($object_pid, 'is_tracked_by_workflow', 'FALSE'));
+}
+
+/**
  * This function will set the current state of workflow for an object.
  * uses RELS-EXT
  * @param string $object_id
@@ -782,7 +807,7 @@ function islandora_workflow_get_object_assignee($object_id) {
 /**
  * This function will set the indicated relationship on the indicated object.
  * It will create or replace the relationship  as apropriate.
- * The
+ * The function currently only does literals.
  * @param $object_id
  *   the fedora pid of the object whos rels-ext will be modified
  * @param string $relationship

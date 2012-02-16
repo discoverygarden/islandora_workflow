@@ -640,8 +640,18 @@ function islandora_workflow_admin_submit($form, &$form_state) {
  */
 function islandora_workflow_collections(&$form_state) {
   module_load_include('inc', 'islandora_workflow');
+  module_load_include('inc', 'islandora_fedora_api', 'islandora_fedora_api.risearch');
+
+  $query_file_name = drupal_get_path('module', 'islandora_workflow') . '/collection_workflow_states_query.txt';
+  $query_file_handle = fopen($query_file_name, "r");
+  $query_string = fread($query_file_handle, filesize($query_file_name));
+  fclose($query_file_handle);
+
+  $query_result = query_resource_index($query_string);
+  dsm($query_result);
+
   $workflow_collection_form = array();
-  $collections = islandora_workflow_get_all_collections();
+  $collections = islandora_workflow_get_all_collections();//should be able to nix this
 
   //theme
   $workflow_collection_form['#theme'] = 'workflow_collections';
@@ -674,6 +684,14 @@ function islandora_workflow_collections_submit($form, &$form_state) {
   $collections = islandora_workflow_get_all_collections();
   foreach ($collections as $collection_pid => $collection_label) {
     dsm($form_state['values'][$collection_pid]);
+    if ($form_state['values'][$collection_pid] != 'old value') {
+      if($form_state['values'][$collection_pid]) {
+
+      }
+      else{
+
+      }
+    }
   }
 }
 
@@ -715,7 +733,7 @@ function islandora_workflow_help($path, $arg) {
  *   the array of available themes
  */
 function islandora_workflow_theme() {
-   $themes=array();
+   $themes = array();
    $themes['permissions_role_table']=array(
    'arguments' => array('list' => NULL, 'form' => NULL),
    'template' => 'permissions_role_table'
