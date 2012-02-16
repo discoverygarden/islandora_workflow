@@ -637,6 +637,8 @@ function islandora_workflow_admin_submit($form, &$form_state) {
  * track collections in the workflow.
  * @param array $form
  * @todo: populate with current state
+ * @todo: refine iether the colleciton_query or the collection_workflow_states_query
+ *   so they return the same pids, or refactor collection_query out
  */
 function islandora_workflow_collections(&$form_state) {
   module_load_include('inc', 'islandora_workflow');
@@ -647,19 +649,59 @@ function islandora_workflow_collections(&$form_state) {
   $query_string = fread($query_file_handle, filesize($query_file_name));
   fclose($query_file_handle);
 
-  $query_result = query_resource_index($query_string);
-  dsm($query_result);
+  $query_return_string = query_resource_index($query_string);
 
+  if ($query_return_string) {
+    $query_return_dom = DOMDocument::loadXML($query_return_string);
+  }
+
+  //format query results for use (xml->array)
+  $collection_data = array();
+  $result_nodes = $query_return_dom->getElementsByTagName('result');
+  $result_nodes_length = $result_nodes->length;
+  if ($result_nodes_length > 0) {
+    for ($i=0; $i < $result_nodes_length; $i++) {
+      $result_node = $result_nodes->item($i);
+
+      $label_element = $result_node->getElementsByTagName('label')->item(0);
+      $collection_pid_element = $result_node->getElementsByTagName('collection_object')->item(0);
+      $workflow_tracking_element = $result_node->getElementsByTagName('workflow_tracking')->item(0);
+
+      $collection_object_uri = $collection_pid_element->getAttribute('uri');
+      //info:fedora/ is 12 chars
+      $collection_object_pid = substr($collection_object_uri, 12, strlen($collection_object_uri));//need to extract the pid
+
+      $collection_data[$collection_object_pid] = array();
+
+      if ($label_element) {
+        $label = $label_element->nodeValue;
+        if ($label) {
+          //the label may not be pupulated
+          $collection_data[$collection_object_pid]['label'] = $label;
+        }
+      }
+      if ($workflow_tracking_element) {
+        $workflow_tracking = $workflow_tracking_element->nodeValue;
+        if ($workflow_tracking && $workflow_tracking == 'TRUE') {
+          $collection_data[$collection_object_pid]['workflow_tracking'] = TRUE;
+        }
+        else {
+          $collection_data[$collection_object_pid]['workflow_tracking'] = FALSE;
+        }
+      }
+    }
+  }
+  dsm($collection_data);
   $workflow_collection_form = array();
-  $collections = islandora_workflow_get_all_collections();//should be able to nix this
 
-  //theme
+  //make the form
   $workflow_collection_form['#theme'] = 'workflow_collections';
 
-  foreach ($collections as $collection_pid => $collection_label) {
+  foreach ($collection_data as $collection_pid => $collection_info) {
     $workflow_collection_form[$collection_pid] = array(
     '#type' => 'checkbox',
-    '#title' => ($collection_label) ? $collection_label : $collection_pid,
+    '#title' => ($collection_info['label']) ? $collection_info['label'] : $collection_pid,
+    '#default_value' => ($collection_info['workflow_tracking']) ? 1 : 0,
     );
   }
 
@@ -685,11 +727,11 @@ function islandora_workflow_collections_submit($form, &$form_state) {
   foreach ($collections as $collection_pid => $collection_label) {
     dsm($form_state['values'][$collection_pid]);
     if ($form_state['values'][$collection_pid] != 'old value') {
-      if($form_state['values'][$collection_pid]) {
-
+      if ($form_state['values'][$collection_pid]) {
+        islandora_workflow_track_collection_in_workflow($collection_pid);
       }
       else{
-
+        islandora_workflow_stop_tracking_collection_in_workflow($collection_pid);
       }
     }
   }

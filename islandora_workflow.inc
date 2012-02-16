@@ -133,7 +133,7 @@ function islandora_workflow_get_all_members_of_collection($collection_id) {
   if ($result_nodes_length > 0) {
     for ($i=0; $i < $result_nodes_length; $i++) {
       $result_node = $result_nodes->item($i);
-      $result_values = $result_node->childNodes;
+      //$result_values = $result_node->childNodes;//didn't look like this was being used, feb 16, 2012; @todo: remove later if no bugs reported
 
       $label_element = $result_node->getElementsByTagName('label')->item(0);
       $assignee_element = $result_node->getElementsByTagName('assignee')->item(0);
@@ -505,7 +505,7 @@ function islandora_workflow_assign_object($object_id, $user_name) {
  * @todo test
  */
 function islandora_workflow_track_collection_in_workflow($object_pid) {
-  return(islandora_workflow_set_object_relationship($object_pid, 'is_tracked_by_workflow', 'TRUE'));
+  return (islandora_workflow_set_object_relationship($object_pid, 'is_tracked_by_workflow', 'TRUE'));
 }
 
 /**
@@ -517,7 +517,7 @@ function islandora_workflow_track_collection_in_workflow($object_pid) {
  *   * @todo test
  */
 function islandora_workflow_stop_tracking_collection_in_workflow($object_pid) {
-  return(islandora_workflow_set_object_relationship($object_pid, 'is_tracked_by_workflow', 'FALSE'));
+  return (islandora_workflow_set_object_relationship($object_pid, 'is_tracked_by_workflow', 'FALSE'));
 }
 
 /**
