@@ -7,6 +7,9 @@
  *   William Panting
  *
  * @todo
+ *   Look at refactoring out collection_query.txt or collection_workflow_states_query.txt
+ *
+ * @todo
  *   Alow for the sorting of columns: requires signifigent refactoring. Likely dump all data to JS? scaleable?
  *
  * @todo
@@ -637,8 +640,6 @@ function islandora_workflow_admin_submit($form, &$form_state) {
  * track collections in the workflow.
  * @param array $form
  * @todo: populate with current state
- * @todo: refine iether the colleciton_query or the collection_workflow_states_query
- *   so they return the same pids, or refactor collection_query out
  */
 function islandora_workflow_collections(&$form_state) {
   module_load_include('inc', 'islandora_workflow');

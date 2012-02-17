@@ -6,8 +6,8 @@ Acceptable state values: created, in_process(for machine workflow), submitted, a
 Wheather or not to treat collections as being workflow tracked during ingest is handled in a RESL-EXT relationship:
 @todo put relationship here... FALSE and not set will initialy(at least) be functionaly equivalent.
 
-The module currently assumes that the 'islandora:collectionCModel' object acts as a parent for collection content models and not directly as a content model.
-This can be changed via modifying 'collection_query.txt'.
+The module currently assumes that the 'islandora:collectionCModel' object acts as a parent for collection content models or directly as a content model.
+This can be changed via modifying 'collection_query.txt', and collection_workflow_states_query.txt.
 
 Machine level workflow will be handled via fedora microservices.
 Human level workflow will be handled through this drupal module.

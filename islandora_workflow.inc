@@ -4,6 +4,7 @@
  *   This is a collection of helper functions and such for the islandora_workflow module.
  * @author
  *   William Panting
+ * @todo: refactor out object and collection level funcs to their own .incs
  */
 
 /**
@@ -518,6 +519,19 @@ function islandora_workflow_track_collection_in_workflow($object_pid) {
  */
 function islandora_workflow_stop_tracking_collection_in_workflow($object_pid) {
   return (islandora_workflow_set_object_relationship($object_pid, 'is_tracked_by_workflow', 'FALSE'));
+}
+
+/**
+ *This function checks if the collection is tracked in workflow.
+ *The function checks for a RELS-EXT that may not exist.
+ *@param $object_pid
+ *  The pid of the object to check on
+ *@return boolean
+ *  TRUE if the collection is tracked in workflow
+ *  FALSE if the collection is not tracked in workflow
+ */
+function islandora_workflow_is_collection_workflow_tracked() {
+  return;
 }
 
 /**
