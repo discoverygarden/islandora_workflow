@@ -497,44 +497,6 @@ function islandora_workflow_assign_object($object_id, $user_name) {
 }
 
 /**
- * Set the RELS-EXT relationship on a collection for
- * workflow tracking to TRUE
- * @param $object_pid
- *   The object to set the relationship on
- * @return
- *   fedora http response
- * @todo test
- */
-function islandora_workflow_track_collection_in_workflow($object_pid) {
-  return (islandora_workflow_set_object_relationship($object_pid, 'is_tracked_by_workflow', 'TRUE'));
-}
-
-/**
- * Set the RELS-EXT relationship on a collection for
- * workflow tracking to FALSE
- *   The object to set the relationship on
- * @return
- *   fedora http response
- *   * @todo test
- */
-function islandora_workflow_stop_tracking_collection_in_workflow($object_pid) {
-  return (islandora_workflow_set_object_relationship($object_pid, 'is_tracked_by_workflow', 'FALSE'));
-}
-
-/**
- *This function checks if the collection is tracked in workflow.
- *The function checks for a RELS-EXT that may not exist.
- *@param $object_pid
- *  The pid of the object to check on
- *@return boolean
- *  TRUE if the collection is tracked in workflow
- *  FALSE if the collection is not tracked in workflow
- */
-function islandora_workflow_is_collection_workflow_tracked() {
-  return;
-}
-
-/**
  * This function will set the current state of workflow for an object.
  * uses RELS-EXT
  * @param string $object_id

@@ -65,4 +65,47 @@ function islandora_workflow_get_collections() {
   }
   //strip out non-applicable collections via namespace
   $collection_data = islandora_workflow_limit_collections_by_namespace($collection_data);
+  return $collection_data;
+}
+
+/**
+* Set the RELS-EXT relationship on a collection for
+* workflow tracking to TRUE
+* @param $object_pid
+*   The object to set the relationship on
+* @return
+*   fedora http response
+* @todo test
+*/
+function islandora_workflow_track_collection_in_workflow($object_pid) {
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
+  return (islandora_workflow_set_object_relationship($object_pid, 'is_tracked_by_workflow', 'TRUE'));
+}
+
+/**
+ * Set the RELS-EXT relationship on a collection for
+ * workflow tracking to FALSE
+ *   The object to set the relationship on
+ * @return
+ *   fedora http response
+ *   * @todo test
+ */
+function islandora_workflow_stop_tracking_collection_in_workflow($object_pid) {
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
+  return (islandora_workflow_set_object_relationship($object_pid, 'is_tracked_by_workflow', 'FALSE'));
+}
+
+/**
+ *This function checks if the collection is tracked in workflow.
+ *The function checks for a RELS-EXT that may not exist.
+ *@param $object_pid
+ *  The pid of the object to check on
+ *@return boolean
+ *  TRUE if the collection is tracked in workflow
+ *  FALSE if the collection is not tracked in workflow
+ */
+function islandora_workflow_is_collection_workflow_tracked() {
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
+  dsm('in check');
+  return;
 }
