@@ -644,6 +644,7 @@ function islandora_workflow_admin_submit($form, &$form_state) {
 function islandora_workflow_collections(&$form_state) {
   module_load_include('inc', 'islandora_workflow');
   module_load_include('inc', 'islandora_fedora_api', 'islandora_fedora_api.risearch');
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow.collection');
 
   $query_file_name = drupal_get_path('module', 'islandora_workflow') . '/collection_workflow_states_query.txt';
   $query_file_handle = fopen($query_file_name, "r");
@@ -692,7 +693,7 @@ function islandora_workflow_collections(&$form_state) {
       }
     }
   }
-  dsm($collection_data);
+
   $workflow_collection_form = array();
 
   //make the form
