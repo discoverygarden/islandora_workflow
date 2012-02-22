@@ -399,6 +399,38 @@ function islandora_workflow_forms($form_id, $args) {
 }
 
 /**
+ * This form alter hook runs on object ingest to determine weather or not to
+ * add an object to workflow.
+ * @param array $form
+ *   The form!
+ * @param array $form_state
+ *   The form state!!
+ * @param $form_id
+ *   The id of the form!!!
+ * @return
+ */
+function islandora_workflow_form_fedora_repository_ingest_form_alter(&$form, &$form_state) {
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow.collection');
+  $collection_pid = $form_state['storage']['collection_pid'];
+  if (islandora_workflow_is_collection_workflow_tracked($collection_pid)) {
+    $form['#submit'][] = 'islandora_workflow_ingest_submit';
+  }
+  return;
+}
+
+/**
+ *This submit function will push an object into workflow
+ * @param array $form
+ *   The form!
+ * @param array $form_state
+ *   The form state!!
+ */
+function islandora_workflow_ingest_submit($form, &$form_state) {
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
+  return islandora_workflow_init_workflow($form_state['values']['pid']);
+}
+
+/**
  * The menu entries for this module.
  * @return $menu_entries
  *   An arrray of the items to be added to the drupal menu

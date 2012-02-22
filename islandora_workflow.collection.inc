@@ -69,14 +69,15 @@ function islandora_workflow_get_collections() {
 }
 
 /**
-* Set the RELS-EXT relationship on a collection for
-* workflow tracking to TRUE
-* @param $object_pid
-*   The object to set the relationship on
-* @return
-*   fedora http response
-* @todo test
-*/
+ * Set the RELS-EXT relationship on a collection for
+ * workflow tracking to TRUE
+ * @param $object_pid
+ *   The object to set the relationship on
+ * @return
+ *   fedora http response
+ * @todo test
+ * df
+ */
 function islandora_workflow_track_collection_in_workflow($object_pid) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
   return (islandora_workflow_set_object_relationship($object_pid, 'is_tracked_by_workflow', 'TRUE'));
@@ -103,9 +104,27 @@ function islandora_workflow_stop_tracking_collection_in_workflow($object_pid) {
  *@return boolean
  *  TRUE if the collection is tracked in workflow
  *  FALSE if the collection is not tracked in workflow
+ *@todo: look at creating api func for checking if rel exists
  */
-function islandora_workflow_is_collection_workflow_tracked() {
+function islandora_workflow_is_collection_workflow_tracked($object_pid) {
+
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
-  dsm('in check');
-  return;
+  $relationship_in = 'is_tracked_by_workflow';
+  $islandora_workflow_namespace='info:islandora/islandora-system:def/islandora_workflow#';
+  module_load_include('raw.inc', 'islandora_fedora_api'); //for getting an object
+  $apim_object= new FedoraAPIM();
+
+  //get existing relationshp
+  $relationships = $apim_object->getRelationships($object_pid, $islandora_workflow_namespace . $relationship_in, $subject);
+
+
+  $relationships_parser = new DOMDocument();
+  $relationships_parser->loadXML($relationships->data);
+  $relationship_elements = $relationships_parser->getElementsByTagNameNS($islandora_workflow_namespace, $relationship_in);
+  $current_relationship = NULL;
+  $relationship = $relationship_elements->item(0);
+  if (!empty($relationship)) {
+    return TRUE;
+  }
+  return FALSE;
 }

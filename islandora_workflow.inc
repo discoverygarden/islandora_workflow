@@ -282,10 +282,10 @@ function islandora_workflow_itql_to_array($query_results) {
 function islandora_workflow_init_workflow($object_id) {
   //init
   module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
-  $object= new FedoraObject($object_id);
+  $object = new FedoraObject($object_id);
 
   // attach default workflow
-  $default_xml_file_name=drupal_get_path('module', 'islandora_workflow') . '/start_workflow.xml';
+  $default_xml_file_name = drupal_get_path('module', 'islandora_workflow') . '/start_workflow.xml';
   $workflow_parser = new DOMDocument();
   $workflow_parser->load($default_xml_file_name);
   $object->addDatastream('islandora_workflow', NULL,  $workflow_parser->saveXML(), array('dsLabel' => 'workflow', 'mimeType' => 'text/xml', 'controlGroup' => 'X', 'logMessage' => 'Adding islandora_workflow datastream(editorial workflow tracking).'));
@@ -510,6 +510,7 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
   //init
   module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
   module_load_include('inc', 'islandora_fedora_api', 'islandora_fedora_api.exception');
+
   $object = new FedoraObject($object_id);
   $workflow_parser = new DOMDocument();
   global $user;
@@ -594,7 +595,7 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
     $workflow_datastream->__set('content', $workflow_parser->saveXML());
   }
   else {//build xml from default if there is no DS present
-    $default_xml_file_name=drupal_get_path('module', 'islandora_workflow') . '/start_workflow.xml';
+    $default_xml_file_name = drupal_get_path('module', 'islandora_workflow') . '/start_workflow.xml';
     $workflow_parser = new DOMDocument();
     $workflow_parser->load($default_xml_file_name);
     //get elements to populate dynamicaly
