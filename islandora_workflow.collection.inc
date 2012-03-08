@@ -75,8 +75,6 @@ function islandora_workflow_get_collections() {
  *   The object to set the relationship on
  * @return
  *   fedora http response
- * @todo test
- * df
  */
 function islandora_workflow_track_collection_in_workflow($object_pid) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
@@ -89,7 +87,6 @@ function islandora_workflow_track_collection_in_workflow($object_pid) {
  *   The object to set the relationship on
  * @return
  *   fedora http response
- *   * @todo test
  */
 function islandora_workflow_stop_tracking_collection_in_workflow($object_pid) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');

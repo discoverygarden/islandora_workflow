@@ -408,6 +408,7 @@ function islandora_workflow_forms($form_id, $args) {
  * @param $form_id
  *   The id of the form!!!
  * @return
+ * @todo: make the form have a toggle for admins/managers
  */
 function islandora_workflow_form_fedora_repository_ingest_form_alter(&$form, &$form_state) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow.collection');

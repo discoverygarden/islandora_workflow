@@ -134,8 +134,6 @@ function islandora_workflow_get_all_members_of_collection($collection_id) {
   if ($result_nodes_length > 0) {
     for ($i=0; $i < $result_nodes_length; $i++) {
       $result_node = $result_nodes->item($i);
-      //$result_values = $result_node->childNodes;//didn't look like this was being used, feb 16, 2012; @todo: remove later if no bugs reported
-
       $label_element = $result_node->getElementsByTagName('label')->item(0);
       $assignee_element = $result_node->getElementsByTagName('assignee')->item(0);
       $state_element = $result_node->getElementsByTagName('state')->item(0);
@@ -795,8 +793,6 @@ function islandora_workflow_get_object_assignee($object_id) {
  *   This defaults to the object's pid in the REST interface, only specify if a datastream
  * @return
  *   the response from fedora for adding/modifying the relationship
- * @todo
- *   Update to use subject and object so it will work with rels-int
  */
 function islandora_workflow_set_object_relationship($object_id, $relationship_in, $target, $subject = NULL) {
   //init
@@ -915,7 +911,6 @@ function islandora_workflow_set_object_note($object_id, $subject, $body) {
   $note_node_list = $workflow_parser->getElementsByTagName('note');
   $notes_node_list = $workflow_parser->getElementsByTagName('notes');
 
-  //@todo: put in logic to add the element(s) if it doesn't exist
   //make sure that the notes and note elements are present and add them if they are not
   if (!$notes_node_list->item(0)) {
     $notes = $workflow_parser->createElement('notes');
