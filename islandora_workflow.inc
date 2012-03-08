@@ -29,32 +29,34 @@ function islandora_workflow_get_current_users_collections($permission_level='isl
   $permitted_collections=array();
   $collection_list=array();
   if (user_access('islandora_workflow_Administrator') || user_access('administer')) {//admin show all
-    $collection_list=islandora_workflow_get_all_collections();
+    $collection_list = islandora_workflow_get_all_collections();
   }
   elseif (user_access($permission_level) || $permission_level=='all') {//manager show permitted
-    $collection_list=islandora_workflow_get_all_collections();
+    $collection_list = islandora_workflow_get_all_collections();
     //figure out owned collections
     //role perms
     $users_role_collection_permissions = islandora_workflow_get_current_users_role_permissions();
+
     foreach ($users_role_collection_permissions as $role_id => $collections) {
       foreach ($collections as $collection_id => $permission) {
-        if ($permission_level=='all') {//all available permissions
-          $permitted_collections[]=$collection_id;
+        if ($permission_level == 'all') {//all available permissions
+          $permitted_collections[] = $collection_id;
         }
-        elseif ($permission==$permission_level) {
-          $permitted_collections[]=$collection_id;
+        elseif ($permission == $permission_level) {
+          $permitted_collections[] = $collection_id;
         }
       }
     }
     //user perms
-    $users_user_collection_permissions=islandora_workflow_get_current_users_user_permissions();
+    $users_user_collection_permissions = islandora_workflow_get_current_users_user_permissions();
+
     foreach ($users_user_collection_permissions as $role_id => $collections) {
       foreach ($collections as $collection_id => $permission) {
-        if ($permission_level=='all') {//all available permissions
-          $permitted_collections[]=$collection_id;
+        if ($permission_level == 'all') {//all available permissions
+          $permitted_collections[] = $collection_id;
         }
-        elseif ($permission==$permission_level) {
-          $permitted_collections[]=$collection_id;
+        elseif ($permission == $permission_level) {
+          $permitted_collections[] = $collection_id;
         }
       }
     }

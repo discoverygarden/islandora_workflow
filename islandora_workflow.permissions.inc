@@ -24,7 +24,6 @@ function islandora_workflow_get_user_permissions(array $options = array() ) {
   $collection = isset($options['collection']) ? $options['collection'] : NULL;
   $permissions = isset($options['permissions']) ? $options['permissions'] : NULL;
   $userinfo = isset($options['info']) ? $options['info'] : FALSE;
-
   $and = FALSE;
   $where = FALSE;
 
@@ -97,7 +96,6 @@ function islandora_workflow_get_user_permissions(array $options = array() ) {
   while ($row=db_fetch_array($resource)) {
     $results[] = $row;
   }
-
   return $results;
 }
 
@@ -121,7 +119,6 @@ function islandora_workflow_get_role_permissions( array $options = array() ) {
   $collection = isset($options['collection']) ? $options['collection'] : NULL;
   $permissions = isset($options['permissions']) ? $options['permissions'] : NULL;
   $roleinfo = isset($options['info']) ? $options['info'] : FALSE;
-
   $and = FALSE;
   $where = FALSE;
 
@@ -202,7 +199,6 @@ function islandora_workflow_get_role_permissions( array $options = array() ) {
   while ($row=db_fetch_array($resource)) {
     $results[] = $row;
   }
-
   return $results;
 }
 
@@ -433,7 +429,6 @@ function islandora_workflow_get_current_users_role_permissions() {
 
   //build query
   $results = islandora_workflow_get_role_permissions(array('roles' => $roles));
-
   //build return array
   foreach ($results as $row) {
     $perm_list[$row['role']][$row['collection']] = $row['permission'];
@@ -453,8 +448,7 @@ function islandora_workflow_get_current_users_user_permissions() {
   global $user;
 
   //build query
-  $results = islandora_workflow_get_user_permissions(array('user' => $user->name));
-
+  $results = islandora_workflow_get_user_permissions(array('user' => $user->uid));
   //build return array
   foreach ($results as $row) {
     $perm_list[$row['user']][$row['collection']] = $row['permission'];
