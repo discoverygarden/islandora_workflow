@@ -16,9 +16,6 @@
  *   Alow collapsable columns.
  *
  * @todo
- *   Explore using icons for the workflow state.
- *
- * @todo
  *   Make the permissions page display collection labels if there is one rather than pid
  *
  * @todo
@@ -124,6 +121,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
   $users_manager_collections = islandora_workflow_get_current_users_collections();
   $users_editor_collections = islandora_workflow_get_current_users_collections('islandora_workflow_Editor');
   $users_submitter_collections = islandora_workflow_get_current_users_collections('islandora_workflow_Submitter');
+
   $users_collections = islandora_workflow_get_current_users_collections('all');
   //pager init stuff
   global $pager_page_array, $pager_total;
@@ -226,18 +224,18 @@ function islandora_workflow_work_form(&$form_state, $tab) {
       if ($collection_members) {
         //filter collection items if in workflow tab
         if ($tab == 'workflow') {
-          foreach ($collection_members as $member => $member_attibutes) {
+          foreach ($collection_members as $member => $member_attributes) {
             //show things in approved state
-            if ($member_attibutes['state'] != 'approved') {
+            if ($member_attributes['state'] != 'approved') {
               unset($collection_members[$member]);
             }
           }
         }
         //filter collection items if in overview tab
         if ($tab == 'overview') {
-          foreach ($collection_members as $member => $member_attibutes) {
+          foreach ($collection_members as $member => $member_attributes) {
             //filter collection items if the user has manager level access to the collection
-            $workflow_state = $member_attibutes['state'];
+            $workflow_state = $member_attributes['state'];
             //remove everything not in a workflow state
             if (!$workflow_state) {
               unset($collection_members[$member]);
@@ -251,7 +249,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
             }
           }
         }
-        foreach ($collection_members as $member => $member_attibutes) {
+        foreach ($collection_members as $member => $member_attributes) {
           $object_count++;//keeping track of objects to show
           if ($object_count > $object_lower_bound && $object_count <= $object_upper_bound) {
             $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selecter'] = array(
@@ -260,7 +258,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
             );
             $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Assign'] = array(
               '#type' => 'select',
-              '#default_value' => array_search($member_attibutes['assignee'], $users_collections_members[$collection_id]),
+              '#default_value' => array_search($member_attributes['assignee'], $users_collections_members[$collection_id]),
               '#options' => $users_collections_members[$collection_id],
             );
           }
@@ -278,20 +276,20 @@ function islandora_workflow_work_form(&$form_state, $tab) {
         if ($collection_members) {
           //filter collection items if in workflow tab
           if ($tab == 'workflow') {
-            foreach ($collection_members as $member => $member_attibutes) {
+            foreach ($collection_members as $member => $member_attributes) {
               //show things in approved state
-              if ($member_attibutes['state'] != 'submitted') {
+              if ($member_attributes['state'] != 'submitted') {
                 unset($collection_members[$member]);
               }
             }
           }
           //filter collection items if in overview tab
           if ($tab == 'overview') {
-            foreach ($collection_members as $member => $member_attibutes) {
+            foreach ($collection_members as $member => $member_attributes) {
               //filter collection items if the user is not an admin
               if (!user_access('islandora_workflow_Administrator') && !user_access('administer')) {
                 //show things not in published state
-                $workflow_state = $member_attibutes['state'];
+                $workflow_state = $member_attributes['state'];
                 if ($workflow_state=='published' || $workflow_state=='approved') {
                   unset($collection_members[$member]);
                 }
@@ -299,7 +297,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
             }
           }
 
-          foreach ($collection_members as $member => $member_attibutes) {
+          foreach ($collection_members as $member => $member_attributes) {
             $object_count++;//keeping track of objects to show
             if ($object_count > $object_lower_bound && $object_count <=$object_upper_bound) {
               $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selecter']=array(
@@ -308,7 +306,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
               );
               $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Assign'] = array(
                 '#type' => 'select',
-                '#default_value' => array_search($member_attibutes['assignee'], $users_collections_members[$collection_id]),
+                '#default_value' => array_search($member_attributes['assignee'], $users_collections_members[$collection_id]),
                 '#options' => $users_collections_members[$collection_id],
               );
             }
@@ -323,32 +321,34 @@ function islandora_workflow_work_form(&$form_state, $tab) {
       if ((!isset($users_manager_collections[$collection_id])) && (!isset($users_editor_collections[$collection_id]))) {//exclude higher level permissions in the same collection
         // get all objects in those collections that they are submitters (only) in collection
         $collection_members = islandora_workflow_get_all_members_of_collection($collection_id);
-
         if ($collection_members) {
           //filter collection items if in workflow tab
           if ($tab=='workflow') {
-            foreach ($collection_members as $member => $member_attibutes) {
-              //show things in approved state
+            foreach ($collection_members as $member => $member_attributes) {
+              //show things in created state
               global $user;
-              if ($member_attibutes['state'] != 'created' || $member_attibutes['owner'] != $user->name) {
+              //filter by owner if it ever exists this will have to be a fedora call for now because object owner is not registered in RI
+              $member_attributes['owner'] = islandora_workflow_get_object_creator($member);
+              if ($member_attributes['state'] != 'created' || $member_attributes['owner'] != $user->name) {
                 unset($collection_members[$member]);
               }
             }
           }
           //filter collection items if in overview tab
           if ($tab=='overview') {
-            foreach ($collection_members as $member => $member_attibutes) {
+            foreach ($collection_members as $member => $member_attributes) {
               //filter collection items if the user is not an admin
               if (!user_access('islandora_workflow_Administrator') && !user_access('administer')) {
                 //show things not in published state
+                $member_attributes['owner'] = islandora_workflow_get_object_creator($member);
                 global $user;
-                if ($member_attibutes['owner'] != $user->name) {
+                if ($member_attributes['owner'] != $user->name || $member_attributes['state'] == 'published') {
                   unset($collection_members[$member]);
                 }
               }
             }
           }
-          foreach ($collection_members as $member => $member_attibutes) {
+          foreach ($collection_members as $member => $member_attributes) {
             $object_count++;//keeping track of objects to show
             if ($object_count > $object_lower_bound && $object_count <= $object_upper_bound) {
               $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selecter'] = array(
@@ -357,7 +357,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
               );
               $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Assign'] = array(
                 '#type' => 'select',
-                '#default_value' => array_search($member_attibutes['assignee'], $users_collections_members[$collection_id]),
+                '#default_value' => array_search($member_attributes['assignee'], $users_collections_members[$collection_id]),
                 '#options' => $users_collections_members[$collection_id],
               );
             }
@@ -863,10 +863,10 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
     if ($collection_members) {
       $vars['collections'][$collection_id] = array($collection_name => $collection_members);//makes it useful for theme as a list off all the members of all the collections
 
-      foreach ($collection_members as $member => $member_attibutes) {
+      foreach ($collection_members as $member => $member_attributes) {
         if (isset($vars['list'][$collection_id][$member])) { //The isset is here so that only populated items are rendered into HTML for display
 
-          $member_workflow_state = $member_attibutes['state'];
+          $member_workflow_state = $member_attributes['state'];
 
           if ($member_workflow_state) { //make sure workflow data is present too
 
@@ -877,11 +877,11 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
             $vars['list'][$collection_id][$member]['Assign'] = drupal_render($vars['list'][$collection_id][$member]['Assign']);
 
             //get the dates and provide them
-            $vars['list'][$collection_id][$member]['when_created'] = format_date(strtotime($member_attibutes['created_date']), $type = 'small');
-            $vars['list'][$collection_id][$member]['last_workflow_progression'] = format_date(strtotime($member_attibutes['islandora_workflow_modified']), $type = 'small');
+            $vars['list'][$collection_id][$member]['when_created'] = format_date(strtotime($member_attributes['created_date']), $type = 'small');
+            $vars['list'][$collection_id][$member]['last_workflow_progression'] = format_date(strtotime($member_attributes['islandora_workflow_modified']), $type = 'small');
 
             //if there is a note
-            $member_note_subject = $member_attibutes['subject'];
+            $member_note_subject = $member_attributes['subject'];
             if ($member_note_subject) {
               $vars['list'][$collection_id][$member]['note_subject']=
                 l($member_note_subject,
@@ -893,7 +893,7 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
                   'islandora_workflow_edit_note',  array('query' => 'object=' . $member));
             }
 
-            $member_label = $member_attibutes['label'];
+            $member_label = $member_attributes['label'];
             if ($member_label) {//if there is a label
               $vars['list'][$collection_id][$member]['object']=
                 l($member_label,//use the label
