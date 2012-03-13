@@ -29,7 +29,7 @@ $member_object fedora_model:createdDate $created_date
 }
 OPTIONAL
 {
-$member_object fedora_model:owner $owner
+$member_object fedora_model:ownerId $owner
 }
 OPTIONAL
 {

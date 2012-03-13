@@ -327,8 +327,6 @@ function islandora_workflow_work_form(&$form_state, $tab) {
             foreach ($collection_members as $member => $member_attributes) {
               //show things in created state
               global $user;
-              //filter by owner if it ever exists this will have to be a fedora call for now because object owner is not registered in RI
-              $member_attributes['owner'] = islandora_workflow_get_object_creator($member);
               if ($member_attributes['state'] != 'created' || $member_attributes['owner'] != $user->name) {
                 unset($collection_members[$member]);
               }
@@ -340,7 +338,6 @@ function islandora_workflow_work_form(&$form_state, $tab) {
               //filter collection items if the user is not an admin
               if (!user_access('islandora_workflow_Administrator') && !user_access('administer')) {
                 //show things not in published state
-                $member_attributes['owner'] = islandora_workflow_get_object_creator($member);
                 global $user;
                 if ($member_attributes['owner'] != $user->name || $member_attributes['state'] == 'published') {
                   unset($collection_members[$member]);
