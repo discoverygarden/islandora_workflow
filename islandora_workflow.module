@@ -1188,7 +1188,7 @@ function islandora_workflow_user_permissions_form() {
   //setup the form
   $collection_user_permissions_form['islandora_workflow_collection_permissions_table'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Collecion Permissions'),
+    '#title' => t('Collection Permissions'),
     '#collapsible' => FALSE,
     '#collapsed' => FALSE,
     '#tree' => TRUE, //See http://drupal.org/node/751826
