@@ -103,6 +103,8 @@ function islandora_workflow_work() {
         '#content' => drupal_get_form('islandora_workflow_overview_form'),
         '#weight' => '2',
       );
+  
+  
   return tabs_render($page_tabs);
 }
 
@@ -213,10 +215,14 @@ function islandora_workflow_work_form(&$form_state, $tab) {
   //populate tab for viewing objects
 
   //get all members of the collections the user has manager/admin access to
+  
   /*setting the name as $member for edit and manage buttons is against the forms api
   * but neccessary to get around a drupalism that has submit buttons with the same name
   * reporting an incorrect parent
   */
+  /*
+   * @TODO: the following code is a nightmare and needs to be cleaned
+   */
   if ($users_manager_collections) {
     foreach ($users_manager_collections as $collection_id => $collection_name) {
       //get all objects in collection

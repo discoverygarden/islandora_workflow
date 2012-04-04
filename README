@@ -13,7 +13,7 @@ Machine level workflow will be handled via fedora microservices.
 Human level workflow will be handled through this drupal module.
 
 Workflow can be enforced through the use of XACML. There is a settings toggle for this.
-This toggle is volatile, it may cause many problems.  We highly recommend only changing it at install time.
+This toggle starts a large process, we highly recommend only changing it at install time.
 
 For a user to see the 'My Islandora Work' link they need module permissions and some collection level permission set.
 Collection level permissions for users and roles can be set at admin/settings/islandora_workflow_perms.
@@ -31,3 +31,18 @@ For a Drupal user to see the main workflow page they must both have appropriate 
 
 To start an object in the workflow call this function from islandora_workflow.inc: islandora_workflow_init_workflow($object_id)
 On Dec 2nd 2011 the workflow schema underwent a change.  An update utility is packaged with the module.  An update to the current islandora fedora api will be required now.
+
+
+
+PERMISSIONS
+'islandora_workflow_Editor'
+'islandora_workflow_Manager'
+'islandora_workflow_Administrator'
+'islandora_workflow_Submitter'
+
+STATES
+'created'
+'submitted'
+'approved'
+'published'
+'rejected'
