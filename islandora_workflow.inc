@@ -992,18 +992,18 @@ function islandora_workflow_set_object_note($object_id, $subject, $body) {
  */
 function islandora_workflow_get_object_note_subject($object_id) {
   //init
-  module_load_include('object.inc', 'islandora_fedora_api'); //for getting an object
+  module_load_include('object.inc', 'islandora_fedora_api');
   try {
-    $object= new FedoraObject($object_id);
+    $object = new FedoraObject($object_id);
     $workflow_parser = new DOMDocument();
     global $user;
-    $object_datastreams=$object->get_datastreams();
+    $object_datastreams = $object->get_datastreams();
     if (!isset($object_datastreams['islandora_workflow'])) {
       return FALSE;
     }
     //get the DS xml in dom object
-    $workflow_datastream=$object_datastreams['islandora_workflow'];
-    $workflow_string=$workflow_datastream->__get('content');
+    $workflow_datastream = $object_datastreams['islandora_workflow'];
+    $workflow_string = $workflow_datastream->__get('content');
     $workflow_parser->loadXML($workflow_string);
   }
   catch (FedoraAPIRestException $e) {
@@ -1011,7 +1011,7 @@ function islandora_workflow_get_object_note_subject($object_id) {
   }
   $subject='';
 
-  $subject_node_list=$workflow_parser->getElementsByTagName('subject');
+  $subject_node_list = $workflow_parser->getElementsByTagName('subject');
   foreach ($subject_node_list as $subject_element) {
     //get the text
     $subject=$subject_element->nodeValue;
