@@ -135,11 +135,11 @@ function islandora_workflow_work_form(&$form_state, $tab) {
   if ($tab == 'workflow') {
     $pager_index = 0;
   }
-  if ($tab=='overview') {
+  if ($tab == 'overview') {
     $pager_index = 1;
   }
   //set the current page
-  $page=isset($_GET['page']) ? $_GET['page'] : '';
+  $page = isset($_GET['page']) ? $_GET['page'] : '';
   $pager_page_array = explode(',', $page);
   //control the objects displayed on each page
   $objects_per_page = 10;
@@ -172,7 +172,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
     '#weight' => '1',
     '#value' => t('Submit')
   );
-    //approve button
+  //approve button
   if (user_access('islandora_workflow_Administrator') || $users_manager_collections || $users_editor_collections || user_access('administer')) {
     $workflow_tabs_form['Approve'] = array(
       '#type' => 'submit',
@@ -224,9 +224,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
   * but neccessary to get around a drupalism that has submit buttons with the same name
   * reporting an incorrect parent
   */
-  /*
-   * @TODO: the following code is a nightmare and needs to be cleaned
-   */
+   //@TODO: the following code is a nightmare and needs to be cleaned
   if ($users_manager_collections) {
     foreach ($users_manager_collections as $collection_id => $collection_name) {
       //get all objects in collection
@@ -268,8 +266,8 @@ function islandora_workflow_work_form(&$form_state, $tab) {
             );
             $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Assign'] = array(
               '#type' => 'select',
-              '#default_value' => array_search($member_attributes['assignee'], $users_collections_members[$collection_id]),
-              '#options' => $users_collections_members[$collection_id],
+                '#default_value' => isset($member_attributes['assignee']) ? $member_attributes['assignee'] : '',
+                '#options' => $possible_assignee_matrix[$collection_id][$member_attributes['state']],
             );
           }
         }
@@ -308,7 +306,8 @@ function islandora_workflow_work_form(&$form_state, $tab) {
           }
 
           foreach ($collection_members as $member => $member_attributes) {
-            $object_count++;//keeping track of objects to show
+            $object_count++;
+            //keeping track of objects to show
             if ($object_count > $object_lower_bound && $object_count <=$object_upper_bound) {
               $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selecter']=array(
                 '#type' => 'checkbox',
@@ -316,8 +315,8 @@ function islandora_workflow_work_form(&$form_state, $tab) {
               );
               $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Assign'] = array(
                 '#type' => 'select',
-                '#default_value' => array_search($member_attributes['assignee'], $users_collections_members[$collection_id]),
-                '#options' => $users_collections_members[$collection_id],
+                '#default_value' => isset($member_attributes['assignee']) ? $member_attributes['assignee'] : '',
+                '#options' => $possible_assignee_matrix[$collection_id][$member_attributes['state']],
               );
             }
           }
@@ -333,7 +332,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
         $collection_members = islandora_workflow_get_all_members_of_collection($collection_id);
         if ($collection_members) {
           //filter collection items if in workflow tab
-          if ($tab=='workflow') {
+          if ($tab == 'workflow') {
             foreach ($collection_members as $member => $member_attributes) {
               //show things in created state
               global $user;
@@ -343,7 +342,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
             }
           }
           //filter collection items if in overview tab
-          if ($tab=='overview') {
+          if ($tab == 'overview') {
             foreach ($collection_members as $member => $member_attributes) {
               //filter collection items if the user is not an admin
               if (!user_access('islandora_workflow_Administrator') && !user_access('administer')) {
@@ -364,8 +363,8 @@ function islandora_workflow_work_form(&$form_state, $tab) {
               );
               $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Assign'] = array(
                 '#type' => 'select',
-                '#default_value' => array_search($member_attributes['assignee'], $users_collections_members[$collection_id]),
-                '#options' => $users_collections_members[$collection_id],
+                '#default_value' => isset($member_attributes['assignee']) ? $member_attributes['assignee'] : '',
+                '#options' => $possible_assignee_matrix[$collection_id][$member_attributes['state']],
               );
             }
           }
@@ -375,7 +374,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
   }
   //include the tab in the form array so that the preprocessor/theme can be aware of the tab it is
   //drupal hack to pass a variable to my preprocessor function
-  $workflow_tabs_form['objects_form']['objects_form_elems']['tab']=array(
+  $workflow_tabs_form['objects_form']['objects_form_elems']['tab'] = array(
     '#type' => 'textfield',
     '#default_value' => $pager_index,
     '#access' => FALSE
@@ -685,7 +684,7 @@ function islandora_workflow_collections(&$form_state) {
   module_load_include('inc', 'islandora_workflow');
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow.collection');
 
-  $collection_data=islandora_workflow_get_collections();
+  $collection_data = islandora_workflow_get_collections();
 
   $workflow_collection_form = array();
 
@@ -1528,68 +1527,57 @@ function islandora_workflow_batch_finished($success, $results, $operations) {
   *   An easier to use version of $work_form_form
   */
 function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
-  //init
   $clicked_button = $work_form_state['clicked_button']['#value'];
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
   $collections=islandora_workflow_get_all_collections();
-  $selected_object_ids=array();
-  $assignees=array();
-  $assignee_indexes=array();
-  //get selected objects
+  $selected_object_ids = array();
+  $assignees = array();
+  $assignee_indexes = array();
+  // Get selected objects.
   foreach ($work_form_state['values']['objects_form']['objects_form_elems'] as $collection) {
     if (is_array($collection)) {//prevent a warning
       foreach ($collection as $object_id => $object_form_elements) {
-        if ($object_form_elements['Selecter']==1) {
-          $selected_object_ids[]=$object_id;
-          $assignee_indexes[$object_id]=$object_form_elements['Assign'];
-        }
-      }
-    }
-  }
-  //get selected assignees
-  foreach ($work_form['objects_form']['objects_form_elems'] as $collection) {
-    if (isset($collection['#post']) && is_array($collection)) {//makes sure we only operate on the object elements
-      foreach ($collection as $object_id => $object) {
-        if (isset($object['#post']) && is_array($object)) {
-          $assignees[$object_id]=$object['Assign']['#options'][$assignee_indexes[$object_id]];
+        if ($object_form_elements['Selecter'] == 1) {
+          $selected_object_ids[] = $object_id;
+          // Get selected assignees.
+          $assignees[$object_id] = $object_form_elements['Assign'];
         }
       }
     }
   }
   //handle buttons
-  if ($clicked_button=='Submit') {
+  if ($clicked_button == 'Submit') {
     foreach ($selected_object_ids as $object_id) {
       islandora_workflow_submit_object($object_id);
     }
   }
-  elseif ($clicked_button=='Delete') {//this sets fedora state to D
+  elseif ($clicked_button == 'Delete') {
+    //this sets fedora state to D
     foreach ($selected_object_ids as $object_id) {
       islandora_workflow_delete_object($object_id);
     }
   }
-  elseif ($clicked_button=='Reject') {
+  elseif ($clicked_button == 'Reject') {
     foreach ($selected_object_ids as $object_id) {
       islandora_workflow_reject_object($object_id);
     }
   }
-  elseif ($clicked_button=='Approve') {
+  elseif ($clicked_button == 'Approve') {
     foreach ($selected_object_ids as $object_id) {
       islandora_workflow_approve_object($object_id);
     }
   }
-  elseif ($clicked_button=='Publish') {
+  elseif ($clicked_button == 'Publish') {
     foreach ($selected_object_ids as $object_id) {
       islandora_workflow_publish_object($object_id);
-      //this is a hack to get things into the workflow for testing
-      //islandora_workflow_init_workflow($object_id);//remove
     }
   }
-  elseif ($clicked_button=='Claim') {
+  elseif ($clicked_button == 'Claim') {
     foreach ($selected_object_ids as $object_id) {
       islandora_workflow_claim_object($object_id);
     }
   }
-  elseif ($clicked_button=='Assign') {
+  elseif ($clicked_button == 'Assign') {
     foreach ($selected_object_ids as $object_id) {
       islandora_workflow_assign_object($object_id, $assignees[$object_id]);
     }
@@ -1639,27 +1627,27 @@ function islandora_workflow_mail($key, &$message, $params) {
       $body=islandora_workflow_get_object_note_body($params['object_id']);
       $subject=islandora_workflow_get_object_note_subject($params['object_id']);
       //setup email
-      $message['subject']=$params['object_id'] .' Rejected: ' . $subject;
-      $message['body'][]= 'Object '. $params['object_id'] .' has been rejected to you.';
-      $message['body'][]= $body;
+      $message['subject'] = $params['object_id'] . ' Rejected: ' . $subject;
+      $message['body'][] = 'Object ' . $params['object_id'] . ' has been rejected to you.';
+      $message['body'][] = $body;
     break;
     case 'submit':
       //init
-      $body=islandora_workflow_get_object_note_body($params['object_id']);
-      $subject=islandora_workflow_get_object_note_subject($params['object_id']);
+      $body = islandora_workflow_get_object_note_body($params['object_id']);
+      $subject = islandora_workflow_get_object_note_subject($params['object_id']);
       //setup email
-      $message['subject']=$params['object_id'] .' Submited: ' . $subject;
-      $message['body'][]= 'Object '. $params['object_id'] .' has been submited for appoval.';
-      $message['body'][]= $body;
+      $message['subject'] = $params['object_id'] . ' Submited: ' . $subject;
+      $message['body'][] = 'Object ' . $params['object_id'] . ' has been submited for appoval.';
+      $message['body'][] = $body;
     break;
     case 'approve':
       //init
       $body=islandora_workflow_get_object_note_body($params['object_id']);
       $subject=islandora_workflow_get_object_note_subject($params['object_id']);
       //setup email
-      $message['subject']=$params['object_id'] .' Aproved: ' . $subject;
-      $message['body'][]= 'Object '. $params['object_id'] .' has been aproved and is awaiting publication.';
-      $message['body'][]= $body;
+      $message['subject'] = $params['object_id'] . ' Aproved: ' . $subject;
+      $message['body'][] = 'Object ' . $params['object_id'] .' has been aproved and is awaiting publication.';
+      $message['body'][] = $body;
     break;
   }
 }

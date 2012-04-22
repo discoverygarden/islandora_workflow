@@ -1,3 +1,10 @@
+<?php
+/**
+ * @file
+ *   template file for the workflow table
+ */
+
+?>
 <TABLE>
   <THEAD>
     <TR>

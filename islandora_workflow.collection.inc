@@ -1,16 +1,19 @@
 <?php
 /**
  * @file
- *   This include file is meant to hold all helper functions regarding collections
+ *   This include file is meant to hold all helper
+ *   functions regarding collections
  */
 
 /**
- * This function is used to get a list containing all of the islandora collections in a Fedora repo
+ * This function is used to get a list containing all of the
+ * islandora collections in a Fedora repo
  * @TODO:  use this function to replace islandora_workflow_get_all_collections()
  * @author
  *   William Panting
- * @return $collection_list
- *   an associated array of collection pids and names
+ *
+ * @return array
+ *   $collection_list an associated array of collection pids and names
  */
 function islandora_workflow_get_collections() {
   module_load_include('inc', 'islandora_fedora_api', 'islandora_fedora_api.risearch');
@@ -27,12 +30,12 @@ function islandora_workflow_get_collections() {
     $query_return_dom = DOMDocument::loadXML($query_return_string);
   }
 
-  //format query results for use (xml->array)
+  // Format query results for use (xml->array).
   $collection_data = array();
   $result_nodes = $query_return_dom->getElementsByTagName('result');
   $result_nodes_length = $result_nodes->length;
   if ($result_nodes_length > 0) {
-    for ($i=0; $i < $result_nodes_length; $i++) {
+    for ($i = 0; $i < $result_nodes_length; $i++) {
       $result_node = $result_nodes->item($i);
 
       $label_element = $result_node->getElementsByTagName('label')->item(0);
@@ -41,7 +44,8 @@ function islandora_workflow_get_collections() {
 
       $collection_object_uri = $collection_pid_element->getAttribute('uri');
       //info:fedora/ is 12 chars
-      $collection_object_pid = substr($collection_object_uri, 12, strlen($collection_object_uri));//need to extract the pid
+      $collection_object_pid = substr($collection_object_uri, 12, strlen($collection_object_uri));
+      //need to extract the pid
 
       $collection_data[$collection_object_pid] = array();
 
@@ -71,9 +75,11 @@ function islandora_workflow_get_collections() {
 /**
  * Set the RELS-EXT relationship on a collection for
  * workflow tracking to TRUE
- * @param $object_pid
+ *
+ * @param string $object_pid
  *   The object to set the relationship on
- * @return
+ *
+ * @return object
  *   fedora http response
  */
 function islandora_workflow_track_collection_in_workflow($object_pid) {
@@ -85,7 +91,8 @@ function islandora_workflow_track_collection_in_workflow($object_pid) {
  * Set the RELS-EXT relationship on a collection for
  * workflow tracking to FALSE
  *   The object to set the relationship on
- * @return
+ *
+ * @return object
  *   fedora http response
  */
 function islandora_workflow_stop_tracking_collection_in_workflow($object_pid) {
@@ -101,19 +108,18 @@ function islandora_workflow_stop_tracking_collection_in_workflow($object_pid) {
  *@return boolean
  *  TRUE if the collection is tracked in workflow
  *  FALSE if the collection is not tracked in workflow
- *@todo: look at creating api func for checking if rel exists
+ * @todo: look at creating api func for checking if rel exists
  */
 function islandora_workflow_is_collection_workflow_tracked($object_pid) {
 
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
   $relationship_in = 'is_tracked_by_workflow';
-  $islandora_workflow_namespace='info:islandora/islandora-system:def/islandora_workflow#';
-  module_load_include('raw.inc', 'islandora_fedora_api'); //for getting an object
-  $apim_object= new FedoraAPIM();
+  $islandora_workflow_namespace = 'info:islandora/islandora-system:def/islandora_workflow#';
+  module_load_include('raw.inc', 'islandora_fedora_api');
+  $apim_object = new FedoraAPIM();
 
-  //get existing relationshp
+  // Get existing relationshp.
   $relationships = $apim_object->getRelationships($object_pid, $islandora_workflow_namespace . $relationship_in, $subject);
-
 
   $relationships_parser = new DOMDocument();
   $relationships_parser->loadXML($relationships->data);
@@ -134,94 +140,96 @@ function islandora_workflow_is_collection_workflow_tracked($object_pid) {
  * @param boolean $format:  Whether or not to return a string format that is usable for a select
  * @return array : $possible_assignees_by_collection[$collection][$workflow_state][user]='formated_user'
  */
-function get_possible_assignees($collections, $workflow_states=array(), $format=FALSE) {
-
- //init
- if (empty($workflow_states)) {//check all workflow states
-  $workflow_states[] = 'rejected';
-  $workflow_states[] = 'created';
-  $workflow_states[] = 'submitted';
-  $workflow_states[] = 'approved';
-  $workflow_states[] = 'published';
- }
- $possible_assignees_by_collection = array();
- $admins = array();
- $managers = array();
- $editors = array();
- $submitters = array();
-
- //@TODO: optimize this with some 'if '' is in workflow_states'; we don't need to know all the perms all the time
- $admins = islandora_workflow_get_all_users_with_collection_permissions($collections, 'islandora_workflow_Administrator');
- $managers = islandora_workflow_get_all_users_with_collection_permissions($collections, 'islandora_workflow_Manager');
- $editors = islandora_workflow_get_all_users_with_collection_permissions($collections, 'islandora_workflow_Editor');
- $submitters = islandora_workflow_get_all_users_with_collection_permissions($collections, 'islandora_workflow_Submitter');
- //This crazy set of stuff can mostly be repalced with array_replace_recursive() in php3.5+
- $collection_pids = array_unique(array_merge(array_keys($admins), array_keys($managers), array_keys($editors), array_keys($submitters)));
- foreach ($collection_pids as $collection_pid) {
-  $collection = array();
-  //workflow state should go here
-  foreach ($workflow_states as $workflow_state) {
-    
-   if ($workflow_state == 'rejected' || $workflow_state == 'created') {
-    if (isset($admins[$collection_pid])) {
-     $collection = array_merge($collection, $admins[$collection_pid]);
-    }
-    if (isset($managers[$collection_pid])) {
-     $collection = array_merge($collection, $managers[$collection_pid]);
-    }
-    if (isset($editors[$collection_pid])) {
-     $collection = array_merge($collection, $editors[$collection_pid]);
-    }
-    if (isset($submitters[$collection_pid])) {
-     $collection = array_merge($collection, $submitters[$collection_pid]);
-    }
-   }
-   elseif ($workflow_state == 'submitted') {
-    if (isset($admins[$collection_pid])) {
-     $collection = array_merge($collection, $admins[$collection_pid]);
-    }
-    if (isset($managers[$collection_pid])) {
-     $collection = array_merge($collection, $managers[$collection_pid]);
-    }
-    if (isset($editors[$collection_pid])) {
-     $collection = array_merge($collection, $editors[$collection_pid]);
-    }
-   }
-   elseif ($workflow_state == 'approved' || $workflow_state == 'published') {
-    if (isset($admins[$collection_pid])) {
-     $collection = array_merge($collection, $admins[$collection_pid]);
-    }
-    if (isset($managers[$collection_pid])) {
-     $collection = array_merge($collection, $managers[$collection_pid]);
-    }
-   }
-
-   //format to include the permission level of the user
-   //these do not simply replace the existing string because the base case involves searching based on assignee name
-   if ($format) {
-    foreach ($collection as $user_key=>$user) {
-     if(in_array($user, $admins[$collection_pid])) {
-      $collection[$user] = 'Admin: ' . $user;//abbreviation used here because of select size
-     }
-     elseif (in_array($user, $managers[$collection_pid])) {
-      $collection[$user] = 'Manager: ' . $user;
-     }
-     elseif(in_array($user, $editors[$collection_pid])) {
-      $collection[$user] = 'Editor: ' . $user;
-     }
-     elseif(in_array($user, $submitters[$collection_pid])) {
-      $collection[$user] = 'Submitter: ' . $user;
-     }
-     unset($collection[$user_key]);
-    }
-   }
-
-   //prepend the nobody user
-   array_unshift($collection, '');
-   $collection = array_unique($collection);
-   $possible_assignees_by_collection[$collection_pid][$workflow_state] = $collection;
+function get_possible_assignees($collections, $workflow_states = array(), $format = FALSE) {
+  if (empty($workflow_states)) {
+    // Check all workflow states.
+    $workflow_states[] = 'rejected';
+    $workflow_states[] = 'created';
+    $workflow_states[] = 'submitted';
+    $workflow_states[] = 'approved';
+    $workflow_states[] = 'published';
   }
- }
+  $possible_assignees_by_collection = array();
+  $admins = array();
+  $managers = array();
+  $editors = array();
+  $submitters = array();
 
- return $possible_assignees_by_collection;
+  //@TODO: optimize this with some 'if '' is in workflow_states'; we don't need to know all the perms all the time
+  $admins = islandora_workflow_get_all_users_with_collection_permissions($collections, 'islandora_workflow_Administrator');
+  $managers = islandora_workflow_get_all_users_with_collection_permissions($collections, 'islandora_workflow_Manager');
+  $editors = islandora_workflow_get_all_users_with_collection_permissions($collections, 'islandora_workflow_Editor');
+  $submitters = islandora_workflow_get_all_users_with_collection_permissions($collections, 'islandora_workflow_Submitter');
+  /* This crazy set of stuff can mostly be repalced with
+  array_replace_recursive() in php3.5+*/
+  $collection_pids = array_unique(array_merge(array_keys($admins), array_keys($managers), array_keys($editors), array_keys($submitters)));
+  foreach ($collection_pids as $collection_pid) {
+    $collection = array();
+    // Set the nobody user.
+    $collection[''] = '';
+    // Workflow state should go here.
+    foreach ($workflow_states as $workflow_state) {
+      if ($workflow_state == 'rejected' || $workflow_state == 'created') {
+        if (isset($admins[$collection_pid])) {
+          $collection = array_merge($collection, $admins[$collection_pid]);
+        }
+        if (isset($managers[$collection_pid])) {
+          $collection = array_merge($collection, $managers[$collection_pid]);
+        }
+        if (isset($editors[$collection_pid])) {
+          $collection = array_merge($collection, $editors[$collection_pid]);
+        }
+        if (isset($submitters[$collection_pid])) {
+          $collection = array_merge($collection, $submitters[$collection_pid]);
+        }
+      }
+      elseif ($workflow_state == 'submitted') {
+      if (isset($admins[$collection_pid])) {
+       $collection = array_merge($collection, $admins[$collection_pid]);
+      }
+      if (isset($managers[$collection_pid])) {
+       $collection = array_merge($collection, $managers[$collection_pid]);
+      }
+      if (isset($editors[$collection_pid])) {
+       $collection = array_merge($collection, $editors[$collection_pid]);
+      }
+      }
+      elseif ($workflow_state == 'approved' || $workflow_state == 'published') {
+      if (isset($admins[$collection_pid])) {
+       $collection = array_merge($collection, $admins[$collection_pid]);
+      }
+      if (isset($managers[$collection_pid])) {
+       $collection = array_merge($collection, $managers[$collection_pid]);
+      }
+     }
+
+     // Format to include the permission level of the user.
+     //these do not simply replace the existing string because the base case involves searching based on assignee name
+     if ($format) {
+      foreach ($collection as $user_key=>$user) {
+       if(in_array($user, $admins[$collection_pid])) {
+         //abbreviation used here because of select size
+         $collection[$user] = 'Admin: ' . $user;
+       }
+       elseif (in_array($user, $managers[$collection_pid])) {
+         $collection[$user] = 'Manager: ' . $user;
+       }
+       elseif (in_array($user, $editors[$collection_pid])) {
+         $collection[$user] = 'Editor: ' . $user;
+       }
+       elseif (in_array($user, $submitters[$collection_pid])) {
+         $collection[$user] = 'Submitter: ' . $user;
+       }
+       if ($collection[$user_key] != '') {
+         unset($collection[$user_key]);
+       }
+      }
+     }
+
+     $collection = array_unique($collection);
+     $possible_assignees_by_collection[$collection_pid][$workflow_state] = $collection;
+    }
+  }
+
+  return $possible_assignees_by_collection;
 }

@@ -1,6 +1,7 @@
 <?php
 /**
- * @file This file contains all of the helper functions dealing with Permissions for
+ * @file
+ * This file contains all of the helper functions dealing with Permissions for
  * Islandora workflow.
  */
 
@@ -64,10 +65,12 @@ function islandora_workflow_get_user_permissions(array $options = array() ) {
       $query .= ' WHERE';
       $where = TRUE;
     }
-    if ($and)
+    if ($and) {
       $query .= ' AND';
-    else
+    }
+    else {
       $and = TRUE;
+    }
     $query .= " iw.collection = '%s'";
     $args[] = $collection;
   }
@@ -77,16 +80,19 @@ function islandora_workflow_get_user_permissions(array $options = array() ) {
       $query .= ' WHERE';
       $where = TRUE;
     }
-    if ($and)
+    if ($and) {
       $query .= ' AND';
-    else
+    }
+    else {
       $and = TRUE;
+    }
 
     $or = FALSE;
     $query .= ' (';
     foreach ($permissions as $permission) {
-      if ($or)
+      if ($or) {
         $query .= ' OR';
+      }
       $query .= " iw.permission = '%s'";
       $args[] = $permission;
       $or = TRUE;
@@ -150,15 +156,18 @@ function islandora_workflow_get_role_permissions( array $options = array() ) {
       $query .= ' WHERE';
       $where = TRUE;
     }
-    if ($and)
+    if ($and) {
       $query .= ' AND';
-    else
+    }
+    else {
       $and = TRUE;
+    }
     $or = FALSE;
     $query .= ' (';
     foreach ($roles as $role) {
-      if ($or)
+      if ($or) {
         $query .= ' OR';
+      }
       $query .= " iw.role = %d";
       $args[] = $role;
       $or = TRUE;
@@ -196,8 +205,9 @@ function islandora_workflow_get_role_permissions( array $options = array() ) {
     $or = FALSE;
     $query .= '(';
     foreach ($permissions as $permission) {
-      if ($or)
+      if ($or) {
         $query .= ' OR';
+      }
       $query .= " iw.permission = '%s'";
       $args[] = $permission;
       $or = TRUE;
@@ -264,18 +274,20 @@ function islandora_workflow_get_permission_state($collection, $state) {
 }
 
 /**
- * This function query's drupal's DB for all the collection permission entries by role
- * used when displaying the current state for the permission page.
+ * This function query's drupal's DB for all the collection permission
+ * entries by role used when displaying the current state
+ * for the permission page.
  *
- * @return array $perm_list
- *   list of permissions that roles have with the form $perm_list[$role_id][$collection_id]=perms
+ * @return array
+ *   $perm_list list of permissions that roles have with the form
+ *   $perm_list[$role_id][$collection_id]=perms
  */
 function islandora_workflow_get_all_role_permissions() {
   $perm_list = array();
 
   $results = islandora_workflow_get_role_permissions();
 
-  //build return array
+  // Build return array.
   foreach ($results as $row) {
     $perm_list[$row['role']][$row['collection']] = $row['permission'];
   }
@@ -391,11 +403,15 @@ function islandora_workflow_get_all_users_with_collection_permissions($collectio
 }
 
 /**
- * This is a helper function that will search the drupal core database for all users with a specified permission
+ * This is a helper function that will search the drupal core
+ * database for all users with a specified permission
+ *
  * @param string $perm
  *   the permission to search for
- * @return array $users
- *   the list of users with the permission in the form users[user_id]=user_name or false
+ *
+ * @return array
+ *   $users the list of users with the permission in the form
+ *   users[user_id]=user_name or false
  */
 function user_access_list($perm = NULL) {
   $users = FALSE;
@@ -436,10 +452,14 @@ function user_access_list($perm = NULL) {
 }
 
 /**
- * This function query's drupal's DB for all the collection permission entries related to the current user
- * Most usefull for building the work portal, and also used for getting user's owned collections
- * @return array $perm_list
- *   list of permissions the current user has with the indicated $perm_list[$role_id][$collection_id]=perms
+ * This function query's drupal's DB for all the collection permission entries
+ * related to the current user
+ * Most usefull for building the work portal,
+ * and also used for getting user's owned collections
+ *
+ * @return array
+ *   $perm_listlist of permissions the current user has with the indicated
+ *   $perm_list[$role_id][$collection_id]=perms
  */
 function islandora_workflow_get_current_users_role_permissions() {
   /* Do islandora_workflow_get_all_role_permissions with
@@ -488,45 +508,48 @@ function islandora_workflow_get_current_users_user_permissions() {
 }
 
 /**
- * This function will return a list of all roles that have islandora_workflow permissions
- * @return array $privledged_roles
- *   The list of roles
+ * This function will return a list of all roles
+ * that have islandora_workflow permissions
+ *
+ * @return array
+ *   $privledged_roles The list of roles
  */
 function islandora_workflow_get_roles_with_module_permissions() {
-   $privledged_roles = array();
+  $privledged_roles = array();
 
-   //use user_roles for each permission individualy
-   $admin_roles = user_roles($membersonly = FALSE, 'islandora_workflow_Administrator');
-   $manager_roles = user_roles($membersonly = FALSE, 'islandora_workflow_Manager');
-   $editor_roles = user_roles($membersonly = FALSE, 'islandora_workflow_Editor');
-   $submitter_roles = user_roles($membersonly = FALSE, 'islandora_workflow_Submitter');
+  // Use user_roles for each permission individualy.
+  $admin_roles = user_roles($membersonly = FALSE, 'islandora_workflow_Administrator');
+  $manager_roles = user_roles($membersonly = FALSE, 'islandora_workflow_Manager');
+  $editor_roles = user_roles($membersonly = FALSE, 'islandora_workflow_Editor');
+  $submitter_roles = user_roles($membersonly = FALSE, 'islandora_workflow_Submitter');
 
-   //modify the returned arrays to include the permission name, and merge into one array [role_pid][role_name][0...4]permission
-   foreach ($admin_roles as $role_pid => $role_name) {
-     $privledged_roles[$role_pid][$role_name][] = 'islandora_workflow_Administrator';
-   }
+  /* Modify the returned arrays to include the permission name,
+   and merge into one array [role_pid][role_name][0...4]permission*/
+  foreach ($admin_roles as $role_pid => $role_name) {
+    $privledged_roles[$role_pid][$role_name][] = 'islandora_workflow_Administrator';
+  }
 
-   foreach ($manager_roles as $role_pid => $role_name) {
-     $privledged_roles[$role_pid][$role_name][] = 'islandora_workflow_Manager';
-   }
+  foreach ($manager_roles as $role_pid => $role_name) {
+    $privledged_roles[$role_pid][$role_name][] = 'islandora_workflow_Manager';
+  }
 
-   foreach ($editor_roles as $role_pid => $role_name) {
-     $privledged_roles[$role_pid][$role_name][] = 'islandora_workflow_Editor';
-   }
+  foreach ($editor_roles as $role_pid => $role_name) {
+    $privledged_roles[$role_pid][$role_name][] = 'islandora_workflow_Editor';
+  }
 
-   foreach ($submitter_roles as $role_pid => $role_name) {
-     $privledged_roles[$role_pid][$role_name][] = 'islandora_workflow_Submitter';
-   }
+  foreach ($submitter_roles as $role_pid => $role_name) {
+    $privledged_roles[$role_pid][$role_name][] = 'islandora_workflow_Submitter';
+  }
 
-   return $privledged_roles;
+  return $privledged_roles;
 }
 
 /**
  * This function will return a list of all users that have
  * islandora_workflow permissions
  *
- * @return array $privledged_users
- *   The list of users
+ * @return array
+ *   $privledged_users The list of users
  */
 function islandora_workflow_get_users_with_module_permissions() {
   $privledged_users = array();
@@ -539,19 +562,19 @@ function islandora_workflow_get_users_with_module_permissions() {
   /* Modify the returned arrays to include the permission name,
   and merge into one array [role_pid][role_name][0...4]permission. */
   foreach ($admin_users as $user_id => $user_name) {
-   $privledged_users[$user_id][$user_name][] = 'islandora_workflow_Administrator';
+    $privledged_users[$user_id][$user_name][] = 'islandora_workflow_Administrator';
   }
 
   foreach ($manager_users as $user_id => $user_name) {
-   $privledged_users[$user_id][$user_name][] = 'islandora_workflow_Manager';
+    $privledged_users[$user_id][$user_name][] = 'islandora_workflow_Manager';
   }
 
   foreach ($editor_users as $user_id => $user_name) {
-   $privledged_users[$user_id][$user_name][] = 'islandora_workflow_Editor';
+    $privledged_users[$user_id][$user_name][] = 'islandora_workflow_Editor';
   }
 
   foreach ($submitter_users as $user_id => $user_name) {
-   $privledged_users[$user_id][$user_name][] = 'islandora_workflow_Submitter';
+    $privledged_users[$user_id][$user_name][] = 'islandora_workflow_Submitter';
   }
   return $privledged_users;
 }
@@ -570,8 +593,11 @@ function islandora_workflow_get_users_with_module_permissions() {
  *
  * @param string $object_id
  *   The object that we are looking for permissions on
+ *
  * @param object $user_in
- *   The Drupal user whose permissions we are checking or null for the current user
+ *   The Drupal user whose permissions we are
+ *   checking or null for the current user
+ *
  * @return mixed
  *   Iether the string of the highest available permission
  *   to the user on the object or false if there are no permissions
