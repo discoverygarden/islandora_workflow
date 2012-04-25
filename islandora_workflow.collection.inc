@@ -133,12 +133,16 @@ function islandora_workflow_is_collection_workflow_tracked($object_pid) {
 }
 
 /**
- * Should return a blank option, everyone with perms associated with the indicated collection and state, object owner
+ * Should return a blank option, everyone with perms associated with the
+ * indicated collection and state, object owner
+ *
  * @param array $workflow_states: The states to return the possible assignees for, if null return all
  *  (this is cheaper than working on present workflow state)
  * @param array $collections: The set of collections to return the possible assignees for
  * @param boolean $format:  Whether or not to return a string format that is usable for a select
- * @return array : $possible_assignees_by_collection[$collection][$workflow_state][user]='formated_user'
+ *
+ * @return array
+ * $possible_assignees_by_collection[$collection][$workflow_state][user]='formated_user'
  */
 function get_possible_assignees($collections, $workflow_states = array(), $format = FALSE) {
   if (empty($workflow_states)) {

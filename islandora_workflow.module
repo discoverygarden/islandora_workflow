@@ -1529,13 +1529,14 @@ function islandora_workflow_batch_finished($success, $results, $operations) {
 function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
   $clicked_button = $work_form_state['clicked_button']['#value'];
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
-  $collections=islandora_workflow_get_all_collections();
+  $collections = islandora_workflow_get_all_collections();
   $selected_object_ids = array();
   $assignees = array();
   $assignee_indexes = array();
   // Get selected objects.
   foreach ($work_form_state['values']['objects_form']['objects_form_elems'] as $collection) {
-    if (is_array($collection)) {//prevent a warning
+    // Prevent a warning.
+    if (is_array($collection)) {
       foreach ($collection as $object_id => $object_form_elements) {
         if ($object_form_elements['Selecter'] == 1) {
           $selected_object_ids[] = $object_id;
@@ -1545,7 +1546,7 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
       }
     }
   }
-  //handle buttons
+  // Handle buttons.
   if ($clicked_button == 'Submit') {
     foreach ($selected_object_ids as $object_id) {
       islandora_workflow_submit_object($object_id);
