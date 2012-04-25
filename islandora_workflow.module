@@ -439,22 +439,22 @@ function islandora_workflow_ingest_submit($form, &$form_state) {
 
 /**
  * The menu entries for this module.
- * @return $menu_entries
- *   An arrray of the items to be added to the drupal menu
+ * @return array
+ *   $menu_entries An arrray of the items to be added to the drupal menu
  */
 function islandora_workflow_menu() {
-  $menu_entries= array();
-  //settings associated with islandora_workflow
-  $menu_entries['admin/settings/islandora_workflow_opts']=array(
+  $menu_entries = array();
+  // Settings associated with islandora_workflow.
+  $menu_entries['admin/settings/islandora_workflow_opts'] = array(
     'title' => 'Islandora workflow settings',
     'description' => 'Here you can change various settings for the islandora_workflow module.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('islandora_workflow_admin'),
     'access arguments' => array('islandora_workflow_Administrator'),
-    'type' => MENU_NORMAL_ITEM
+    'type' => MENU_NORMAL_ITEM,
   );
-  //settings associated with islandora_workflow and collection permissions
-  $menu_entries['admin/settings/islandora_workflow_perms']=array(
+  // Settings associated with islandora_workflow and collection permissions.
+  $menu_entries['admin/settings/islandora_workflow_perms'] = array(
     'title' => 'Islandora workflow permissions',
     'description' => 'Here you can assign permissions to roles and users on a collection by collection level.',
     'page callback' => 'islandora_workflow_collection_permissions',
@@ -575,14 +575,16 @@ function islandora_workflow_check_permissions($permission_array) {
 }
 
 /**
- * This function returns the form that will let an administrator modify the module's settings
- * @return $adminForm
- *   the form for edditing islandora_workflow settings.
+ * This function returns the form that will let an
+ * administrator modify the module's settings
+ *
+ * @return array
+ *   $adminForm the form for edditing islandora_workflow settings.
  */
 function islandora_workflow_admin(&$form_state) {
   $admin_form = array();
 
-  // check if the xacml api is enabled
+  // Check if the xacml api is enabled.
   $disabled = !module_exists('islandora_xacml_api');
 
   if ($disabled) {
@@ -742,13 +744,16 @@ function islandora_workflow_perm() {
 
 /**
  * drupal hook to show help
+ *
  * @param $path
  *   The path that the help is being accessed from.
- * @return $help
- *   The help string that will be returned to the user.
+ *
+ * @return
+ *   $help The help string that will be returned to the user.
  */
 function islandora_workflow_help($path, $arg) {
-  $help='';//default
+  // Default.
+  $help = '';
 
   switch ($path) {
     case 'admin/modules#description' :

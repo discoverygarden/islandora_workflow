@@ -43,16 +43,16 @@ function islandora_workflow_get_collections() {
       $workflow_tracking_element = $result_node->getElementsByTagName('workflow_tracking')->item(0);
 
       $collection_object_uri = $collection_pid_element->getAttribute('uri');
-      //info:fedora/ is 12 chars
+      // Removing: info:fedora/ is 12 chars.
       $collection_object_pid = substr($collection_object_uri, 12, strlen($collection_object_uri));
-      //need to extract the pid
+      // Need to extract the pid.
 
       $collection_data[$collection_object_pid] = array();
 
       if ($label_element) {
         $label = $label_element->nodeValue;
         if ($label) {
-          //the label may not be pupulated
+          // The label may not be pupulated.
           $collection_data[$collection_object_pid]['label'] = $label;
         }
       }
@@ -67,7 +67,7 @@ function islandora_workflow_get_collections() {
       }
     }
   }
-  //strip out non-applicable collections via namespace
+  // Strip out non-applicable collections via namespace.
   $collection_data = islandora_workflow_limit_collections_by_namespace($collection_data);
   return $collection_data;
 }
