@@ -28,36 +28,44 @@
  *   The schema will be changing so that the last modified date and current note subject will be in the rels-int, large refactor here.
  *
  *  @todo
- *    Address being able to add not-in-workflow objects and broken workflow objects to a workflow state.
+ *    Address being able to add not-in-workflow objects
+ *    and broken workflow objects to a workflow state.
  *    The distinction between the two states.
- *    I think this should be an integration piece: that the 'reject to workflow' should go in an object management UI.
+ *    I think this should be an integration piece: that
+ *    the 'reject to workflow' should go in an object management UI.
  *
- * Two different techniqes are being used for generating similar tables in tabs here:
+ * Two different techniqes are being used for generating
+ * similar tables in tabs here:
  *
- * 1. The work tabs use the same function but pass a parameter to change the content of the form because the only
- * difference is some missing elements in the workflow tab vs the overview tab.
+ * 1. The work tabs use the same function but pass a parameter to change the
+ *   content of the form because the only
+ *   difference is some missing elements in the workflow
+ *   tab vs the overview tab.
  *
- * 2. The permission tabs use seperate functions because the have enough differences (especialy in the submit funciton) to make this easier to follow.
+ * 2. The permission tabs use seperate functions because the have enough
+ *   differences (especialy in the submit funciton) to make
+ *   this easier to follow.
  *
  * This module treates the object owner as the creator for its purposes.
  */
 
 /**
  * This generates the main workflow page
- * @return $page
- *   The html of the page to return
+ * @return string
+ *   $page The html of the page to return
  */
 function islandora_workflow_work() {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
-  $page_tabs=array(
+  $page_tabs = array(
     '#type' => 'tabset',
   );
-  //make the last page-changed tab selected
+  // Make the last page-changed tab selected.
   if (isset($_SESSION['workflow_page']['pager_page_array']) && isset($_GET['page'])) {
-    $page=$_GET['page'];
+    $page = $_GET['page'];
     $current_pages = explode(',', $page);
     $last_pages = $_SESSION['workflow_page']['pager_page_array'];
-    if ($current_pages[0] != $last_pages[0]) {//workflow page change
+    // Workflow page change.
+    if ($current_pages[0] != $last_pages[0]) {
       $page_tabs['Workflow'] = array(
         '#type' => 'tabpage',
         '#title' => t('Workflow'),
@@ -145,7 +153,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
   // Control the objects displayed on each page.
   $objects_per_page = 10;
   $object_count = 0;
-  $object_lower_bound = $pager_page_array[$pager_index]*$objects_per_page;
+  $object_lower_bound = $pager_page_array[$pager_index] * $objects_per_page;
   $object_upper_bound = $object_lower_bound+$objects_per_page;
   //record the current $pager_page_array for comparison with the next time the page loads [to pick the tab to display]
   //@todo: fix we should be re setting this session variable when the user changes tabs
@@ -292,14 +300,14 @@ function islandora_workflow_work_form(&$form_state, $tab) {
               }
             }
           }
-          //filter collection items if in overview tab
+          // Filter collection items if in overview tab.
           if ($tab == 'overview') {
             foreach ($collection_members as $member => $member_attributes) {
-              //filter collection items if the user is not an admin
+              // Filter collection items if the user is not an admin.
               if (!user_access('islandora_workflow_Administrator') && !user_access('administer')) {
-                //show things not in published state
+                // Show things not in published state.
                 $workflow_state = $member_attributes['state'];
-                if ($workflow_state=='published' || $workflow_state=='approved') {
+                if ($workflow_state == 'published' || $workflow_state == 'approved') {
                   unset($collection_members[$member]);
                 }
               }
@@ -308,9 +316,9 @@ function islandora_workflow_work_form(&$form_state, $tab) {
 
           foreach ($collection_members as $member => $member_attributes) {
             $object_count++;
-            //keeping track of objects to show
-            if ($object_count > $object_lower_bound && $object_count <=$object_upper_bound) {
-              $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selecter']=array(
+            // Keeping track of objects to show.
+            if ($object_count > $object_lower_bound && $object_count <= $object_upper_bound) {
+              $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selecter'] = array(
                 '#type' => 'checkbox',
                 '#title' => t(''),
               );
@@ -463,52 +471,55 @@ function islandora_workflow_menu() {
     'access arguments' => array(array('islandora_workflow_Administrator', 'islandora_workflow_Manager')),
     'type' => MENU_NORMAL_ITEM
   );
-  //settings associated with islandora_workflow and individual collections (whether or not to consider them 'in workflow')
-  $menu_entries['admin/settings/islandora_workflow_collections']=array(
+  /* Settings associated with islandora_workflow and individual collections
+    (whether or not to consider them 'in workflow').*/
+  $menu_entries['admin/settings/islandora_workflow_collections'] = array(
     'title' => 'Islandora workflow collections',
     'description' => 'Here you can set what collections to track via workflow.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('islandora_workflow_collections'),
     'access arguments' => array('islandora_workflow_Administrator'),
-    'type' => MENU_NORMAL_ITEM
+    'type' => MENU_NORMAL_ITEM,
   );
-  //main working page for islandora_workflow
-  $menu_entries['islandora_workflow']=array(
+  // Main working page for islandora_workflow.
+  $menu_entries['islandora_workflow'] = array(
     'title' => 'My Islandora work',
     'description' => 'This is the main access point to islandora_workflow',
     'page callback' => 'islandora_workflow_work',
     'access callback' => 'islandora_workflow_check_permissions',
     'access arguments' => array(array('islandora_workflow_Administrator', 'islandora_workflow_Editor', 'islandora_workflow_Manager', 'islandora_workflow_Submitter')),
-    'type' => MENU_NORMAL_ITEM
-   );
-  //main working page for islandora_workflow
-  $menu_entries['islandora_workflow_edit_note']=array(
+    'type' => MENU_NORMAL_ITEM,
+  );
+  // Main working page for islandora_workflow.
+  $menu_entries['islandora_workflow_edit_note'] = array(
     'title' => 'Edit Note',
     'description' => 'You may edit the note on this object',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('islandora_workflow_edit_note_form'),
     'access callback' => 'islandora_workflow_check_permissions',
     'access arguments' => array(array('islandora_workflow_Administrator', 'islandora_workflow_Editor', 'islandora_workflow_Manager', 'islandora_workflow_Submitter')),
-    'type' => MENU_CALLBACK
-   );
- return $menu_entries;
+    'type' => MENU_CALLBACK,
+  );
+  return $menu_entries;
 }
 
 /**
- * This function is the hook_form for the islandora_workflow_edit_note callback for editing the note on an object
- * @return array $edit_note_form
- *   The drupal form array for editing a note.
+ * This function is the hook_form for the islandora_workflow_edit_note callback
+ * for editing the note on an object
+ *
+ * @return array
+ *   $edit_note_form The drupal form array for editing a note.
  */
 function islandora_workflow_edit_note_form() {
 
   if (isset($_GET['object'])) {
-    //init
-    module_load_include('inc', 'islandora_workflow', 'islandora_workflow'); //for getting the current note state
-    $object_id=$_GET['object'];
-    $subject=islandora_workflow_get_object_note_subject($object_id);
-    $body=islandora_workflow_get_object_note_body($object_id);
-    $edit_note_form['#redirect']=array('islandora_workflow');
-    $edit_note_form['note_form']=array(
+    // For getting the current note state.
+    module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
+    $object_id = $_GET['object'];
+    $subject = islandora_workflow_get_object_note_subject($object_id);
+    $body = islandora_workflow_get_object_note_body($object_id);
+    $edit_note_form['#redirect'] = array('islandora_workflow');
+    $edit_note_form['note_form'] = array(
       '#type' => 'fieldset',
       '#title' => t('Note'),
       '#collapsible' => FALSE,
@@ -517,15 +528,15 @@ function islandora_workflow_edit_note_form() {
       '#description' => t('Change the note attached to this object.'),
     );
 
-    //submit button
-    $edit_note_form['note_form']['Subject']= array(
+    // Submit button.
+    $edit_note_form['note_form']['Subject'] = array(
       '#type' => 'textfield',
       '#weight' => '1',
-      '#default_value' => $subject
+      '#default_value' => $subject,
     );
 
-    //submit button
-    $edit_note_form['note_form']['Body']= array(
+    // Submit button.
+    $edit_note_form['note_form']['Body'] = array(
       '#type' => 'textarea',
       '#weight' => '2',
       '#default_value' => $body
@@ -736,6 +747,7 @@ function islandora_workflow_collections_submit($form, &$form_state) {
 /**
  * drupal permission hook
  * The list of avaialble permissions for this module.
+ *
  * @return array
  *   The list of permissions.
  */
@@ -746,10 +758,10 @@ function islandora_workflow_perm() {
 /**
  * drupal hook to show help
  *
- * @param $path
+ * @param string $path
  *   The path that the help is being accessed from.
  *
- * @return
+ * @return string
  *   $help The help string that will be returned to the user.
  */
 function islandora_workflow_help($path, $arg) {
