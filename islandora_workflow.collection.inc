@@ -188,46 +188,47 @@ function get_possible_assignees($collections, $workflow_states = array(), $forma
         }
       }
       elseif ($workflow_state == 'submitted') {
-      if (isset($admins[$collection_pid])) {
-       $collection = array_merge($collection, $admins[$collection_pid]);
-      }
-      if (isset($managers[$collection_pid])) {
-       $collection = array_merge($collection, $managers[$collection_pid]);
-      }
-      if (isset($editors[$collection_pid])) {
-       $collection = array_merge($collection, $editors[$collection_pid]);
-      }
+        if (isset($admins[$collection_pid])) {
+          $collection = array_merge($collection, $admins[$collection_pid]);
+        }
+        if (isset($managers[$collection_pid])) {
+          $collection = array_merge($collection, $managers[$collection_pid]);
+        }
+        if (isset($editors[$collection_pid])) {
+          $collection = array_merge($collection, $editors[$collection_pid]);
+        }
       }
       elseif ($workflow_state == 'approved' || $workflow_state == 'published') {
-      if (isset($admins[$collection_pid])) {
-       $collection = array_merge($collection, $admins[$collection_pid]);
+        if (isset($admins[$collection_pid])) {
+          $collection = array_merge($collection, $admins[$collection_pid]);
+        }
+        if (isset($managers[$collection_pid])) {
+          $collection = array_merge($collection, $managers[$collection_pid]);
+        }
       }
-      if (isset($managers[$collection_pid])) {
-       $collection = array_merge($collection, $managers[$collection_pid]);
-      }
-     }
 
-     // Format to include the permission level of the user.
-     //these do not simply replace the existing string because the base case involves searching based on assignee name
-     if ($format) {
-      foreach ($collection as $user_key=>$user) {
-       if(in_array($user, $admins[$collection_pid])) {
-         //abbreviation used here because of select size
-         $collection[$user] = 'Admin: ' . $user;
-       }
-       elseif (in_array($user, $managers[$collection_pid])) {
-         $collection[$user] = 'Manager: ' . $user;
-       }
-       elseif (in_array($user, $editors[$collection_pid])) {
-         $collection[$user] = 'Editor: ' . $user;
-       }
-       elseif (in_array($user, $submitters[$collection_pid])) {
-         $collection[$user] = 'Submitter: ' . $user;
-       }
-       if ($collection[$user_key] != '') {
-         unset($collection[$user_key]);
-       }
-      }
+      // Format to include the permission level of the user.
+      /* These do not simply replace the existing string because the base case
+       * involves searching based on assignee name.*/
+      if ($format) {
+        foreach ($collection as $user_key=>$user) {
+          if(in_array($user, $admins[$collection_pid])) {
+            // Abbreviation used here because of select size.
+            $collection[$user] = 'Admin: ' . $user;
+          }
+          elseif (in_array($user, $managers[$collection_pid])) {
+           $collection[$user] = 'Manager: ' . $user;
+          }
+          elseif (in_array($user, $editors[$collection_pid])) {
+           $collection[$user] = 'Editor: ' . $user;
+          }
+          elseif (in_array($user, $submitters[$collection_pid])) {
+           $collection[$user] = 'Submitter: ' . $user;
+          }
+          if ($collection[$user_key] != '') {
+           unset($collection[$user_key]);
+          }
+        }
      }
 
      $collection = array_unique($collection);

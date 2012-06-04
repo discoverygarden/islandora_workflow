@@ -154,8 +154,9 @@ function islandora_workflow_work_form(&$form_state, $tab) {
   $objects_per_page = 10;
   $object_count = 0;
   $object_lower_bound = $pager_page_array[$pager_index] * $objects_per_page;
-  $object_upper_bound = $object_lower_bound+$objects_per_page;
-  //record the current $pager_page_array for comparison with the next time the page loads [to pick the tab to display]
+  $object_upper_bound = $object_lower_bound + $objects_per_page;
+  /* Record the current $pager_page_array for comparison with
+  the next time the page loads [to pick the tab to display].*/
   //@todo: fix we should be re setting this session variable when the user changes tabs
   $_SESSION['workflow_page']['pager_page_array'] = $pager_page_array;
   //populate an array of all users in relevent collections, to be used in the assign-to-user drop down
@@ -164,7 +165,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
   //submit_function declaration
   $workflow_tabs_form['#submit'] = array('islandora_workflow_work_form_submit');
 
-  //tab forms
+  // Tab forms.
   $workflow_tabs_form['objects_form'] = array(
     '#type' => 'fieldset',
     '#title' => t('Workflow'),
@@ -386,29 +387,33 @@ function islandora_workflow_work_form(&$form_state, $tab) {
   $workflow_tabs_form['objects_form']['objects_form_elems']['tab'] = array(
     '#type' => 'textfield',
     '#default_value' => $pager_index,
-    '#access' => FALSE
+    '#access' => FALSE,
   );
 
-  //set pager total now that we know how many objects there are
-  $pager_total[$pager_index] = ceil($object_count/$objects_per_page);
+  // Set pager total now that we know how many objects there are.
+  $pager_total[$pager_index] = ceil($object_count / $objects_per_page);
 
   return $workflow_tabs_form;
 }
 
 /**
- *This function is used to let me have multiple 'islandora_workflow_work_form's on
- *the same page without collision
- *@param string $form_id
- *  the string identifying the form
- *@param array $args
- *  an array containign the arguments provided to drupal_get_form()
- *@return array $form_info
- *  an associative array containing the form_id callback and arguments
+ * This function is used to let me have multiple
+ * 'islandora_workflow_work_form's on
+ * the same page without collision
+ *
+ * @param string $form_id
+ *   the string identifying the form
+ * @param array $args
+ *   an array containign the arguments provided to drupal_get_form()
+ *
+ * @return array
+ *   $form_info an associative array containing the
+ *   form_id callback and arguments
  */
 function islandora_workflow_forms($form_id, $args) {
 
-  $form_info['islandora_workflow_workflow_form']= array('callback' => 'islandora_workflow_work_form', 'callback arguments' => array('workflow'));
-  $form_info['islandora_workflow_overview_form']= array('callback' => 'islandora_workflow_work_form', 'callback arguments' => array('overview'));
+  $form_info['islandora_workflow_workflow_form'] = array('callback' => 'islandora_workflow_work_form', 'callback arguments' => array('workflow'));
+  $form_info['islandora_workflow_overview_form'] = array('callback' => 'islandora_workflow_work_form', 'callback arguments' => array('overview'));
 
   return $form_info;
 }
@@ -416,13 +421,14 @@ function islandora_workflow_forms($form_id, $args) {
 /**
  * This form alter hook runs on object ingest to determine weather or not to
  * add an object to workflow.
+ *
  * @param array $form
  *   The form!
  * @param array $form_state
  *   The form state!!
- * @param $form_id
- *   The id of the form!!!
- * @return
+ *
+ * @return NULL
+ *   Nothing
  * @todo: make the form have a toggle for admins/managers
  */
 function islandora_workflow_form_fedora_repository_ingest_form_alter(&$form, &$form_state) {
@@ -923,28 +929,29 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
                 l($member_label,//use the label
                   'fedora/repository/'. $member);
             }
-            else {//no label
-              $vars['list'][$collection_id][$member]['object']=
-                l($member,//use the pid
-                  'fedora/repository/'. $member);
+            else {
+              // No label, use the pid.
+              $vars['list'][$collection_id][$member]['object'] = l($member, 'fedora/repository/' . $member);
             }
           }
         }
       }
     }
-    else {//remove the collection in it has no members
-     unset($vars['collections'][$collection_id]);
+    else {
+      // Remove the collection in it has no members.
+      unset($vars['collections'][$collection_id]);
     }
   }
 }
 
 /**
  * This generates the page for editing collection level permissions
- * @return $collection_role_permissions_form
- *   The form for changing collection permissions granted to roles
+ * @return array
+ *   $collection_role_permissions_form The form for changing collection
+ *   permissions granted to roles
  */
 function islandora_workflow_collection_permissions() {
-  $page_tabs=array(
+  $page_tabs = array(
     '#type' => 'tabset',
   );
   $page_tabs['Users'] = array(
@@ -1033,13 +1040,13 @@ function islandora_workflow_role_permissions_form() {
       }
       //change the left over permission strings to be more user friendly
       if (in_array('islandora_workflow_Manager', $current_module_permissions[$role_id][key($role_name)])) {
-        $current_module_permissions[$role_id][key($role_name)][array_search('islandora_workflow_Manager', $current_module_permissions[$role_id][key($role_name)])]='Manager';
+        $current_module_permissions[$role_id][key($role_name)][array_search('islandora_workflow_Manager', $current_module_permissions[$role_id][key($role_name)])] = 'Manager';
       }
       if (in_array('islandora_workflow_Editor', $current_module_permissions[$role_id][key($role_name)])) {
-        $current_module_permissions[$role_id][key($role_name)][array_search('islandora_workflow_Editor', $current_module_permissions[$role_id][key($role_name)])]='Editor';
+        $current_module_permissions[$role_id][key($role_name)][array_search('islandora_workflow_Editor', $current_module_permissions[$role_id][key($role_name)])] = 'Editor';
       }
       if (in_array('islandora_workflow_Submitter', $current_module_permissions[$role_id][key($role_name)])) {
-        $current_module_permissions[$role_id][key($role_name)][array_search('islandora_workflow_Submitter', $current_module_permissions[$role_id][key($role_name)])]='Submitter';
+        $current_module_permissions[$role_id][key($role_name)][array_search('islandora_workflow_Submitter', $current_module_permissions[$role_id][key($role_name)])] = 'Submitter';
       }
         $collection_id=$_SESSION['workflow_permissions_page']['active_collection'];
         //change the default permission string to be inline with the user friendly strings
