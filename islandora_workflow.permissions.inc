@@ -363,7 +363,8 @@ function islandora_workflow_get_all_users_with_collection_permissions($collectio
           $users[$collection_id] = array();
         }
         if (!in_array($user_name, $users[$collection_id])) {
-          // Add the user to the users array for the collection if they aren't in it.
+          /* Add the user to the
+           * users array for the collection if they aren't in it.*/
           $users[$collection_id][] = $user_name;
         }
       }
@@ -386,7 +387,8 @@ function islandora_workflow_get_all_users_with_collection_permissions($collectio
             $users_via_role[$role_id][] = $row->uid;
           }
         }
-        // Add the user/collection relationships for each role to the $users list if they are not already on it.
+        /* Add the user/collection relationships for each
+         * role to the $users list if they are not already on it.*/
         foreach ($users_via_role[$role_id] as $user_id) {
           $user_name = user_load($user_id)->name;
           if (!isset($users[$collection_id])) {

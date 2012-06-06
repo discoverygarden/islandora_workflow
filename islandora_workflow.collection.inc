@@ -46,7 +46,6 @@ function islandora_workflow_get_collections() {
       // Removing: info:fedora/ is 12 chars.
       $collection_object_pid = substr($collection_object_uri, 12, strlen($collection_object_uri));
       // Need to extract the pid.
-
       $collection_data[$collection_object_pid] = array();
 
       if ($label_element) {
@@ -101,14 +100,16 @@ function islandora_workflow_stop_tracking_collection_in_workflow($object_pid) {
 }
 
 /**
- *This function checks if the collection is tracked in workflow.
- *The function checks for a RELS-EXT that may not exist.
- *@param $object_pid
- *  The pid of the object to check on
- *@return boolean
- *  TRUE if the collection is tracked in workflow
- *  FALSE if the collection is not tracked in workflow
- * @todo: look at creating api func for checking if rel exists
+ * This function checks if the collection is tracked in workflow.
+ * The function checks for a RELS-EXT that may not exist.
+ *
+ * @param string $object_pid
+ *   The pid of the object to check on
+ *
+ * @return boolean
+ *   TRUE if the collection is tracked in workflow
+ *   FALSE if the collection is not tracked in workflow
+ *  @todo: look at creating api func for checking if rel exists
  */
 function islandora_workflow_is_collection_workflow_tracked($object_pid) {
 
@@ -136,13 +137,17 @@ function islandora_workflow_is_collection_workflow_tracked($object_pid) {
  * Should return a blank option, everyone with perms associated with the
  * indicated collection and state, object owner
  *
- * @param array $workflow_states: The states to return the possible assignees for, if null return all
- *  (this is cheaper than working on present workflow state)
- * @param array $collections: The set of collections to return the possible assignees for
- * @param boolean $format:  Whether or not to return a string format that is usable for a select
+ * @param array $collections
+ *   The set of collections to return the possible assignees for
+ * @param array $workflow_states
+ *   The states to return the possible assignees for, if null return all
+ *   (this is cheaper than working on present workflow state)
+ * @param boolean $format
+ *   Whether or not to return a string format that is usable for a select
  *
  * @return array
- * $possible_assignees_by_collection[$collection][$workflow_state][user]='formated_user'
+ *   $possible_assignees_by_collection[$collection][$workflow_state][user]
+ *   ='formated_user'
  */
 function get_possible_assignees($collections, $workflow_states = array(), $format = FALSE) {
   if (empty($workflow_states)) {
@@ -159,7 +164,8 @@ function get_possible_assignees($collections, $workflow_states = array(), $forma
   $editors = array();
   $submitters = array();
 
-  //@TODO: optimize this with some 'if '' is in workflow_states'; we don't need to know all the perms all the time
+  /* @TODO: optimize this with some 'if '' is in workflow_states';
+   * we don't need to know all the perms all the time.*/
   $admins = islandora_workflow_get_all_users_with_collection_permissions($collections, 'islandora_workflow_Administrator');
   $managers = islandora_workflow_get_all_users_with_collection_permissions($collections, 'islandora_workflow_Manager');
   $editors = islandora_workflow_get_all_users_with_collection_permissions($collections, 'islandora_workflow_Editor');
@@ -211,30 +217,29 @@ function get_possible_assignees($collections, $workflow_states = array(), $forma
       /* These do not simply replace the existing string because the base case
        * involves searching based on assignee name.*/
       if ($format) {
-        foreach ($collection as $user_key=>$user) {
-          if(in_array($user, $admins[$collection_pid])) {
+        foreach ($collection as $user_key => $user) {
+          if (in_array($user, $admins[$collection_pid])) {
             // Abbreviation used here because of select size.
             $collection[$user] = 'Admin: ' . $user;
           }
           elseif (in_array($user, $managers[$collection_pid])) {
-           $collection[$user] = 'Manager: ' . $user;
+            $collection[$user] = 'Manager: ' . $user;
           }
           elseif (in_array($user, $editors[$collection_pid])) {
-           $collection[$user] = 'Editor: ' . $user;
+            $collection[$user] = 'Editor: ' . $user;
           }
           elseif (in_array($user, $submitters[$collection_pid])) {
-           $collection[$user] = 'Submitter: ' . $user;
+            $collection[$user] = 'Submitter: ' . $user;
           }
           if ($collection[$user_key] != '') {
-           unset($collection[$user_key]);
+            unset($collection[$user_key]);
           }
         }
-     }
+      }
 
-     $collection = array_unique($collection);
-     $possible_assignees_by_collection[$collection_pid][$workflow_state] = $collection;
+      $collection = array_unique($collection);
+      $possible_assignees_by_collection[$collection_pid][$workflow_state] = $collection;
     }
   }
-
   return $possible_assignees_by_collection;
 }

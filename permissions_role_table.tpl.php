@@ -1,5 +1,10 @@
 <?php
-  print($list['collection_selector'].$list['collection_submit']);
+/**
+ * @file
+ *   The template for permissions by role.
+ */
+
+  print($list['collection_selector'] . $list['collection_submit']);
 ?>
 <TABLE>
 
@@ -10,7 +15,7 @@
       </TH>
       <!-- Display a header for each collection -->
       <?php
-      print('<TH>' . $_SESSION['workflow_permissions_page']['active_collection'] .'</TH>');
+      print('<TH>' . $_SESSION['workflow_permissions_page']['active_collection'] . '</TH>');
       ?>
     </TR>
 	</THEAD>
@@ -19,14 +24,14 @@
 	</TFOOT>
 
 	<TBODY>
-	<!-- Display Table cells for each collection/role intersection -->
-		<?php
-		  foreach($roles as $role_id => $role_name) {
-		    print('<TR><TD>'.key($role_name).'</TD>');
-		    print('<TD>'.$list[$role_id][$_SESSION['workflow_permissions_page']['active_collection']].'</TD>');
-		    print('</TR>');
-		  }
-		  ?>
+      <!-- Display Table cells for each collection/role intersection -->
+      <?php
+        foreach($roles as $role_id => $role_name) :
+          print('<TR><TD>' . key($role_name) . '</TD>');
+          print('<TD>' . $list[$role_id][$_SESSION['workflow_permissions_page']['active_collection']] . '</TD>');
+          print('</TR>');
+          endforeach;
+        ?>
 	</TBODY>
 
 </TABLE>
