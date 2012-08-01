@@ -53,7 +53,9 @@ function islandora_workflow_assignment_valid_assignee_permissions($state) {
  * @return array 
  */
 function islandora_workflow_assignment_user_delete_batch(&$edit, &$account) {
+  
   module_load_include('inc','islandora_fedora_api','islandora_fedora_api.raw');
+  
   $assigned_objects = islandora_workflow_assignment_by_user($account);
   $predicate = 'info:islandora/islandora-system:def/islandora_workflow#assignee';
   $object = $account->name;
@@ -61,7 +63,7 @@ function islandora_workflow_assignment_user_delete_batch(&$edit, &$account) {
   $operations = array(); // @TODO make the following into a batch job
   foreach ($assigned_objects as $object_pid) {
     // remove the assignment from each object
-    $apim = new Fedora_APIM();
+    $apim = new FedoraAPIM();
     $apim->purgeRelationship($object_pid, $predicate, $object, $optional_args);
   }    
   return $operations;
@@ -75,7 +77,9 @@ function islandora_workflow_assignment_user_delete_batch(&$edit, &$account) {
  * @return array 
  */
 function islandora_workflow_assignment_user_edit_batch(&$edit, &$account) {
+  
   module_load_include('inc','islandora_fedora_api','islandora_fedora_api.raw');
+  
   $iw_perms = islandora_workflow_perm();
   $assigned_objects = islandora_workflow_assignment_by_user($account);
   $existing_roles = $account->roles;
@@ -86,11 +90,11 @@ function islandora_workflow_assignment_user_edit_batch(&$edit, &$account) {
     return;
   }
   $new_roles = $edit['roles'];
-  $apim = new Fedora_APIM();
+  $apim = new FedoraAPIM();
   foreach($assigned_objects as $object) {
     // check the state of each object - and match against the user's perms
     $state = $object->state; 
-    $valid_perms = islandora_workflow_valid_assignee_permissions($state);
+    $valid_perms = islandora_workflow_assignment_valid_permissions($state);
     $access = FALSE;
     $valid_roles = user_roles(FALSE,$valid_perms);
     if (empty(array_intersect_key($new_roles, $valid_roles))) {
@@ -110,6 +114,10 @@ function islandora_workflow_assignment_user_edit_batch(&$edit, &$account) {
  * If not, the assignment will be removed. 
  */
 function islandora_workflow_assignment_role_delete_batch(&$form, &$form_state) {
+  
+  module_load_include('inc','islandora_workflow','islandora_workflow');
+  module_load_include('inc','islandora_fedora_api','islandora_fedora_api.raw');
+    
   if ($form_state['values']['op'] == t('Delete role')) {
     $operations = array();
 
@@ -126,7 +134,7 @@ function islandora_workflow_assignment_role_delete_batch(&$form, &$form_state) {
     // so we now know that the role being deleted can be assigned things of some state
     $users = islandora_workflow_get_users_with_role($rid);
     $new_user = new stdClass();
-    $apim = new Fedora_APIM();
+    $apim = new FedoraAPIM();
     foreach($users as $uid) {
       $account = user_load($uid);
       // figure out if they lose any permissions as a result
@@ -180,7 +188,8 @@ function islandora_workflow_assignment_role_delete_batch(&$form, &$form_state) {
 function islandora_workflow_assignment_workflow_state_change($object_pid, $state) {
   
   module_load_include('inc','islandora_workflow','islandora_workflow');
-  
+  module_load_include('inc','islandora_fedora_api','islandora_fedora_api.raw');
+    
   $assignee_name = islandora_workflow_get_object_assignee($object_pid);
   if (!$assignee_name) {
     return; 
@@ -195,7 +204,7 @@ function islandora_workflow_assignment_workflow_state_change($object_pid, $state
     }
   }
   if(!$is_assignee_valid) {
-    $apim = new Fedora_APIM();
+    $apim = new FedoraAPIM();
     $predicate = 'info:islandora/islandora-system:def/islandora_workflow#assignee';
     $object = $assignee->name;
     $optional_args = array('isLiteral' => TRUE);
