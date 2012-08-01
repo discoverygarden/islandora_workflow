@@ -676,6 +676,7 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
   if ($state != 'published' && islandora_workflow_get_object_fedora_state($object_id) != 'I') {
     $object->__set('state', 'I');
   }
+  module_invoke_all('workflow_state_change', $object_id, $state);
   return (islandora_workflow_set_object_relationship($object_id, 'state', $state));
 }
 
