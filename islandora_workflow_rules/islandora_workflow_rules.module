@@ -1,0 +1,117 @@
+<?php
+
+define(ISLANDORA_RULES_MANAGER, 'islandora_workflow_Manager');
+define(ISLANDORA_RULES_EDITOR, 'islandora_workflow_Editor');
+define(ISLANDORA_RULES_SUBMITTER, 'islandora_workflow_Submitter');
+define(ISLANDORA_RULES_ADMINISTRATOR, 'islandora_workflow_Administrator');
+
+/**
+ * Implements hook_rule_action_info().
+ */
+function islandora_workflow_rules_action_info() {
+	return array(
+		'islandora_workflow_rules_email_someone' => array(
+			'label' => t('Email Someone'),
+			'module' => 'Islandora Rules',
+			'arguments' => array(
+				'object' => array(
+					'type' => 'fedora_object',
+					'label' => t('The object that has been modified'),
+				),
+				'relationship' => array(
+					'type' => 'workflow_role',
+					'label' => t('The workflow roles to contact'),
+				),
+			),
+			'eval input' => array('message'),
+		)
+	);
+}
+
+function islandora_workflow_rules_email_someone($object, $relationship) {
+	$addressees = islandora_rules_get_recipients($object,$relationship);
+	foreach ($addressees as $address) {
+		# code...
+		drupal_mail();
+	}
+
+}
+
+function islandora_workflow_rules_email_someone_form($settings, &$form) {
+	$settings += array('message' => '');
+	$form['settings']['message'] = array(
+		'#type' => 'textarea',
+		'#title' => t('Message'),
+		'#default_value' => $settings['message'],
+		'#description' => t('The message to be sent.'),
+	);
+}
+
+/** 
+ * Implements hook_rules_condition_info().
+ */
+function islandora_workflow_rules_condition_info() {
+	// none yet ..
+}
+
+function islandora_workflow_rules_event_info() {
+	$arguments = array(
+		'object' => array(
+			'label' => t('Object'),
+			'type' => 'fedora_object',
+		),
+		'relationship' => array(
+			'label' => t('Workflow Role'),
+			'type' => 'workflow_role',
+		),
+	);
+
+	return array(
+		'islandora_workflow_rules_reject_object' => array(
+			'label' => t('Reject Fedora Object'),
+			'module' => 'Islandora Rules',
+			'arguments' => $arguments,
+		),
+		'islandora_workflow_rules_approve_object' => array(
+			'label' => t('Approve Fedora Object'),
+			'module' => 'Islandora Rules',	
+			'arguments' => $arguments,
+		),
+		'islandora_workflow_rules_submit_object' => array(
+			'label' => t('Submit Fedora Object'),
+			'module' => 'Islandora Rules',
+			'arguments' => $arguments,
+		),
+		'islandora_workflow_rules_assign_object' => array(
+			'label' => t('Assign Fedora Object'),
+			'module' => 'Islandora Rules',
+			'arguments' => $arguments,
+		),
+	);
+}
+
+/**
+ * Implements hook_token_values().
+ */
+function islandora_workflow_token_values($type, $object = NULL, $options = array()) {
+	$values = array();
+	if ($type == 'fedora_object') {
+		
+	}
+	return $values;
+}
+
+/** 
+ * Implements hook_token_list().
+ */
+function islandora_workflow_token_list() {
+
+}
+
+// specify the data types
+class fedora_object_rules extends rules_data_type {
+
+}
+
+// example usage
+// rules_invoke_event('islandora_workflow_rules_approve_object',$object,$relationship);

@@ -1,0 +1,6 @@
+name = Islandora Workflow Rules
+description = Rules integration for Islandora Workflow
+dependencies[] = islandora_workflow
+dependencies[] = rules
+dependencies[] = token
+core = 6.x
