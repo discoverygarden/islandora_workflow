@@ -1855,3 +1855,45 @@ function islandora_workflow_user($op, &$edit, &$account, $category = NULL) {
       break;
   }
 }
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function islandora_workflow_form_user_admin_role_alter() {
+  array_unshift($form['#submit'],'islandora_workflow_delete_role');
+}
+
+/**
+ * Role deletion callback function.
+ * Remove permissions based on the role to be deleted,
+ * for every collection that has them.
+ */
+function islandora_workflow_delete_role($form, &$form_state) {
+  
+  module_load_include('inc','islandora_workflow','islandora_workflow.permissions');
+  
+  if ($form_state['values']['op'] == t('Delete role')) {
+    $operations = array();
+    $collections = db_query('SELECT collection AS pid 
+      FROM {islandora_workflow_role_permissions} WHERE role = %d',
+      $form_state['values']['rid']);
+    db_query('DELETE FROM {islandora_workflow_role_permissions} WHERE role = %d', 
+      $form_state['values']['rid']);
+
+    while($collection = mysql_fetch_assoc($collections)) {
+      $members = islandora_workflow_get_all_members_of_collection($collection['pid']);
+      $operations[] = array(
+        'islandora_workflow_batch_function', 
+        array($collection['pid'], $members, $delete = FALSE)
+      );
+    }
+    if (count($operations) > 0) {
+      $batch = array(
+        'title' => t('Updating XACML Policies'),
+        'operations' => $operations,
+        'finished' => 'islandora_workflow_batch_finished',
+      );
+      batch_set($batch);
+    }
+  }
+}
