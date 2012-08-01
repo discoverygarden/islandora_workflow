@@ -1236,3 +1236,17 @@ function islandora_workflow_get_object_state_time_stamp($object_id) {
 
   return $times;
 }
+
+/**
+ * Get all users with a specific role.
+ * @param int $rid the role ID
+ * @return array $user_ids An array of user IDs. 
+ */
+function islandora_workflow_get_users_with_role($rid) {
+	$user_ids = array();
+  $result = db_query('SELECT uid FROM {users_roles} WHERE rid = %d', $rid);
+	while ($row = mysql_fetch_assoc($result)) {
+		$user_ids[] = $row['uid'];
+	}
+	return $user_ids;
+}
