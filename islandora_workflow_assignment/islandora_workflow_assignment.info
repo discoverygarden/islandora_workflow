@@ -1,4 +1,5 @@
 name = Islandora Workflow Assignment
 description = Manages assignees of Islandora workflow objects, responding to user and role events.
+package = Islandora
 dependencies[] = islandora_workflow
 core = 6.x

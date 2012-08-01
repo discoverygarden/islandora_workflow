@@ -1,5 +1,6 @@
 name = Islandora Workflow Rules
 description = Rules integration for Islandora Workflow
+package = Islandora
 dependencies[] = islandora_workflow
 dependencies[] = rules
 dependencies[] = token
