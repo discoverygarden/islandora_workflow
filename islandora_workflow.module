@@ -1786,73 +1786,22 @@ function islandora_workflow_mail($key, &$message, $params) {
  */
 function islandora_workflow_user($op, &$edit, &$account, $category = NULL) {
   
-  module_load_include('inc','islandora_workflow','islandora_workflow.permissions');
-  
+  $batch_operations = array();
   switch($op) {
     case 'delete':
-      // get all the objects for which this user has permissions
-      $options = array('user' => $account->uid);
-      $rows = islandora_workflow_get_user_permissions($options);
-      // returns an array with the keys (user, collection, permission)
-      // delete the ex-user's permissions.
-      $operations = array();
-      foreach($rows as $row) {
-        $collection_pid = $row['collection'];
-        $permission = $row['permission'];
-
-        $permission_delete = db_query("DELETE FROM {islandora_workflow_user_permissions} 
-          WHERE collection = '%s' and permission = '%s'", $collection_pid, $permission);
-        db_query($permissions_delete);
-
-        // batch operations
-        $members = islandora_workflow_get_all_members_of_collection($collection_pid);
-        $operations[] = array(
-          'islandora_workflow_batch_function', 
-          array($collection_pid, $members, $delete = FALSE)
-        );
-      }
-      if (count($operations) > 0) {
-        $batch = array(
-          'title' => t('Updating XACML Policies'),
-          'operations' => $operations,
-          'finished' => 'islandora_workflow_batch_finished',
-        );
-        batch_set($batch);
-      }
+      $batch_operations = module_invoke_all('user_delete_batch', $edit, $account, $category);
       break;
     case 'edit':
-      // something to check the expired roles
-      $iw_perms = islandora_workflow_perm();
-      $existing_roles = $account->roles;
-      $new_roles = $edit['roles'];
-      $operations = array();
-
-      $roles_diff_keys = array_diff_key($existing_roles, $new_roles);
-      while($rid = key($roles_diff_keys))
-        // get all values of 'collection' where user = $uid and permission = $permission
-        $collections = db_query('SELECT collection AS pid 
-          FROM {islandora_workflow_role_permissions}
-          WHERE user = %d AND role = %d', $user->uid, $rid);
-        // delete all rows in the table where user = $uid and permission = $permission 
-        db_query('DELETE FROM {islandora_workflow_role_permissions}
-          WHERE user = %d AND role = %d', $user->uid, $rid);
-        
-        while($collection = mysql_fetch_assoc($collections)) {
-          $members = islandora_workflow_get_all_members_of_collection($collection['pid']);
-          $operations[] = array(
-            'islandora_workflow_batch_function',
-            array($collection['pid'], $members, $delete = FALSE)
-          );
-      }
-      if (count($operations) > 0) {
-        $batch = array(
-          'title' => t('Updating XACML Policies'),
-          'operations' => $operations,
-          'finished' => 'islandora_workflow_batch_finished',
-        );
-        batch_set($batch);
-      }
+      $batch_operations = module_invoke_all('user_edit_batch', $edit, $account, $category);
       break;
+  }
+  if (!empty($batch_operations)) {
+    $batch = array(
+      'title' => t('Updating XACML Policies'),
+      'operations' => $batch_operations,
+      'finished' => 'islandora_workflow_batch_finished',
+    );
+    batch_set($batch);
   }
 }
 
@@ -1863,17 +1812,30 @@ function islandora_workflow_form_user_admin_role_alter() {
   array_unshift($form['#submit'],'islandora_workflow_delete_role');
 }
 
+function islandora_workflow_delete_role($form, &$form_state) {
+  $batch_operations = module_invoke_all('role_delete_batch', $form, $form_state);
+  if (!empty($batch_operations)) {
+    $batch = array(
+      'title' => t('Updating XACML Policies'),
+      'operations' => $batch_operations,
+      'finished' => 'islandora_workflow_batch_finished',
+    );
+    batch_set($batch);
+  }
+}
+
 /**
  * Role deletion callback function.
  * Remove permissions based on the role to be deleted,
  * for every collection that has them.
  */
-function islandora_workflow_delete_role($form, &$form_state) {
+function islandora_workflow_role_delete_batch($form, &$form_state) {
   
   module_load_include('inc','islandora_workflow','islandora_workflow.permissions');
   
+  $operations = array();
+  
   if ($form_state['values']['op'] == t('Delete role')) {
-    $operations = array();
     $collections = db_query('SELECT collection AS pid 
       FROM {islandora_workflow_role_permissions} WHERE role = %d',
       $form_state['values']['rid']);
@@ -1887,13 +1849,66 @@ function islandora_workflow_delete_role($form, &$form_state) {
         array($collection['pid'], $members, $delete = FALSE)
       );
     }
-    if (count($operations) > 0) {
-      $batch = array(
-        'title' => t('Updating XACML Policies'),
-        'operations' => $operations,
-        'finished' => 'islandora_workflow_batch_finished',
+    
+  }
+  return $operations;
+}
+
+function islandora_workflow_user_delete_batch(&$edit, &$account, $category = NULL) {
+  
+  module_load_include('inc','islandora_workflow','islandora_workflow.permissions');
+  
+  // get all the objects for which this user has permissions
+  $options = array('user' => $account->uid);
+  $rows = islandora_workflow_get_user_permissions($options);
+  // returns an array with the keys (user, collection, permission)
+  // delete the ex-user's permissions.
+  $operations = array();
+  foreach($rows as $row) {
+    $collection_pid = $row['collection'];
+    $permission = $row['permission'];
+
+    $permission_delete = db_query("DELETE FROM {islandora_workflow_user_permissions} 
+      WHERE collection = '%s' and permission = '%s'", $collection_pid, $permission);
+    db_query($permissions_delete);
+
+    // batch operations
+    $members = islandora_workflow_get_all_members_of_collection($collection_pid);
+    $operations[] = array(
+      'islandora_workflow_batch_function', 
+      array($collection_pid, $members, $delete = FALSE)
+    );
+  }
+  return $operations;
+}
+
+function islandora_workflow_user_edit_batch(&$edit, &$account, $category = NULL) {
+  
+  module_load_include('inc','islandora_workflow','islandora_workflow.permissions');
+  
+  // something to check the expired roles
+  $iw_perms = islandora_workflow_perm();
+  $existing_roles = $account->roles;
+  $new_roles = $edit['roles'];
+  $operations = array();
+
+  $roles_diff_keys = array_diff_key($existing_roles, $new_roles);
+  while($rid = key($roles_diff_keys)) {
+    // get all values of 'collection' where user = $uid and permission = $permission
+    $collections = db_query('SELECT collection AS pid 
+      FROM {islandora_workflow_role_permissions}
+      WHERE user = %d AND role = %d', $user->uid, $rid);
+    // delete all rows in the table where user = $uid and permission = $permission 
+    db_query('DELETE FROM {islandora_workflow_role_permissions}
+      WHERE user = %d AND role = %d', $user->uid, $rid);
+        
+    while($collection = mysql_fetch_assoc($collections)) {
+      $members = islandora_workflow_get_all_members_of_collection($collection['pid']);
+      $operations[] = array(
+        'islandora_workflow_batch_function',
+        array($collection['pid'], $members, $delete = FALSE)
       );
-      batch_set($batch);
     }
   }
+  return $operations;
 }

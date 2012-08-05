@@ -58,7 +58,9 @@ function islandora_workflow_assignment_user_delete_batch(&$edit, &$account) {
   // @TODO make the following into a batch job
   foreach ($assigned_objects as $object_pid) {
     // remove the assignment from each object
-    islandora_workflow_assignment_remove($object_pid, $account->name);
+    $operations[] = array('islandora_workflow_assignment_remove',
+      array(object_pid, $account->name)
+    );
   }    
   return $operations;
 }
@@ -68,23 +70,20 @@ function islandora_workflow_assignment_user_delete_batch(&$edit, &$account) {
  * Remove assignments which have become invalid.
  * @param object $edit
  * @param user $account
- * @return array 
+ * @return array An array of batch operations
  */
-function islandora_workflow_assignment_user_edit_batch(&$edit, &$account, $collection_pid = NULL) {
+function islandora_workflow_assignment_user_edit_batch(&$edit, &$account, $category = NULL) {
+  
+  $operations = array();
   
   $iw_perms = islandora_workflow_perm();
-  if (!empty($collection_pid)) {
-    $assigned_objects = array($collection_pid);
-  }
-  else {
-    $assigned_objects = islandora_workflow_assignment_by_user($account);
-  }
+  $assigned_objects = islandora_workflow_assignment_by_user($account);
   $existing_roles = $account->roles;
   if (empty($edit['roles'])) {
-    return;
+    return $operations;
   }
   if (empty(array_diff($account->roles,$edit['roles']))) {
-    return;
+    return $operations;
   }
   $new_roles = $edit['roles'];
   foreach($assigned_objects as $object) {
@@ -94,9 +93,12 @@ function islandora_workflow_assignment_user_edit_batch(&$edit, &$account, $colle
     $access = FALSE;
     $valid_roles = user_roles(FALSE,$valid_perms);
     if (empty(array_intersect_key($new_roles, $valid_roles))) {
-      islandora_workflow_assignment_remove($object->pid, $account->name);
+      $operations[] = array('islandora_workflow_assignment_remove',
+        array($object->pid, $account->name)
+      );
     }
   }
+  return $operations;
 }
 
 /**
@@ -202,11 +204,14 @@ function islandora_workflow_assignment_workflow_state_change($object_pid, $state
  * @return HTTPResponse
  */
 function islandora_workflow_assignment_remove($object_pid, $assignee = NULL) {
+  
   module_load_include('inc','islandora_fedora_api','islandora_fedora_api.raw');
+  
   static $apim;
   if (!isset($apim)) {
     $apim = new FedoraAPIM();
   }
+  
   $predicate = 'info:islandora/islandora-system:def/islandora_workflow#assignee';
   if (!$assignee) {
     $response = $apim->getRelationships($object_pid,$predicate); 
