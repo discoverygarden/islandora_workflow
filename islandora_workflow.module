@@ -1800,7 +1800,7 @@ function islandora_workflow_user($op, &$edit, &$account, $category = NULL) {
         $collection_pid = $row['collection'];
         $permission = $row['permission'];
 
-        $permission_delete = db_query("DELETE FROM {islandora_workflow_role_permissions} 
+        $permission_delete = db_query("DELETE FROM {islandora_workflow_user_permissions} 
           WHERE collection = '%s' and permission = '%s'", $collection_pid, $permission);
         db_query($permissions_delete);
 
