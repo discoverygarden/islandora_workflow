@@ -1,0 +1,11 @@
+PREFIX fedora-rels-ext: <info:fedora/fedora-system:def/relations-external#>
+PREFIX workflow: <info:islandora/islandora-system:def/islandora_workflow#>
+
+SELECT ?pid ?assignee ?state
+WHERE {
+	?pid workflow:assignee ?assignee .
+  ?pid fedora-rels-ext:isMemberOfCollection ?collection . 
+  OPTIONAL {
+		?pid workflow:state ?state .
+	}
+}

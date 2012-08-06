@@ -1243,7 +1243,9 @@ function islandora_workflow_role_permissions_form_submit($collection_role_permis
         }
       }
     }
-
+    
+    islandora_workflow_assignment_workflow_permission_change($collection_pid);
+    
     /* If Xacml is used, then we need to update every
      * single member of a collection in a batch.*/
     if (variable_get('islandora_workflow_enforce_security', 0) && module_exists('islandora_xacml_api') && $members) {
@@ -1499,6 +1501,8 @@ function islandora_workflow_user_permissions_form_submit($collection_user_permis
       }
     }
 
+    islandora_workflow_assignment_workflow_permission_change($collection_pid);
+    
     /* If Xacml is used, then we need to update
      * every single member of a collection in a batch*/
     if (variable_get('islandora_workflow_enforce_security', 0) && module_exists('islandora_xacml_api') && $members) {

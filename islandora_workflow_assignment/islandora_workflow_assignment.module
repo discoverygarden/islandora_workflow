@@ -25,6 +25,29 @@ function islandora_workflow_assignment_by_user($account) {
 }
 
 /**
+ * Return all assignees for members of a given collection.
+ * @param string $collection_pid the PID of the collection.
+ * @return array an array of results.
+ */
+function islandora_workflow_assignment_by_collection($collection_pid) {
+  // get the stored query
+  $query_file_name = drupal_get_path('module', 'islandora_workflow_assignment') . '/assignee_per_collection_query.sparql';
+  $query_file_handle = fopen($query_file_name, "r");
+  $query_string = fread($query_file_handle, filesize($query_file_name));
+  fclose($query_file_handle);
+
+  $query = preg_replace('/\?collection/','"'. $collection_pid .'"',$query);
+  $query_return_json = query_resource_index($query, $limit = -1, $offset = 0, $format = 'json');
+  
+  if ($query_return_json) {
+    $query_return = json_decode($query_return_string);
+    return $query_return->results;
+  }
+  return array();
+
+}
+
+/**
  * Get the permissions a user must have in order to be the assignee of an object. 
  * @param string $state
  * @return array An array of permission names. 
@@ -227,4 +250,29 @@ function islandora_workflow_assignment_remove($object_pid, $assignee = NULL) {
   $optional_args = array('isLiteral' => TRUE);
   return $apim->purgeRelationship($object_pid, $predicate, $assignee, $optional_args);
   // @TODO drupal_set_message here -- OK for batch jobs?
+}
+
+/**
+ * Check a collection's members for invalid assignees, removing them as necessary.
+ * @param string $collection_pid The PID of the parent collection. 
+ * @return void
+ */
+function islandora_workflow_assignment_workflow_permission_change($collection_pid) {
+  
+  module_load_include('inc','islandora_workflow','islandora_workflow.collection');
+  
+  // @TODO have this return an array of operations when invoked as a hook.
+  $possible_assignees = get_possible_assignees(array($collection_pid));
+  $members = islandora_workflow_assignment_by_collection($collection_pid);
+  foreach($members as $member) {
+    if(empty($member->assignee)) {continue;}
+    // @TODO continue if the user's permissions are new or unchanged
+    if(empty($member->state)) {
+      $member->state = 'created'; // @TODO do we need a sensible default like this? It's here for now, just in case
+    }
+    if(!in_array($member->assignee, $possible_assignees[$collection_pid][$member->state])) {
+      islandora_workflow_assignment_remove($object_pid,$member->assignee);
+    }
+  }
+    
 }
