@@ -143,6 +143,19 @@ function islandora_workflow_work_form(&$form_state, $tab) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
   // For getting workflow info.
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow.collection');
+
+  if(empty($form_state['storage']['step'])) {
+    $form_state['storage']['step'] = 1;
+  }
+  switch ($form_state['storage']['step']) {
+    case 2:
+      return islandora_workflow_work_form_page_two($form_state, $tab);
+      break;
+    default:
+      // do nothing
+      break;
+  }
+
   $users_manager_collections = islandora_workflow_get_current_users_collections();
   $users_editor_collections = islandora_workflow_get_current_users_collections('islandora_workflow_Editor');
   $users_submitter_collections = islandora_workflow_get_current_users_collections('islandora_workflow_Submitter');
@@ -1694,9 +1707,13 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
     }
   }
   elseif ($clicked_button == 'Reject') {
+    /*
     foreach ($selected_object_ids as $object_id) {
       islandora_workflow_reject_object($object_id);
     }
+    */
+    $form_state['storage']['step'] += 1;
+    $form_state['rebuild'] = TRUE;
   }
   elseif ($clicked_button == 'Approve') {
     foreach ($selected_object_ids as $object_id) {
@@ -1915,4 +1932,39 @@ function islandora_workflow_user_edit_batch(&$edit, &$account, $category = NULL)
     }
   }
   return $operations;
+}
+
+function islandora_workflow_work_form_page_two(&$form_state, $tab) {
+
+  $selected_objects = array();
+  $values = $form_state['objects_form']['objects_form_elems'];
+  $collections = array_keys($values);
+  $possible_assignees = get_possible_assignees($collections);
+
+  foreach ($values as $collection_pid => $object) {
+    foreach($object as $object_pid => $attributes) {
+      if (!empty($attributes['Selecter'])) {
+        $form['assignees'][$object_id] = array(
+          '#type' => 'select',
+          '#title' => $object_id,
+          '#options' => $possible_assignees[$collection_pid]['rejected'],
+          '#default_value' => '',
+        );
+      }
+    }
+  }
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Assign',
+  );
+  $form['#submit'] = array('islandora_workflow_work_form_page_two_submit');
+  return $form;
+
+}
+
+function islandora_workflow_work_form_page_two_submit($form, &$form_state) {
+  $assignees = array_filter($form_state['values']['assignees']);
+  foreach($assignees as $object_id => $user_name) {
+    islandora_workflow_assign_object($object_id, $user_name);
+  }
 }
