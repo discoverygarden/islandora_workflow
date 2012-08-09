@@ -528,10 +528,25 @@ function islandora_workflow_menu() {
   $menu_entries['islandora_workflow'] = array(
     'title' => 'My Islandora work',
     'description' => 'This is the main access point to islandora_workflow',
-    'page callback' => 'islandora_workflow_work',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('islandora_workflow_my_work_form'),
     'access callback' => 'islandora_workflow_check_permissions',
     'access arguments' => array(array('islandora_workflow_Administrator', 'islandora_workflow_Editor', 'islandora_workflow_Manager', 'islandora_workflow_Submitter')),
     'type' => MENU_NORMAL_ITEM,
+  );
+  $menu_entries['islandora_workflow/my-work'] = array(
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('islandora_workflow_my_work_form'),
+    'access callback' => 'islandora_workflow_check_permissions',
+    'access arguments' => array(array('islandora_workflow_Administrator', 'islandora_workflow_Editor', 'islandora_workflow_Manager', 'islandora_workflow_Submitter')),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+  $menu_entries['islandora_workflow/overview'] = array(
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('islandora_workflow_overview_form'),
+    'access callback' => 'islandora_workflow_check_permissions',
+    'access arguments' => array(array('islandora_workflow_Administrator', 'islandora_workflow_Editor', 'islandora_workflow_Manager', 'islandora_workflow_Submitter')),
+    'type' => MENU_LOCAL_TASK,
   );
   // Main working page for islandora_workflow.
   $menu_entries['islandora_workflow_edit_note'] = array(
@@ -1967,4 +1982,12 @@ function islandora_workflow_work_form_page_two_submit($form, &$form_state) {
   foreach($assignees as $object_id => $user_name) {
     islandora_workflow_assign_object($object_id, $user_name);
   }
+}
+
+function islandora_workflow_my_work_form($form_state) {
+  return islandora_workflow_work_form('workflow');
+}
+
+function islandora_workflow_overview_form($form_state) {
+  return islandora_workflow_work_form('overview');
 }
