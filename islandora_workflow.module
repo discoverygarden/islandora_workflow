@@ -1729,8 +1729,8 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
       islandora_workflow_reject_object($object_id);
     }
     */
-    $form_state['storage']['step'] += 1;
-    $form_state['rebuild'] = TRUE;
+    $work_form_state['storage']['step'] += 1;
+    $work_form_state['rebuild'] = TRUE;
   }
   elseif ($clicked_button == 'Approve') {
     foreach ($selected_object_ids as $object_id) {
