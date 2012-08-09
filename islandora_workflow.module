@@ -535,6 +535,7 @@ function islandora_workflow_menu() {
     'type' => MENU_NORMAL_ITEM,
   );
   $menu_entries['islandora_workflow/my-work'] = array(
+    'title' => 'My Work',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('islandora_workflow_my_work_form'),
     'access callback' => 'islandora_workflow_check_permissions',
@@ -542,6 +543,7 @@ function islandora_workflow_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
   $menu_entries['islandora_workflow/overview'] = array(
+    'title' => 'Overview',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('islandora_workflow_overview_form'),
     'access callback' => 'islandora_workflow_check_permissions',
