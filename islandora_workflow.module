@@ -1959,6 +1959,9 @@ function islandora_workflow_work_form_page_two(&$form_state, $tab) {
   $possible_assignees = get_possible_assignees($collections);
 
   foreach ($values as $collection_pid => $object) {
+    if (!is_array($object)) {
+      continue;
+    }
     foreach($object as $object_pid => $attributes) {
       if (!empty($attributes['Selecter'])) {
         $form['assignees'][$object_id] = array(
