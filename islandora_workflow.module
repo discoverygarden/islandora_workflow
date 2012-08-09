@@ -1954,19 +1954,24 @@ function islandora_workflow_user_edit_batch(&$edit, &$account, $category = NULL)
 function islandora_workflow_work_form_page_two(&$form_state, $tab) {
 
   $selected_objects = array();
-  $values = $form_state['objects_form']['objects_form_elems'];
+  $values = $form_state['values']['objects_form']['objects_form_elems'];
   $collections = array_keys($values);
   $possible_assignees = get_possible_assignees($collections);
 
+  $form['assignees'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Assign Rejected Objects'),
+    '#description' => t('You may assign rejected objects to a user with suitable permissions.')
+  );
   foreach ($values as $collection_pid => $object) {
     if (!is_array($object)) {
       continue;
     }
     foreach($object as $object_pid => $attributes) {
       if (!empty($attributes['Selecter'])) {
-        $form['assignees'][$object_id] = array(
+        $form['assignees'][$object_pid] = array(
           '#type' => 'select',
-          '#title' => $object_id,
+          '#title' => $object_pid,
           '#options' => $possible_assignees[$collection_pid]['rejected'],
           '#default_value' => '',
         );
