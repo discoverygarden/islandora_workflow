@@ -60,7 +60,7 @@
 function islandora_workflow_init() {
   module_load_include('inc','fedora_repository','api/fedora_utils');
   if (!fedora_available()) {
-    drupal_set_message(t('The Fedora server is not available','error'));
+    drupal_set_message(t('The Fedora server is not available'),'error');
   }
 }
 
