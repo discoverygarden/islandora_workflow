@@ -230,7 +230,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
     $workflow_tabs_form['Reject'] = array(
       '#type' => 'submit',
       '#weight' => '4',
-      '#value' => t('Reject'),
+      '#value' => t('Reject...'),
     );
   }
   // Claim button.
