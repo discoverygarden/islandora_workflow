@@ -1694,8 +1694,6 @@ function islandora_workflow_work_form_validate($form, &$form_state) {
     case 'Claim':
     case 'Delete':
       $selected_object_ids = array();
-      $assignees = array();
-      $assignee_indexes = array();
       // Get selected objects.
       $elements = $form_state['values']['objects_form']['objects_form_elems'];
       foreach ($elements as $collection) {
@@ -1710,7 +1708,7 @@ function islandora_workflow_work_form_validate($form, &$form_state) {
       }
       if (empty($selected_object_ids)) {
         form_set_error('objects_form][objects_form_elems',
-            'No objects selected'
+            'No objects selected.'
         );
       }
       break;
