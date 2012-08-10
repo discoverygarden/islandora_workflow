@@ -1988,6 +1988,8 @@ function islandora_workflow_user_edit_batch(&$edit, &$account, $category = NULL)
 
 function islandora_workflow_work_form_page_two(&$form_state, $tab) {
 
+  // This only works for rejecting objects at the moment
+
   $selected_objects = array();
   $values = $form_state['values']['objects_form']['objects_form_elems'];
   $collections = array_keys($values);
@@ -1996,7 +1998,8 @@ function islandora_workflow_work_form_page_two(&$form_state, $tab) {
   $form['assignees'] = array(
     '#type' => 'fieldset',
     '#title' => t('Assign Rejected Objects'),
-    '#description' => t('You may assign rejected objects to a user with suitable permissions.')
+    '#description' => t('You may assign rejected objects to a user with suitable permissions.'),
+    '#theme' => 'workflow_table',
   );
   foreach ($values as $collection_pid => $object) {
     if (!is_array($object)) {
@@ -2004,7 +2007,7 @@ function islandora_workflow_work_form_page_two(&$form_state, $tab) {
     }
     foreach($object as $object_pid => $attributes) {
       if (!empty($attributes['Selecter'])) {
-        $form['assignees'][$object_pid] = array(
+        $form['assignees'][$collection_pid][$object_pid]['Assign'] = array(
           '#type' => 'select',
           '#title' => $object_pid,
           '#options' => $possible_assignees[$collection_pid]['rejected'],
