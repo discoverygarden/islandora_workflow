@@ -1682,6 +1682,41 @@ function islandora_workflow_batch_finished($success, $results, $operations) {
   }
 }
 
+function islandora_workflow_work_form_validate($form, &$form_state) {
+  $clicked_button = $form_state['clicked_button']['#value'];
+  switch($clicked_button) {
+    case 'Approve':
+    case 'Assign':
+    case 'Publish':
+    case 'Reject':
+    case 'Claim':
+    case 'Delete':
+      $selected_object_ids = array();
+      $assignees = array();
+      $assignee_indexes = array();
+      // Get selected objects.
+      $elements = $form_state['values']['objects_form']['objects_form_elems'];
+      foreach ($elements as $collection) {
+        // Prevent a warning.
+        if (is_array($collection)) {
+          foreach ($collection as $object_id => $object_form_elements) {
+            if ($object_form_elements['Selecter'] == 1) {
+              $selected_object_ids[] = $object_id;
+            }
+          }
+        }
+      }
+      if (empty($selected_object_ids)) {
+        form_set_error('objects_form][objects_form_elems',
+            'No objects selected'
+        );
+      }
+      break;
+    default:
+      break;
+  }
+}
+
 /**
  * This function handles all of the possible submits
  * from the workflow work form (overview and workflow)
