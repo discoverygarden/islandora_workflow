@@ -57,6 +57,13 @@
  * This module treates the object owner as the creator for its purposes.
  */
 
+function islandora_workflow_init() {
+  module_load_include('inc','fedora_repository','api/fedora_utils');
+  if (!fedora_available()) {
+    drupal_set_message(t('The Fedora server is not available','error'));
+  }
+}
+
 /**
  * This generates the main workflow page
  * @return string
@@ -2018,7 +2025,7 @@ function islandora_workflow_work_form_page_two(&$form_state, $tab) {
   }
   $form['submit'] = array(
     '#type' => 'submit',
-    '#value' => 'Assign',
+    '#value' => 'Reject and Assign',
   );
   $form['#submit'] = array('islandora_workflow_work_form_page_two_submit');
   return $form;
