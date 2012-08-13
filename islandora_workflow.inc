@@ -368,6 +368,7 @@ function islandora_workflow_reject_object($object_id) {
       $address = $recipient->mail;
       // User email to send to.
       drupal_mail('islandora_workflow', 'reject', $address, language_default(), $params);
+      rules_invoke_event('islandora_workflow_rules_approve_object', $params);
     }
     else {
       drupal_set_message(t('No email sent for the rejection of: ' . $object_id));
@@ -412,7 +413,7 @@ function islandora_workflow_approve_object($object_id) {
     $emails = format_email_array_to_string($emails);
     $params = array('object_id' => $object_id);
     drupal_mail('islandora_workflow', 'approve', $emails, language_default(), $params);
-
+    rules_invoke_event('islandora_workflow_rules_approve_object', $params);
     return (islandora_workflow_set_object_workflow_state($object_id, 'approved'));
   }
   else {
@@ -486,7 +487,7 @@ function islandora_workflow_submit_object($object_id) {
     $emails = format_email_array_to_string($emails);
     $params = array('object_id' => $object_id);
     drupal_mail('islandora_workflow', 'submit', $emails, language_default(), $params);
-
+    rules_invoke_event('islandora_workflow_rules_submit_object', $params);
     return (islandora_workflow_set_object_workflow_state($object_id, 'submitted'));
   }
   else {
@@ -535,7 +536,7 @@ function islandora_workflow_assign_object($object_id, $user_name) {
   $address = $recipient->mail;
   // User email to send to.
   drupal_mail('islandora_workflow', 'assign', $address, language_default(), $params);
-
+  rules_invoke_event('islandora_workflow_rules_assign_object', $params);
   // Assign object.
   return (islandora_workflow_set_object_relationship($object_id, 'assignee', $user_name));
 }
