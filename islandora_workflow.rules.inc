@@ -59,7 +59,7 @@ function islandora_workflow_rules_email_recipients($settings) {
  * @param array $settings
  */
 function islandora_workflow_rules_email_someone($settings) {
-  $recipients = islandora_workflow_rules_recipients($settings);
+  $recipients = islandora_workflow_rules_email_recipients($settings);
 	foreach ($recipients as $recipient) {
 		# code...
 		// drupal_mail();
