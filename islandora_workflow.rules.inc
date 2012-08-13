@@ -26,10 +26,12 @@ function islandora_workflow_rules_action_info() {
 
 function islandora_workflow_rules_email_recipients($settings) {
   module_load_include('inc','fedora_repository','api/fedora_item');
-  $object = new Fedora_Item($settings['object']);
+
+  $recipients = array();
+  $item = new Fedora_Item($settings['object']);
   // get everyone who has the given workflow roles for the parent collection
   $collections = array();
-  $parents = $item->getRelationships('isMemberOfCollection');
+  $parents = $item->get_relationships('isMemberOfCollection');
   foreach($parents as $parent) {
     $collections[] = $parent['object'];
   }
@@ -48,7 +50,7 @@ function islandora_workflow_rules_email_recipients($settings) {
     $creator_name = $item->objectProfile->objOwnerId;
     $creator = user_load(array('name' => $creator_name));
     if ($creator) {
-      $recipients += $creator->uid;
+      $recipients[]= $creator->uid;
     }
   }
   return $recipients;
