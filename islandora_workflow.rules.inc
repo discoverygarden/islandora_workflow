@@ -18,37 +18,64 @@ function islandora_workflow_rules_action_info() {
 					'type' => 'fedora_object',
 					'label' => t('The object that has been modified'),
 				),
-				'relationship' => array(
-					'type' => 'workflow_role',
-					'label' => t('The workflow roles to contact'),
-				),
 			),
 			'eval input' => array('message'),
 		)
 	);
 }
 
+function islandora_workflow_rules_email_recipients($settings) {
+  module_load_include('inc','fedora_repository','api/fedora_item');
+  $object = new Fedora_Item($settings['object']);
+  // get everyone who has the given workflow roles for the parent collection
+  $collections = array();
+  $parents = $item->getRelationships('isMemberOfCollection');
+  foreach($parents as $parent) {
+    $collections[] = $parent['object'];
+  }
+  $options = array(
+    'collection' => $collections,
+    'permissions' => $settings['roles'],
+  );
+  $user_permissions = islandora_workflow_get_user_permissions($options);
+  // returns an array with the keys [user,collection,permission]
+  foreach($user_permissions as $user_permission) {
+    $uid = $user_permission['user'];
+    $recipients[] = $uid;
+  }
+
+  if($settings['notify_creator']) {
+    $creator_name = $item->objectProfile->objOwnerId;
+    $creator = user_load(array('name' => $creator_name));
+    if ($creator) {
+      $recipients += $creator->uid;
+    }
+  }
+  return $recipients;
+}
+
+/**
+ * A Rules action to send email to people.
+ * @param array $settings
+ */
 function islandora_workflow_rules_email_someone($settings) {
-  $object = $settings['object'];
-  $roles_to_notify = $settings['roles'];
-  $notify_creator = $settings['notify_creator'];
-	$addressees = islandora_rules_get_recipients($object,$roles_to_notify);
-	foreach ($addressees as $address) {
+  $recipients = islandora_workflow_rules_recipients($settings);
+	foreach ($recipients as $recipient) {
 		# code...
 		// drupal_mail();
     // just log it for now.
+    $account = user_load($recipient);
     watchdog('iw_rules','Sending message about %object to %address',
-      array('%object' => $object, '%address' => $address)
+      array('%object' => $settings['object'], '%address' => $account->mail)
     );
 	}
-  if ($notify_creator) {
-    watchdog('iw_rules','Sending message to creator of %object',
-      array('%object' => $object)
-    );
-  }
-
 }
 
+/**
+ * Settings form for the Rules acton to send people email.
+ * @param array $settings
+ * @param array $form
+ */
 function islandora_workflow_rules_email_someone_form($settings, &$form) {
 	$settings += array(
     'message' => '',
@@ -62,9 +89,9 @@ function islandora_workflow_rules_email_someone_form($settings, &$form) {
 		'#description' => t('The message to be sent.'),
 	);
   $role_options = array(
-    'admin' => t('Workflow Administrator'),
-    'manager' => t('Manager'),
-    'editor' => t('Editor'),
+    ISLANDORA_RULES_ADMINISTRATOR => t('Workflow Administrator'),
+    ISLANDORA_RULES_MANAGER => t('Manager'),
+    ISLANDORA_RULES_EDITOR => t('Editor'),
   );
   $form['settings']['roles'] = array(
     '#type' => 'select',
@@ -96,30 +123,30 @@ function islandora_workflow_rules_condition_info() {
  */
 function islandora_workflow_rules_event_info() {
 	$arguments = array(
-		'object' => array(
-			'label' => t('Object'),
+		'object_id' => array(
+			'label' => t('Object PID'),
 			'type' => 'fedora_object',
 		),
 	);
 
 	return array(
 		'islandora_workflow_rules_reject_object' => array(
-			'label' => t('Reject Fedora Object'),
+			'label' => t('After rejecting a Fedora object'),
 			'module' => 'Islandora Rules',
 			'arguments' => $arguments,
 		),
 		'islandora_workflow_rules_approve_object' => array(
-			'label' => t('Approve Fedora Object'),
+			'label' => t('After approving a Fedora object'),
 			'module' => 'Islandora Rules',	
 			'arguments' => $arguments,
 		),
 		'islandora_workflow_rules_submit_object' => array(
-			'label' => t('Submit Fedora Object'),
+			'label' => t('After submitting a Fedora object'),
 			'module' => 'Islandora Rules',
 			'arguments' => $arguments,
 		),
 		'islandora_workflow_rules_assign_object' => array(
-			'label' => t('Assign Fedora Object'),
+			'label' => t('After assigning a Fedora object'),
 			'module' => 'Islandora Rules',
 			'arguments' => $arguments,
 		),
@@ -133,8 +160,8 @@ function islandora_workflow_token_values($type, $object = NULL, $options = array
 	$values = array();
 	if ('fedora_object' == $type) {
 		$values['fedora-object-pid'] = $object->pid;
-    $values['fedora-object-title'] = $object->get_label();
-    $values['fedora-object-creator'] = $object->get_ownerId();
+    $values['fedora-object-title'] = $object->objectProfile->objLabel;
+    $values['fedora-object-creator'] = $object->objectProfile->objOwnerId;
 	}
 	return $values;
 }
@@ -172,8 +199,8 @@ function islandora_workflow_rules_data_type_info() {
 class fedora_object_rules_data_type extends rules_data_type {
 
   function load($pid) {
-    module_load_include('inc','islandora_fedora_api','islandora_fedora_api.object');
-    return new FedoraObject($pid);
+    module_load_include('inc','fedora_repository','api/fedora_item');
+    return new Fedora_Item($pid);
   }
 
   function get_identifier() {
