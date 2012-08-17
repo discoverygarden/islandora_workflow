@@ -2007,6 +2007,7 @@ function islandora_workflow_work_form_page_two(&$form_state, $tab) {
     '#title' => t('Assign Rejected Objects'),
     '#description' => t('You may assign rejected objects to a user with suitable permissions.'),
     '#theme' => 'workflow_table',
+    '#tree' => TRUE,
   );
   foreach ($values as $collection_pid => $object) {
     if (!is_array($object)) {
