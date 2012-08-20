@@ -2013,12 +2013,14 @@ function islandora_workflow_work_form_page_two(&$form_state, $tab) {
     if (!is_array($object)) {
       continue;
     }
+    $options = $possible_assignees[$collection_pid]['rejected'];
+
     foreach($object as $object_pid => $attributes) {
       if (!empty($attributes['Selecter'])) {
         $form['assignees'][$collection_pid][$object_pid]['Assign'] = array(
           '#type' => 'select',
           '#title' => $object_pid,
-          '#options' => $possible_assignees[$collection_pid]['rejected'],
+          '#options' => array_merge($options, $options),
           '#default_value' => '',
         );
       }
