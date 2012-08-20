@@ -2031,6 +2031,8 @@ function islandora_workflow_work_form_page_two(&$form_state, $tab) {
     '#value' => 'Reject and Assign',
   );
   $form['#submit'] = array('islandora_workflow_work_form_page_two_submit');
+  // Redirect to the default local task.
+  $form['#redirect'] = array('islandora_workflow');
   return $form;
 
 }
@@ -2045,6 +2047,8 @@ function islandora_workflow_work_form_page_two_submit($form, &$form_state) {
       }
     }
   }
+  // Get rid of storage so the redirect can work.
+  unset($form_state['storage']);
 }
 
 function islandora_workflow_my_work_form($form_state) {
