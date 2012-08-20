@@ -2035,9 +2035,11 @@ function islandora_workflow_work_form_page_two(&$form_state, $tab) {
 
 function islandora_workflow_work_form_page_two_submit($form, &$form_state) {
   $assignees = array_filter($form_state['values']['assignees']);
-  foreach($assignees as $object_id => $user_name) {
-    islandora_workflow_reject_object($object_id);
-    islandora_workflow_assign_object($object_id, $user_name);
+  foreach($assignees as $collection_id => $object) {
+    foreach($object as $object_id => $user_name) {
+      islandora_workflow_reject_object($object_id);
+      islandora_workflow_assign_object($object_id, $user_name);
+    }
   }
 }
 
