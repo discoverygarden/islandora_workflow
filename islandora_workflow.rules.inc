@@ -57,9 +57,12 @@ function islandora_workflow_rules_email_recipients($object) {
 
 /**
  * A Rules action to send email to people.
+ * @param Fedora_Item $object
  * @param array $settings
  */
 function islandora_workflow_rules_email_someone($object, $settings) {
+  dpm('object:');
+  dpm($object);
   $recipients = islandora_workflow_rules_email_recipients($object);
 	foreach ($recipients as $recipient) {
 		# code...
@@ -200,15 +203,20 @@ function islandora_workflow_rules_data_type_info() {
 class fedora_object_rules_data_type extends rules_data_type {
 
   function load($pid) {
+    watchdog('iw_rules','fedora_object_rules_data_type::load(%pid)',array('%pid'=>$pid));
     module_load_include('inc','fedora_repository','api/fedora_item');
-    return new Fedora_Item($pid);
+    $object = new Fedora_Item($pid);
+    return $object;
   }
 
   function get_identifier() {
+    watchdog('iw_rules','fedora_object_rules_data_type::get_identifier');
     $fedora_object = $this->get();
     if ($fedora_object) {
+      watchdog('iw_rules','About to return %pid',array('%pid' => $fedora_object->pid));
       return $fedora_object->pid;
     }
+    watchdog('iw_rules','Couldnt get identifier');
   }
 
 }
