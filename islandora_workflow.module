@@ -2051,10 +2051,10 @@ function islandora_workflow_work_form_page_two_submit($form, &$form_state) {
   unset($form_state['storage']);
 }
 
-function islandora_workflow_my_work_form($form_state) {
-  return islandora_workflow_work_form('workflow');
+function islandora_workflow_my_work_form(&$form_state) {
+  return islandora_workflow_work_form($form_state, 'workflow');
 }
 
-function islandora_workflow_overview_form($form_state) {
-  return islandora_workflow_work_form('overview');
+function islandora_workflow_overview_form(&$form_state) {
+  return islandora_workflow_work_form($form_state, 'overview');
 }
