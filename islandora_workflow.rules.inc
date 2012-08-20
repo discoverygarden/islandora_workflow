@@ -24,14 +24,13 @@ function islandora_workflow_rules_action_info() {
 	);
 }
 
-function islandora_workflow_rules_email_recipients($settings) {
+function islandora_workflow_rules_email_recipients($object) {
   module_load_include('inc','fedora_repository','api/fedora_item');
 
   $recipients = array();
-  $item = new Fedora_Item($settings['object']);
   // get everyone who has the given workflow roles for the parent collection
   $collections = array();
-  $parents = $item->get_relationships('isMemberOfCollection');
+  $parents = $object->get_relationships('isMemberOfCollection');
   foreach($parents as $parent) {
     $collections[] = $parent['object'];
   }
@@ -60,8 +59,8 @@ function islandora_workflow_rules_email_recipients($settings) {
  * A Rules action to send email to people.
  * @param array $settings
  */
-function islandora_workflow_rules_email_someone($settings) {
-  $recipients = islandora_workflow_rules_email_recipients($settings);
+function islandora_workflow_rules_email_someone($object, $settings) {
+  $recipients = islandora_workflow_rules_email_recipients($object);
 	foreach ($recipients as $recipient) {
 		# code...
 		// drupal_mail();
