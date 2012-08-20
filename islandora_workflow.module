@@ -1998,7 +1998,7 @@ function islandora_workflow_work_form_page_two(&$form_state, $tab) {
   // This only works for rejecting objects at the moment
 
   $selected_objects = array();
-  $values = $form_state['values']; // ['objects_form']['objects_form_elems'];
+  $values = $form_state['values']['objects_form']['objects_form_elems'];
   $collections = array_keys($values);
   $possible_assignees = get_possible_assignees($collections);
 
