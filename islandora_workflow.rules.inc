@@ -61,8 +61,11 @@ function islandora_workflow_rules_email_recipients($object) {
  * @param array $settings
  */
 function islandora_workflow_rules_email_someone($object, $settings) {
-  dpm('object:');
-  dpm($object);
+  if (!is_object($object)) {
+    dpm('The following thing is not an pbject');
+    dpm($object);
+    dpm('Told you so');
+  }
   $recipients = islandora_workflow_rules_email_recipients($object);
 	foreach ($recipients as $recipient) {
 		# code...
