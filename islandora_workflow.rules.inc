@@ -30,6 +30,12 @@ function islandora_workflow_rules_email_recipients($object) {
   $recipients = array();
   // get everyone who has the given workflow roles for the parent collection
   $collections = array();
+  if (!is_object($object)) {
+    dpm('I tried to get the recipients, but is_object($object) == FALSE');
+    dpm($object);
+    dpm("You see");
+    return $recipients;
+  }
   $parents = $object->get_relationships('isMemberOfCollection');
   foreach($parents as $parent) {
     $collections[] = $parent['object'];
@@ -65,6 +71,7 @@ function islandora_workflow_rules_email_someone($object, $settings) {
     dpm('The following thing is not an pbject');
     dpm($object);
     dpm('Told you so');
+    return FALSE;
   }
   $recipients = islandora_workflow_rules_email_recipients($object);
 	foreach ($recipients as $recipient) {
