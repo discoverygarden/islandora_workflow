@@ -363,13 +363,13 @@ function islandora_workflow_reject_object($object_id) {
     $user_name = islandora_workflow_get_object_creator($object_id);
     if ($user_name) {
       // Some objects may not have been created by a drupal user.
-      $params = array('object' => new Fedora_Item($object_id));
+      $object = new Fedora_Item($object_id);
       // Optional parameters for mail hook.
       $recipient = user_load(array('name' => $user_name));
       $address = $recipient->mail;
       // User email to send to.
       // drupal_mail('islandora_workflow', 'reject', $address, language_default(), $params);
-      rules_invoke_event('islandora_workflow_rules_approve_object', $params);
+      rules_invoke_event('islandora_workflow_rules_reject_object', $object);
     }
     else {
       drupal_set_message(t('No email sent for the rejection of: ' . $object_id));
@@ -413,9 +413,9 @@ function islandora_workflow_approve_object($object_id) {
       array($collection), $permission_level = 'islandora_workflow_Manager');
     $emails = get_users_email_by_name($manager_list[$collection]);
     $emails = format_email_array_to_string($emails);
-    $params = array('object' => new Fedora_Item($object_id));
+    $object = new Fedora_Item($object_id);
     // drupal_mail('islandora_workflow', 'approve', $emails, language_default(), $params);
-    rules_invoke_event('islandora_workflow_rules_approve_object', $params);
+    rules_invoke_event('islandora_workflow_rules_approve_object', $object);
     return (islandora_workflow_set_object_workflow_state($object_id, 'approved'));
   }
   else {
@@ -488,9 +488,9 @@ function islandora_workflow_submit_object($object_id) {
       array($collection), $permission_level = 'islandora_workflow_Editor');
     $emails = get_users_email_by_name($editor_list[$collection]);
     $emails = format_email_array_to_string($emails);
-    $params = array('object' => new Fedora_Item($object_id));
+    $object = new Fedora_Item($object_id);
     // drupal_mail('islandora_workflow', 'submit', $emails, language_default(), $params);
-    rules_invoke_event('islandora_workflow_rules_submit_object', $params);
+    rules_invoke_event('islandora_workflow_rules_submit_object', $object);
     return (islandora_workflow_set_object_workflow_state($object_id, 'submitted'));
   }
   else {
@@ -534,13 +534,13 @@ function islandora_workflow_assign_object($object_id, $user_name) {
     return FALSE;
   }
   // Send out email to assignee.
-  $params = array('object' => new Fedora_Item($object_id));
+  $object = new Fedora_Item($object_id);
   // Optional parameters for mail hook.
   $recipient = user_load(array('name' => $user_name));
   $address = $recipient->mail;
   // User email to send to.
   // drupal_mail('islandora_workflow', 'assign', $address, language_default(), $params);
-  rules_invoke_event('islandora_workflow_rules_assign_object', $params);
+  rules_invoke_event('islandora_workflow_rules_assign_object', $object);
   // Assign object.
   return (islandora_workflow_set_object_relationship($object_id, 'assignee', $user_name));
 }
