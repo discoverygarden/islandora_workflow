@@ -36,7 +36,7 @@ function islandora_workflow_rules_email_recipients($object) {
     dpm("You see");
     return $recipients;
   }
-  $parents = $object->get_relationships('isMemberOfCollection');
+  $parents = $object->get_relationships('fedora:isMemberOfCollection');
   foreach($parents as $parent) {
     $collections[] = $parent['object'];
   }
