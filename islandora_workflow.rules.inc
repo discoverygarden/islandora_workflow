@@ -24,18 +24,12 @@ function islandora_workflow_rules_action_info() {
 	);
 }
 
-function islandora_workflow_rules_email_recipients($object) {
+function islandora_workflow_rules_email_recipients($object, $settings) {
   module_load_include('inc','fedora_repository','api/fedora_item');
 
   $recipients = array();
   // get everyone who has the given workflow roles for the parent collection
   $collections = array();
-  if (!is_object($object)) {
-    dpm('I tried to get the recipients, but is_object($object) == FALSE');
-    dpm($object);
-    dpm("You see");
-    return $recipients;
-  }
   $parents = $object->get_relationships('fedora:isMemberOfCollection');
   foreach($parents as $parent) {
     $collections[] = $parent['object'];
@@ -52,7 +46,7 @@ function islandora_workflow_rules_email_recipients($object) {
   }
 
   if($settings['notify_creator']) {
-    $creator_name = $item->objectProfile->objOwnerId;
+    $creator_name = $object->objectProfile->objOwnerId;
     $creator = user_load(array('name' => $creator_name));
     if ($creator) {
       $recipients[]= $creator->uid;
@@ -73,7 +67,7 @@ function islandora_workflow_rules_email_someone($object, $settings) {
     dpm('Told you so');
     return FALSE;
   }
-  $recipients = islandora_workflow_rules_email_recipients($object);
+  $recipients = islandora_workflow_rules_email_recipients($object, $settings);
 	foreach ($recipients as $recipient) {
 		# code...
 		// drupal_mail();
