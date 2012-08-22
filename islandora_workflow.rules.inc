@@ -80,7 +80,7 @@ function islandora_workflow_rules_email_someone($object, $settings) {
     // just log it for now.
     $account = user_load($recipient);
     watchdog('iw_rules','Sending message about %object to %address',
-      array('%object' => $settings['object'], '%address' => $account->mail)
+      array('%object' => $object->pid, '%address' => $account->mail)
     );
 	}
 }
