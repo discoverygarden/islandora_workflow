@@ -368,7 +368,7 @@ function islandora_workflow_reject_object($object_id) {
       $recipient = user_load(array('name' => $user_name));
       $address = $recipient->mail;
       // User email to send to.
-      drupal_mail('islandora_workflow', 'reject', $address, language_default(), $params);
+      // drupal_mail('islandora_workflow', 'reject', $address, language_default(), $params);
       rules_invoke_event('islandora_workflow_rules_approve_object', $params);
     }
     else {
@@ -414,7 +414,7 @@ function islandora_workflow_approve_object($object_id) {
     $emails = get_users_email_by_name($manager_list[$collection]);
     $emails = format_email_array_to_string($emails);
     $params = array('object' => new Fedora_Item($object_id));
-    drupal_mail('islandora_workflow', 'approve', $emails, language_default(), $params);
+    // drupal_mail('islandora_workflow', 'approve', $emails, language_default(), $params);
     rules_invoke_event('islandora_workflow_rules_approve_object', $params);
     return (islandora_workflow_set_object_workflow_state($object_id, 'approved'));
   }
@@ -489,7 +489,7 @@ function islandora_workflow_submit_object($object_id) {
     $emails = get_users_email_by_name($editor_list[$collection]);
     $emails = format_email_array_to_string($emails);
     $params = array('object' => new Fedora_Item($object_id));
-    drupal_mail('islandora_workflow', 'submit', $emails, language_default(), $params);
+    // drupal_mail('islandora_workflow', 'submit', $emails, language_default(), $params);
     rules_invoke_event('islandora_workflow_rules_submit_object', $params);
     return (islandora_workflow_set_object_workflow_state($object_id, 'submitted'));
   }
@@ -539,7 +539,7 @@ function islandora_workflow_assign_object($object_id, $user_name) {
   $recipient = user_load(array('name' => $user_name));
   $address = $recipient->mail;
   // User email to send to.
-  drupal_mail('islandora_workflow', 'assign', $address, language_default(), $params);
+  // drupal_mail('islandora_workflow', 'assign', $address, language_default(), $params);
   rules_invoke_event('islandora_workflow_rules_assign_object', $params);
   // Assign object.
   return (islandora_workflow_set_object_relationship($object_id, 'assignee', $user_name));
