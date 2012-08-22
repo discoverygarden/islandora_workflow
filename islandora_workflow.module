@@ -1267,6 +1267,13 @@ function islandora_workflow_role_permissions_form_submit($collection_role_permis
     }
 
     $collection_pid = $_SESSION['workflow_permissions_page']['active_collection'];
+    // beware! The session variable is now in the format "$label [$pid]".
+    // We need to separate this out using a regex.
+    // Look for a value in square brackets at the end of the option label.
+    $pattern = '/\[([^[]+?)\]$/';
+    if (preg_match($pattern,$collection_pid,$matches)) {
+      $collection_pid = $matches[1];
+    }
 
     // Check if the collection is empty.
     if (variable_get('islandora_workflow_enforce_security', 0) && module_exists('islandora_xacml_api')) {
