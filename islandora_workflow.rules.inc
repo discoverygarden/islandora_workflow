@@ -137,8 +137,8 @@ function islandora_workflow_rules_condition_info() {
  */
 function islandora_workflow_rules_event_info() {
 	$arguments = array(
-		'object_id' => array(
-			'label' => t('Object PID'),
+		'object' => array(
+			'label' => t('Fedora Object'),
 			'type' => 'fedora_object',
 		),
 	);
