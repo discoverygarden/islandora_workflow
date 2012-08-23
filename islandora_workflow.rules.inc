@@ -117,6 +117,13 @@ function islandora_workflow_rules_email_someone_form($settings, &$form) {
 }
 
 // @TODO validate the form so you can't notify no-one.
+function islandora_workflow_rules_email_someone_form_validate($form, &$form_state) {
+  $values = $form_state['values'];
+  $has_recipient = !empty($values['roles']) || $values['notify_creator'];
+  if (!$has_recipient) {
+    form_set_error('settings','Please select at least one workflow role or creator');
+  }
+}
 
 /** 
  * Implements hook_rules_condition_info().
