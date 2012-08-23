@@ -45,7 +45,7 @@ function islandora_workflow_assignment_by_collection($collection_pid) {
   $query_return_json = query_resource_index($query, $limit = -1, $offset = 0, $format = 'json');
   
   if ($query_return_json) {
-    $query_return = json_decode($query_return_string);
+    $query_return = json_decode($query_return_json);
     return $query_return->results;
   }
   return array();
