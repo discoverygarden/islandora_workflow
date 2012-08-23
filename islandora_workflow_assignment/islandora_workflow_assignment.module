@@ -105,7 +105,8 @@ function islandora_workflow_assignment_user_edit_batch(&$edit, &$account, $categ
   if (empty($edit['roles'])) {
     return $operations;
   }
-  if (empty(array_diff($account->roles,$edit['roles']))) {
+  $roles_diff = array_diff($account->roles,$edit['roles']);
+  if (empty($roles_diff)) {
     return $operations;
   }
   $new_roles = $edit['roles'];
