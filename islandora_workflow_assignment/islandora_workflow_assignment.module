@@ -178,7 +178,8 @@ function islandora_workflow_assignment_role_delete_batch(&$form, &$form_state) {
         // get the valid permissions for each item
         // work out whether they still have that permission somehow
         $valid_perms = islandora_workflow_assignment_valid_permissions($object->state); // @TODO
-        if(empty(array_intersect($new_perms,$valid_perms))) {
+        $perms_intersection = array_intersect($new_perms,$valid_perms);
+        if(empty($perms_intersection)) { {
           // remove assignments
           // @TODO make this into a batch job?
           islandora_workflow_assignment_remove($object_pid, $assignee->name);
