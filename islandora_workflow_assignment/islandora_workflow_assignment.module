@@ -116,7 +116,8 @@ function islandora_workflow_assignment_user_edit_batch(&$edit, &$account, $categ
     $valid_perms = islandora_workflow_assignment_valid_permissions($state);
     $access = FALSE;
     $valid_roles = user_roles(FALSE,$valid_perms);
-    if (empty(array_intersect_key($new_roles, $valid_roles))) {
+    $roles_intersection = array_intersect_key($new_roles, $valid_roles);
+    if (empty($roles_intersection)) {
       $operations[] = array('islandora_workflow_assignment_remove',
         array($object->pid, $account->name)
       );
