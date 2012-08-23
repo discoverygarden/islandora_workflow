@@ -617,7 +617,7 @@ function islandora_workflow_user_object_permission_check($object_id, $user_in = 
   $workflow_state = islandora_workflow_get_object_workflow_state($object_id);
 
   // Editor level.
-  if (isset($editor_permissions[$parent]) && ($workflow_state == 'submitted' || $workflow_state == 'created')) {
+  if (isset($editor_permissions[$parent]) && ($workflow_state == 'submitted' || $workflow_state == 'created' || $workflow_state == 'rejected')) {
     return 'islandora_workflow_Editor';
   }
 
