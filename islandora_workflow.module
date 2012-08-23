@@ -1573,8 +1573,7 @@ function islandora_workflow_user_permissions_form_submit($collection_user_permis
   }
   // Collection to display.
   elseif ($clicked_button == 'Select Collection') {
-    $key = $collection_user_permissions_form_state['values']['islandora_workflow_collection_permissions_table']['permissions_table']['collection_selector'];
-    $active_collection = $collection_user_permissions_form['islandora_workflow_collection_permissions_table']['permissions_table']['collection_selector']['#options'][$key];
+    $active_collection = $collection_user_permissions_form_state['values']['islandora_workflow_collection_permissions_table']['permissions_table']['collection_selector'];
     $_SESSION['workflow_permissions_page']['active_collection'] = $active_collection;
   }
 }
