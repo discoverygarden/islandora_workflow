@@ -114,7 +114,7 @@ function islandora_workflow_rules_email_someone_validate($form, &$form_state) {
   $settings = $form_state['values']['settings'];
   $has_recipient = !empty($settings['roles']) || $settings['notify_creator'];
   if (!$has_recipient) {
-    form_set_error('settings','Please select at least one workflow role or creator');
+    form_set_error('settings',t('Please select at least one workflow role or creator'));
   }
 }
 
