@@ -214,7 +214,7 @@ function islandora_workflow_assignment_workflow_state_change($object_pid, $state
     return; 
   }
   $assignee = user_load(array('name' => $assignee_name));
-  $valid_permissions = islandora_workflow_assignment_valid_permissions($state);
+  $valid_permissions = islandora_workflow_assignment_valid_assignee_permissions($state);
   $is_assignee_valid = FALSE;
   foreach($valid_permissions as $permission) {
     if (user_access($permission,$assignee)) {
