@@ -6,7 +6,9 @@
  * @return array an array of results.
  */
 function islandora_workflow_assignment_by_user($account) {
-  
+
+  module_load_include('inc', 'islandora_fedora_api', 'islandora_fedora_api.risearch');
+
   // get the stored query
   $query_file_name = drupal_get_path('module', 'islandora_workflow') . '/assignee_query.txt';
   $query_file_handle = fopen($query_file_name, "r");
@@ -30,6 +32,9 @@ function islandora_workflow_assignment_by_user($account) {
  * @return array an array of results.
  */
 function islandora_workflow_assignment_by_collection($collection_pid) {
+
+  module_load_include('inc', 'islandora_fedora_api', 'islandora_fedora_api.risearch');
+  
   // get the stored query
   $query_file_name = drupal_get_path('module', 'islandora_workflow_assignment') . '/assignee_per_collection_query.sparql';
   $query_file_handle = fopen($query_file_name, "r");
