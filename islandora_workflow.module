@@ -2085,7 +2085,7 @@ function islandora_workflow_islandora_tabs_alter(&$tabs, $params) {
   $pid = $params['pid'];
   $content_models = $params['content_models'];
   $parent = islandora_workflow_get_object_parent($pid);
-  $permission = islandora_workflow_user_object_permissions_check($pid);
+  $permission = islandora_workflow_user_object_permission_check($pid);
   $objectHelper = new ObjectHelper();
 
   if (module_exists('islandora_collection_manager')) {
