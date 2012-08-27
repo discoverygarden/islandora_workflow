@@ -1,12 +1,13 @@
 <?php
 /**
  * @file
- *   This file should hold all object level helper
- *   funcitons for the workflow module.
+ * This file should hold object level helper functions for the workflow module.
  *   I'd like there to be a class that extends the api object class.
  */
 
 /**
+ * Remove the assignee of one or more objects.
+ *
  * This function will nullify the assignee if the passed in assignee
  * will not be able to modify the object if it is in the passed in state
  *
