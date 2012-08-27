@@ -1,13 +1,12 @@
 <?php
+
 /**
  * @file
- *   This include file is meant to hold all helper
- *   functions regarding collections
+ * This .inc file is meant to hold all helper functions regarding collections.
  */
 
 /**
- * This function is used to get a list containing all of the
- * islandora collections in a Fedora repo
+ * Get a list of all of the Islandora collections in a Fedora repository.
  * @TODO:  use this function to replace islandora_workflow_get_all_collections()
  * @author
  *   William Panting
@@ -72,8 +71,7 @@ function islandora_workflow_get_collections() {
 }
 
 /**
- * Set the RELS-EXT relationship on a collection for
- * workflow tracking to TRUE
+ * Mark a collection as being tracked by workflow via a RELS-EXT relationship.
  *
  * @param string $object_pid
  *   The object to set the relationship on
@@ -87,12 +85,13 @@ function islandora_workflow_track_collection_in_workflow($object_pid) {
 }
 
 /**
- * Set the RELS-EXT relationship on a collection for
- * workflow tracking to FALSE
+ * Mark a collection as not being tracked by workflow via RELS-EXT.
+ *
+ * @param string $object_pid
  *   The object to set the relationship on
  *
  * @return object
- *   fedora http response
+ *   Fedora HTTP response
  */
 function islandora_workflow_stop_tracking_collection_in_workflow($object_pid) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
@@ -100,15 +99,13 @@ function islandora_workflow_stop_tracking_collection_in_workflow($object_pid) {
 }
 
 /**
- * This function checks if the collection is tracked in workflow.
- * The function checks for a RELS-EXT that may not exist.
+ * Check an object's RELS-EXT to see if the collection is tracked in workflow.
  *
  * @param string $object_pid
- *   The pid of the object to check on
+ *   The PID of the object to check on
  *
  * @return boolean
- *   TRUE if the collection is tracked in workflow
- *   FALSE if the collection is not tracked in workflow
+ *   TRUE if the collection is tracked in workflow, FALSE otherwise.
  *  @todo: look at creating api func for checking if rel exists
  */
 function islandora_workflow_is_collection_workflow_tracked($object_pid) {
@@ -134,16 +131,15 @@ function islandora_workflow_is_collection_workflow_tracked($object_pid) {
 }
 
 /**
- * Should return a blank option, everyone with perms associated with the
- * indicated collection and state, object owner
+ * Get a list of possible assignees (including none) for the given collections.
  *
  * @param array $collections
  *   The set of collections to return the possible assignees for
  * @param array $workflow_states
- *   The states to return the possible assignees for, if null return all
+ *   The states to return the possible assignees for. If empty, return all
  *   (this is cheaper than working on present workflow state)
  * @param boolean $format
- *   Whether or not to return a string format that is usable for a select
+ *   Whether or not to return a string format that is usable for a <select> tag
  *
  * @return array
  *   $possible_assignees_by_collection[$collection][$workflow_state][user]
