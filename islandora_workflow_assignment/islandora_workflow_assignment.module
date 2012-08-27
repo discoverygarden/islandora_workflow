@@ -1,23 +1,32 @@
 <?php
+/**
+ * @file
+ * A module to handle assignment of Islandora workflow objects.
+ */
 
 /**
  * Return all objects assigned to a given user, along with their workflow state.
- * @param user $account a user object.
- * @return array an array of results.
+ *
+ * @param object $account
+ *   a user object.
+ *
+ * @return array
+ *   an array of results.
  */
 function islandora_workflow_assignment_by_user($account) {
 
   module_load_include('inc', 'islandora_fedora_api', 'islandora_fedora_api.risearch');
 
-  // get the stored query
+  // Get the stored query.
   $query_file_name = drupal_get_path('module', 'islandora_workflow') . '/assignee_query.txt';
   $query_file_handle = fopen($query_file_name, "r");
   $query_string = fread($query_file_handle, filesize($query_file_name));
   fclose($query_file_handle);
 
-  $query = preg_replace('/\?username/','"'. $account->name .'"',$query);
-  $query_return_json = query_resource_index($query, $limit = -1, $offset = 0, $format = 'json');
-  
+  $query = preg_replace('/\?username/', '"' . $account->name . '"', $query);
+  $limit = -1;
+  $query_return_json = query_resource_index($query, $limit, $offset = 0, $format = 'json');
+
   if ($query_return_json) {
     $query_return = json_decode($query_return_string);
     return $query_return->results;
@@ -28,22 +37,27 @@ function islandora_workflow_assignment_by_user($account) {
 
 /**
  * Return all assignees for members of a given collection.
- * @param string $collection_pid the PID of the collection.
- * @return array an array of results.
+ *
+ * @param string $collection_pid
+ *   the PID of the collection.
+ *
+ * @return array
+ *   an array of results.
  */
 function islandora_workflow_assignment_by_collection($collection_pid) {
 
   module_load_include('inc', 'islandora_fedora_api', 'islandora_fedora_api.risearch');
-  
-  // get the stored query
+
+  // Get the stored query.
   $query_file_name = drupal_get_path('module', 'islandora_workflow_assignment') . '/assignees_per_collection_query.sparql';
   $query_file_handle = fopen($query_file_name, "r");
   $query = fread($query_file_handle, filesize($query_file_name));
   fclose($query_file_handle);
 
-  $query = preg_replace('/\?collection/','"'. $collection_pid .'"',$query);
-  $query_return_json = query_resource_index($query, $limit = -1, $offset = 0, $format = 'json');
-  
+  $query = preg_replace('/\?collection/', '"' . $collection_pid . '"', $query);
+  $limit = -1;
+  $query_return_json = query_resource_index($query, $limit, $offset = 0, $format = 'json');
+
   if ($query_return_json) {
     $query_return = json_decode($query_return_json);
     return $query_return->results;
@@ -53,9 +67,13 @@ function islandora_workflow_assignment_by_collection($collection_pid) {
 }
 
 /**
- * Get the permissions a user must have in order to be the assignee of an object. 
+ * Get permissions a user must have in order to be the assignee of an object.
+ *
  * @param string $state
- * @return array An array of permission names. 
+ *   The state of the object.
+ *
+ * @return array
+ *   An array of permission names.
  */
 function islandora_workflow_assignment_valid_assignee_permissions($state) {
   $permissions = array();
@@ -76,55 +94,72 @@ function islandora_workflow_assignment_valid_assignee_permissions($state) {
 
 /**
  * Remove an about-to-be-deleted user from their assignments.
+ *
+ * Returns an array of batch operations.
+ *
  * @param object $edit
+ *   The dit made to the user account.
  * @param user $account
- * @return array 
+ *   The original user account.
+ *
+ * @return array
+ *   An array of batch operations.
  */
 function islandora_workflow_assignment_user_delete_batch(&$edit, &$account) {
-  
+
   $assigned_objects = islandora_workflow_assignment_by_user($account);
-  // @TODO make the following into a batch job
+  // @TODO make the following into a batch job.
   foreach ($assigned_objects as $object_pid) {
-    // remove the assignment from each object
-    $operations[] = array('islandora_workflow_assignment_remove',
-      array(object_pid, $account->name)
+    // Remove the assignment from each object.
+    $operations[] = array(
+      'islandora_workflow_assignment_remove',
+      array(object_pid, $account->name),
     );
-  }    
+  }
   return $operations;
 }
 
 /**
  * Check the validity of a user's assignments after their roles have changed.
+ *
  * Remove assignments which have become invalid.
+ *
  * @param object $edit
+ *   The edit mad to the user account.
  * @param user $account
- * @return array An array of batch operations
+ *   The original user account.
+ * @param string $category
+ *   The category of edit being made.
+ *
+ * @return array
+ *   An array of batch operations
  */
 function islandora_workflow_assignment_user_edit_batch(&$edit, &$account, $category = NULL) {
-  
+
   $operations = array();
-  
+
   $iw_perms = islandora_workflow_perm();
   $assigned_objects = islandora_workflow_assignment_by_user($account);
   $existing_roles = $account->roles;
   if (empty($edit['roles'])) {
     return $operations;
   }
-  $roles_diff = array_diff($account->roles,$edit['roles']);
+  $roles_diff = array_diff($account->roles, $edit['roles']);
   if (empty($roles_diff)) {
     return $operations;
   }
   $new_roles = $edit['roles'];
-  foreach($assigned_objects as $object) {
-    // check the state of each object - and match against the user's perms
-    $state = $object->state; 
+  foreach ($assigned_objects as $object) {
+    // Check the state of each object - and match against the user's perms.
+    $state = $object->state;
     $valid_perms = islandora_workflow_assignment_valid_permissions($state);
     $access = FALSE;
-    $valid_roles = user_roles(FALSE,$valid_perms);
+    $valid_roles = user_roles(FALSE, $valid_perms);
     $roles_intersection = array_intersect_key($new_roles, $valid_roles);
     if (empty($roles_intersection)) {
-      $operations[] = array('islandora_workflow_assignment_remove',
-        array($object->pid, $account->name)
+      $operations[] = array(
+        'islandora_workflow_assignment_remove',
+        array($object->pid, $account->name),
       );
     }
   }
@@ -133,59 +168,61 @@ function islandora_workflow_assignment_user_edit_batch(&$edit, &$account, $categ
 
 /**
  * Form submission handler for the admin roles form.
+ *
  * Checks that users still have permissions to be assigned objects,
  * after a role they previously held has been deleted.
- * If not, the assignment will be removed. 
+ * If not, the assignment will be removed.
+ *
+ * @param array $form
+ *   The form.
+ * @param array $form_state
+ *   The form state.
  */
 function islandora_workflow_assignment_role_delete_batch(&$form, &$form_state) {
-  
-  module_load_include('inc','islandora_workflow','islandora_workflow');
-    
+
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
+
   if ($form_state['values']['op'] == t('Delete role')) {
     $operations = array();
 
-    // why would this be a problem?
-    // if there was a single role (this one) which had a permission no other one had
-    // (for at least one user),
-    // which once they lost it meant they couldn't be assigned to an object no more.
-
-    $assignee_roles = user_roles(FALSE,islandora_workflow_perm());
+    $assignee_roles = user_roles(FALSE, islandora_workflow_perm());
     $rid = $form_state['values']['rid'];
-    if(!array_key_exists($rid,$assignee_roles)) {
+    if (!array_key_exists($rid, $assignee_roles)) {
       return;
     }
-    // so we now know that the role being deleted can be assigned things of some state
+    // We know that the role being deleted can be assigned things of some state.
     $users = islandora_workflow_get_users_with_role($rid);
     $new_user = new stdClass();
-    foreach($users as $uid) {
+    foreach ($users as $uid) {
       $account = user_load($uid);
-      // figure out if they lose any permissions as a result
-      $new_roles = array_diff_key($account->roles,array($rid => 'role name'));
-      // We can perform user_access() on any stdClass object,
-      // as long as it has 'uid' and 'roles' attributes
-      $new_user->uid = -1; // hack
+      // Figure out if they lose any permissions as a result.
+      $new_roles = array_diff_key($account->roles, array($rid => 'role name'));
+      /*
+       * We can perform user_access() on any stdClass object,
+       * as long as it has 'uid' and 'roles' attributes.
+       */
+      $new_user->uid = -1;
       $new_user->roles = $new_roles;
-      foreach(islandora_workflow_perm() as $iw_perm) {
-        if (user_access($iw_perm,$account)) {
+      foreach (islandora_workflow_perm() as $iw_perm) {
+        if (user_access($iw_perm, $account)) {
           $old_perms[] = $iw_perm;
         }
-        if (user_access($iw_perm,$new_user)) {
+        if (user_access($iw_perm, $new_user)) {
           $new_perms[] = $iw_perm;
         }
       }
-      $perms_diff = array_diff($old_perms,$new_perms);
+      $perms_diff = array_diff($old_perms, $new_perms);
       if (empty($perms_diff)) {
-        continue; // save time if the user's permissions haven't changed
+        // Save time if the user's permissions haven't changed.
+        continue;
       }
-      // if so, go through all the items for which they are the assignee
-      $objects = islandora_workflow_assignment_by_user($account); 
-      foreach($objects as $object) {
-        // get the valid permissions for each item
-        // work out whether they still have that permission somehow
-        $valid_perms = islandora_workflow_assignment_valid_permissions($object->state); // @TODO
-        $perms_intersection = array_intersect($new_perms,$valid_perms);
-        if(empty($perms_intersection)) {
-          // remove assignments
+      // If they have, go through all the items for which they are the assignee.
+      $objects = islandora_workflow_assignment_by_user($account);
+      foreach ($objects as $object) {
+        // Work out whether they still have valid permission.
+        $valid_perms = islandora_workflow_assignment_valid_permissions($object->state);
+        $perms_intersection = array_intersect($new_perms, $valid_perms);
+        if (empty($perms_intersection)) {
           // @TODO make this into a batch job?
           islandora_workflow_assignment_remove($object_pid, $assignee->name);
         }
@@ -196,56 +233,66 @@ function islandora_workflow_assignment_role_delete_batch(&$form, &$form_state) {
   }
 }
 
-/** 
+/**
  * Implements hook_workflow_state_change().
+ *
  * Check that an object's assignee still has the right permissions
- * after its workflow state has been changed. 
- * If not, remove the assignee. 
- * @param string $object_pid the PID of the object.
- * @param string $state the object's new workflow state.
- * @return void
+ * after its workflow state has been changed.
+ * If not, remove the assignee.
+ *
+ * @param string $object_pid
+ *   the PID of the object.
+ * @param string $state
+ *   the object's new workflow state.
  */
 function islandora_workflow_assignment_workflow_state_change($object_pid, $state) {
-  
-  module_load_include('inc','islandora_workflow','islandora_workflow');
-    
+
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
+
   $assignee_name = islandora_workflow_get_object_assignee($object_pid);
   if (!$assignee_name) {
-    return; 
+    return;
   }
   $assignee = user_load(array('name' => $assignee_name));
   $valid_permissions = islandora_workflow_assignment_valid_assignee_permissions($state);
   $is_assignee_valid = FALSE;
-  foreach($valid_permissions as $permission) {
-    if (user_access($permission,$assignee)) {
+  foreach ($valid_permissions as $permission) {
+    if (user_access($permission, $assignee)) {
       $is_assignee_valid = TRUE;
       break;
     }
   }
-  if(!$is_assignee_valid) {
+  if (!$is_assignee_valid) {
     islandora_workflow_assignment_remove($object_pid, $assignee->name);
   }
 }
 
 /**
  * Removes the named user as the assignee for a Fedora object.
- * @staticvar FedoraAPIM $apim the FedoraAPIM object
- * @param string $object_pid The PID of the Fedora object
- * @param string $assignee The Drupal username of the assignee.
+ *
+ * @staticvar FedoraAPIM $apim
+ *   the FedoraAPIM object
+ *
+ * @param string $object_pid
+ *   The PID of the Fedora object
+ * @param string $assignee
+ *   The Drupal username of the assignee.
+ *
  * @return HTTPResponse
+ *   A HTTP response from Fedora
  */
 function islandora_workflow_assignment_remove($object_pid, $assignee = NULL) {
-  
-  module_load_include('inc','islandora_fedora_api','islandora_fedora_api.raw');
-  
+
+  module_load_include('inc', 'islandora_fedora_api', 'islandora_fedora_api.raw');
+
   static $apim;
   if (!isset($apim)) {
     $apim = new FedoraAPIM();
   }
-  
+
   $predicate = 'info:islandora/islandora-system:def/islandora_workflow#assignee';
   if (!$assignee) {
-    $response = $apim->getRelationships($object_pid,$predicate); 
+    $response = $apim->getRelationships($object_pid, $predicate);
     $pattern = '/<assignee.+?>([^<]+?)<\/assignee>/';
     if (preg_match($pattern, $response->data, $matches)) {
       $assignee = $matches[1][0];
@@ -261,26 +308,29 @@ function islandora_workflow_assignment_remove($object_pid, $assignee = NULL) {
 }
 
 /**
- * Check a collection's members for invalid assignees, removing them as necessary.
- * @param string $collection_pid The PID of the parent collection. 
- * @return void
+ * Check a collection's members for invalid assignees and remove them.
+ *
+ * @param string $collection_pid
+ *   The PID of the parent collection.
  */
 function islandora_workflow_assignment_workflow_permission_change($collection_pid) {
-  
-  module_load_include('inc','islandora_workflow','islandora_workflow.collection');
-  
+
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow.collection');
+
   // @TODO have this return an array of operations when invoked as a hook.
   $possible_assignees = get_possible_assignees(array($collection_pid));
   $members = islandora_workflow_assignment_by_collection($collection_pid);
-  foreach($members as $member) {
-    if(empty($member->assignee)) {continue;}
-    // @TODO continue if the user's permissions are new or unchanged
-    if(empty($member->state)) {
-      $member->state = 'created'; // @TODO do we need a sensible default like this? It's here for now, just in case
+  foreach ($members as $member) {
+    if (empty($member->assignee)) {
+      continue;
     }
-    if(!in_array($member->assignee, $possible_assignees[$collection_pid][$member->state])) {
-      islandora_workflow_assignment_remove($object_pid,$member->assignee);
+    // @TODO continue if the user's permissions are new or unchanged
+    if (empty($member->state)) {
+      $member->state = 'created';
+      // @TODO do we need a sensible default like this?
+    }
+    if (!in_array($member->assignee, $possible_assignees[$collection_pid][$member->state])) {
+      islandora_workflow_assignment_remove($object_pid, $member->assignee);
     }
   }
-    
 }
