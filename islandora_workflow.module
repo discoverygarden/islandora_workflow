@@ -733,8 +733,8 @@ function islandora_workflow_admin_submit($form, &$form_state) {
     variable_set('islandora_workflow_enforce_security', $form_state['values']['islandora_workflow_enforce_security']);
 
     // Get the list of collections with members that need to be updated.
-    $collection_list = islandora_workflow_get_all_collections();
-    foreach ($collection_list as $collection_pid => $collection_name) {
+    $collection_list = islandora_workflow_get_collections();
+    foreach ($collection_list as $collection_pid => $collection_information) {
       $members = islandora_workflow_get_all_members_of_collection($collection_pid);
       if ($members) {
         $collection_list[$collection_pid] = $members;
