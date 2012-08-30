@@ -941,12 +941,12 @@ function islandora_workflow_theme() {
   */
 function islandora_workflow_preprocess_workflow_collections(&$vars) {
   module_load_include('inc', 'islandora_workflow');
-  $collections = islandora_workflow_get_all_collections();
+  $collections = islandora_workflow_get_collections();
 
   $vars['collections'] = $collections;
   $vars['list']['submit'] = drupal_render($vars['list']['submit']);
   // Tender each form element.
-  foreach ($collections as $collection_pid => $collection_label) {
+  foreach ($collections as $collection_pid => $collection_information) {
     $vars['list']['collection_checkboxes'][$collection_pid] = drupal_render($vars['list'][$collection_pid]);
   }
 }
