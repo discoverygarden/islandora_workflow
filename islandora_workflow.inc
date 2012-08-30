@@ -36,11 +36,11 @@ function islandora_workflow_get_current_users_collections($permission_level = 'i
   $collection_list = array();
   if (user_access('islandora_workflow_Administrator') || user_access('administer')) {
     // Admin show all.
-    $collection_list = islandora_workflow_get_all_collections();
+    $collection_list = islandora_workflow_get_collections();
   }
   elseif (user_access($permission_level) || $permission_level == 'all') {
     // Manager show permitted.
-    $collection_list = islandora_workflow_get_all_collections();
+    $collection_list = islandora_workflow_get_collections();
     // Figure out owned collections.
     // Role perms.
     $users_role_collection_permissions = islandora_workflow_get_current_users_role_permissions();
@@ -71,7 +71,7 @@ function islandora_workflow_get_current_users_collections($permission_level = 'i
       }
     }
     // Only send back owned collection pids and names.
-    foreach ($collection_list as $collection_pid => $collection_name) {
+    foreach ($collection_list as $collection_pid => $collection_information) {
       if (!in_array($collection_pid, $permitted_collections)) {
         unset($collection_list[$collection_pid]);
       }
