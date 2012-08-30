@@ -1,8 +1,0 @@
-PREFIX workflow: <info:islandora/islandora-system:def/islandora_workflow#>
-SELECT ?pid ?state
-WHERE {
-	?pid workflow:assignee ?username .
-	OPTIONAL {
-		?pid workflow:state ?state .
-	}
-}
