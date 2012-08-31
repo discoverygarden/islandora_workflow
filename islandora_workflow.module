@@ -165,11 +165,11 @@ function islandora_workflow_work_form(&$form_state, $tab) {
       break;
   }
 
-  $users_manager_collections = islandora_workflow_get_current_users_collections();
-  $users_editor_collections = islandora_workflow_get_current_users_collections('islandora_workflow_Editor');
-  $users_submitter_collections = islandora_workflow_get_current_users_collections('islandora_workflow_Submitter');
+  $users_manager_collections = islandora_workflow_get_users_collections();
+  $users_editor_collections = islandora_workflow_get_users_collections('islandora_workflow_Editor');
+  $users_submitter_collections = islandora_workflow_get_users_collections('islandora_workflow_Submitter');
 
-  $users_collections = islandora_workflow_get_current_users_collections('all');
+  $users_collections = islandora_workflow_get_users_collections('all');
   $possible_assignee_matrix = get_possible_assignees(array_keys($users_collections), array(), $format = TRUE);
   // @TODO: use the assignee matrix in the slects for assignees
   // Pager init stuff.
@@ -655,7 +655,7 @@ function islandora_workflow_check_permissions($permission_array) {
   // Loop through permissions allowed.
   foreach ($permission_array as $permission) {
     // Return true if the user has an allowed permission.
-    if ($permission != 'islandora_workflow_Administrator' && user_access($permission) && islandora_workflow_get_current_users_collections($permission) != FALSE) {
+    if ($permission != 'islandora_workflow_Administrator' && user_access($permission) && islandora_workflow_get_users_collections($permission) != FALSE) {
       return TRUE;
     }
   }
@@ -1018,7 +1018,7 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
   module_load_include('inc', 'fedora_repository', 'api/fedora_collection');
 
-  $vars['collections'] = islandora_workflow_get_current_users_collections('all');
+  $vars['collections'] = islandora_workflow_get_users_collections('all');
   foreach ($vars['collections'] as $collection_id => $collection_name) {
     $collection_members = islandora_workflow_get_all_members_of_collection($collection_id);
     if ($collection_members) {
@@ -1118,7 +1118,7 @@ function islandora_workflow_role_permissions_form() {
   $current_module_permissions = array();
 
   // Collect current state data.
-  $my_collections = islandora_workflow_get_current_users_collections();
+  $my_collections = islandora_workflow_get_users_collections();
 
   // Used to get what roles to display and avaialbe options for selects.
   $current_module_permissions = islandora_workflow_get_roles_with_module_permissions();
@@ -1382,7 +1382,7 @@ function islandora_workflow_user_permissions_form() {
 
   // Collect current state data.
   // Used to get list of collections to display.
-  $my_collections = islandora_workflow_get_current_users_collections();
+  $my_collections = islandora_workflow_get_users_collections();
   // Used to get what users to display and avaialbe options for selects.
   $current_module_permissions = islandora_workflow_get_users_with_module_permissions();
   // Used to find the default options for slects.

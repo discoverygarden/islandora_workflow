@@ -17,8 +17,8 @@
  * to compile a list of
  * collections that the user has the supplied permission to
  * This is also handy to determin if the user has any permissions at that lvl:
- * if (islandora_workflow_get_current_users_collections($perm)!=FALSE) {}
- * if (islandora_workflow_get_current_users_collections()) {}
+ * if (islandora_workflow_get_users_collections($perm)!=FALSE) {}
+ * if (islandora_workflow_get_users_collections()) {}
  *
  * @param string $permission_level
  *   the permission level we are looking for if it is the string

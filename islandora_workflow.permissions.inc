@@ -634,13 +634,13 @@ function islandora_workflow_get_users_with_module_permissions() {
 function islandora_workflow_user_object_permission_check($object_id, $user_in = NULL) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
 
-  $manager_permissions = islandora_workflow_get_current_users_collections('islandora_workflow_Manager');
+  $manager_permissions = islandora_workflow_get_users_collections('islandora_workflow_Manager');
   $parent = islandora_workflow_get_object_parent($object_id);
   // If the user has manager level access return true.
   if (isset($manager_permissions[$parent])) {
     return 'islandora_workflow_Manager';
   }
-  $editor_permissions = islandora_workflow_get_current_users_collections('islandora_workflow_Editor');
+  $editor_permissions = islandora_workflow_get_users_collections('islandora_workflow_Editor');
   $workflow_state = islandora_workflow_get_object_workflow_state($object_id);
 
   // Editor level.
@@ -649,7 +649,7 @@ function islandora_workflow_user_object_permission_check($object_id, $user_in = 
   }
 
   // Even more init.
-  $submitter_permissions = islandora_workflow_get_current_users_collections('islandora_workflow_Submitter');
+  $submitter_permissions = islandora_workflow_get_users_collections('islandora_workflow_Submitter');
   $creator = islandora_workflow_get_object_creator($object_id);
   $user_name = NULL;
   // Get user name.
