@@ -30,6 +30,8 @@
  *   FALSE if the current user doesn't have the permission for any collection.
  */
 function islandora_workflow_get_users_collections($permission_level = 'islandora_workflow_Manager', $account = NULL) {
+
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow.collection');
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
 
   GLOBAL $user;

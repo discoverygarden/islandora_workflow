@@ -723,7 +723,10 @@ function islandora_workflow_admin(&$form_state) {
  *   The state of the form passed in
  */
 function islandora_workflow_admin_submit($form, &$form_state) {
+
   module_load_include('inc', 'islandora_workflow');
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow.collection');
+
   drupal_set_message(t('Your settings have been updated.'));
 
   // If the setting changed.
@@ -829,7 +832,9 @@ function islandora_workflow_collections(&$form_state) {
  *   The complete state of the form submitted.
  */
 function islandora_workflow_collections_submit($form, &$form_state) {
+
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow.collection');
+
   $collections = islandora_workflow_get_collections();
   foreach ($collections as $collection_pid => $collection_data) {
     if ($form_state['values'][$collection_pid] != $form[$collection_pid]['#default_value']) {
@@ -940,7 +945,11 @@ function islandora_workflow_theme() {
   *   $vars the modified list of variables to send to the template
   */
 function islandora_workflow_preprocess_workflow_collections(&$vars) {
+  
   module_load_include('inc', 'islandora_workflow');
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow.collection');
+
+
   $collections = islandora_workflow_get_collections();
 
   $vars['collections'] = $collections;
