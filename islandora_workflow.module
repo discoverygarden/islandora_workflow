@@ -2265,10 +2265,19 @@ function islandora_workflow_islandora_tabs_alter(&$tabs, $params) {
 
   $pid = $params['pid'];
   $content_models = $params['content_models'];
-  $parent = islandora_workflow_get_object_parent($pid);
-  $permission = islandora_workflow_user_object_permission_check($pid);
+  $is_collection = FALSE;
+  foreach ($content_models as $content_model) {
+    if($content_model->pid == 'islandora:collectionCModel') {
+      $is_collection = TRUE;
+      break;
+    }
+  }
+  if (!$is_collection) {
+    $pid = islandora_workflow_get_object_parent($pid);
+  }
   $objectHelper = new ObjectHelper();
-
+  $permission = islandora_workflow_user_object_permission_check($pid);
+  
   if (module_exists('islandora_collection_manager')) {
     // Restrict the 'Manage This Collection' tab to managers and above.
     $management_access = ('islandora_workflow_Manager' == $permission);
@@ -2285,14 +2294,7 @@ function islandora_workflow_islandora_tabs_alter(&$tabs, $params) {
 
   // Restrict object details/edit to appropriate permissions.
   if (array_key_exists('fedora_object_details', $tabs)) {
-    $is_a_collection = FALSE;
-    foreach ($content_models as $content_model) {
-      if ('islandora:collectionCModel' == $content_model->pid) {
-        $is_a_collection = TRUE;
-        break;
-      }
-    }
-    if ($is_a_collection) {
+    if ($is_collection) {
       // Managers and above.
       $update_access = ('islandora_workflow_Manager' == $permission);
     }
