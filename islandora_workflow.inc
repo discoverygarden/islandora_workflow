@@ -27,23 +27,29 @@
  * @return $collection_list
  *   an associated array of collection PIDs and names.
  * @return boolean
- *   FALSE if the current user doesn't have the permisison for any collection.
+ *   FALSE if the current user doesn't have the permission for any collection.
  */
-function islandora_workflow_get_current_users_collections($permission_level = 'islandora_workflow_Manager') {
+function islandora_workflow_get_users_collections($permission_level = 'islandora_workflow_Manager', $account = NULL) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
+
+  GLOBAL $user;
+
+  if (empty($account)) {
+    $account = drupal_clone($user);
+  }
 
   $permitted_collections = array();
   $collection_list = array();
-  if (user_access('islandora_workflow_Administrator') || user_access('administer')) {
+  if (user_access('islandora_workflow_Administrator', $account) || user_access('administer', $account)) {
     // Admin show all.
     $collection_list = islandora_workflow_get_collections();
   }
-  elseif (user_access($permission_level) || $permission_level == 'all') {
+  elseif (user_access($permission_level, $account) || $permission_level == 'all') {
     // Manager show permitted.
     $collection_list = islandora_workflow_get_collections();
     // Figure out owned collections.
     // Role perms.
-    $users_role_collection_permissions = islandora_workflow_get_current_users_role_permissions();
+    $users_role_collection_permissions = islandora_workflow_get_users_role_permissions($account);
 
     foreach ($users_role_collection_permissions as $role_id => $collections) {
       foreach ($collections as $collection_id => $permission) {
@@ -57,7 +63,7 @@ function islandora_workflow_get_current_users_collections($permission_level = 'i
       }
     }
     // User perms.
-    $users_user_collection_permissions = islandora_workflow_get_current_users_user_permissions();
+    $users_user_collection_permissions = islandora_workflow_get_users_user_permissions($account);
 
     foreach ($users_user_collection_permissions as $role_id => $collections) {
       foreach ($collections as $collection_id => $permission) {

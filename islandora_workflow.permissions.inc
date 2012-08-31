@@ -467,8 +467,9 @@ function user_access_list($perm = NULL) {
 }
 
 /**
- * Get collection permissions related to the current user's roles.
+ * Get collection permissions related to a user's roles.
  *
+ * Defaults to the current user.
  * Queries the Drupal database.
  *
  * Most useful for building the work portal,
@@ -478,15 +479,19 @@ function user_access_list($perm = NULL) {
  *   $perm_listlist of permissions the current user has with the indicated
  *   $perm_list[$role_id][$collection_id]=perms
  */
-function islandora_workflow_get_current_users_role_permissions() {
+function islandora_workflow_get_users_role_permissions($account = NULL) {
   /* Do islandora_workflow_get_all_role_permissions with
   restrictions on the roles to the list of roles the current user has. */
   $perm_list = array();
   // Use $user->roles to get an array $roles[$role_id]=[$role_name].
   global $user;
 
+  if (empty($account)) {
+    $account = drupal_clone($user);
+  }
+
   $roles = array();
-  foreach ($user->roles as $rid => $name) {
+  foreach ($account->roles as $rid => $name) {
     $roles[] = $rid;
   }
 
@@ -500,8 +505,9 @@ function islandora_workflow_get_current_users_role_permissions() {
 }
 
 /**
- * Get all user-based collection permissions for the current user.
+ * Get all user-based collection permissions for a user.
  *
+ * Defaults to the current user.
  * Queries the Drupal database.
  *
  * Most useful for building the work portal, and also used for getting a user's
@@ -511,14 +517,18 @@ function islandora_workflow_get_current_users_role_permissions() {
  *   $perm_listlist of permissions the current user has with the indicated
  *   $perm_list[$role_id][$collection_id]=perms
  */
-function islandora_workflow_get_current_users_user_permissions() {
+function islandora_workflow_get_users_user_permissions($account = NULL) {
   /* Do islandora_workflow_get_all_role_permissions with restrictions on
   the roles to the list of roles the current user has*/
   $perm_list = array();
   global $user;
 
+  if (empty($account)) {
+    $account = drupal_clone($user);
+  }
+
   // Build query.
-  $results = islandora_workflow_get_user_permissions(array('user' => $user->uid));
+  $results = islandora_workflow_get_user_permissions(array('user' => $account->uid));
   // Build return array.
   foreach ($results as $row) {
     $perm_list[$row['user']][$row['collection']] = $row['permission'];
