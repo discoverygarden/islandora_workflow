@@ -4,10 +4,10 @@
  * Provides Rules events and an action for integration with workflow.
  */
 
-define(ISLANDORA_RULES_MANAGER, 'islandora_workflow_Manager');
-define(ISLANDORA_RULES_EDITOR, 'islandora_workflow_Editor');
-define(ISLANDORA_RULES_SUBMITTER, 'islandora_workflow_Submitter');
-define(ISLANDORA_RULES_ADMINISTRATOR, 'islandora_workflow_Administrator');
+define('ISLANDORA_RULES_MANAGER', 'islandora_workflow_Manager');
+define('ISLANDORA_RULES_EDITOR', 'islandora_workflow_Editor');
+define('ISLANDORA_RULES_SUBMITTER', 'islandora_workflow_Submitter');
+define('ISLANDORA_RULES_ADMINISTRATOR', 'islandora_workflow_Administrator');
 
 /**
  * Implements hook_rules_action_info().
