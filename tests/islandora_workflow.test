@@ -62,7 +62,7 @@ class IslandoraWorkflowWebTestCase extends DrupalWebTestCase {
   /**
    * Tidy up after ourselves.
    */
-  public static function tearDown() {
+  public function tearDown() {
 
   }
 
