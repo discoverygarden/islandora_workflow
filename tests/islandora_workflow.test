@@ -13,11 +13,9 @@ class IslandoraWorkflowWebTestCase extends DrupalWebTestCase {
    */
   public function getInfo() {
     return array(
-      'islandora_workflow' => array(
-        'name' => 'Islandora Workflow',
-        'description' => 'Check that Islandora Workflow regulates permissions correctly',
-        'group' => 'Islandora',
-      ),
+      'name' => 'Islandora Workflow',
+      'description' => 'Check that Islandora Workflow regulates permissions correctly',
+      'group' => 'Islandora',
     );
   }
 
