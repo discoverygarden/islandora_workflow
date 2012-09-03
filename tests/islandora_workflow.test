@@ -1,7 +1,99 @@
 <?php
-
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+/**
+ * @file
+ * Test Islandora Workflow functionality.
  */
-?>
+
+class IslandoraWorkflowWebTestCase extends DrupalWebTestCase {
+
+  /**
+   * Get information aboout this module's tests.
+   * @return array
+   *   Information about the tests.
+   */
+  public function getInfo() {
+    return array(
+      'islandora_workflow' => array(
+        'name' => 'Islandora Workflow',
+        'description' => 'Check that Islandora Workflow regulates permissions correctly',
+        'group' => 'Islandora',
+      ),
+    );
+  }
+
+  /**
+   * Get ready to test.
+   */
+  public function setUp() {
+
+    // Enable required modules.
+    parent::setUp(
+      'imageapi',
+      'tabs',
+      'php_lib',
+      'objective_forms',
+      'xml_schema_api',
+      'xml_form_api',
+      'xml_form_builder',
+      'jquery_update',
+      'jquery_ui',
+      'xml_form_elements',
+      'xml_forms',
+      'content_model_forms',
+      'fedora_repository',
+      'islandora_workflow',
+      'islandora_workflow_assignment',
+      'pdf_solution_pack',
+      'rules',
+      'islandora_xacml_api',
+      'pdf_solution_pack'
+    );
+
+    // Create permissions.
+    $admin_role = 'islandora_workflow_Administrator';
+    $manager_role = 'islandora_workflow_Manager';
+    $editor_role = 'islandora_workflow_Editor';
+    $submitter_role = 'islandora_workflow_Submitter';
+    // Create users.
+    $this->editorUser = $this->drupalCreateUser(array($editor_role));
+    $this->drupalLogin($this->editorUser);
+  }
+
+  /**
+   * Tidy up after ourselves.
+   */
+  public static function tearDown() {
+
+  }
+
+  /**
+   * Test that an editor can add to a collection he has editor permissions for.
+   */
+  function test_islandora_workflow_collectionTabs() {
+    define('COLLECTION', 'islandora:sp_pdf_collection');
+    define('EDITOR_PERMISSION', 2);
+
+    // Track the PDF collection (from the Solution Pack) via workflow.
+    $path = 'admin/settings/islandora_workflow_collections';
+    $edit = array(
+      COLLECTION => 1,
+    );
+    $submit_value = t('Save collection configuration');
+    $this->drupalPost($path, $edit, $submit_value);
+
+    // Give the 'editor' user editor perm's for the newly-created collection.
+    // Remember he's stored in $this->editor_user.
+    $path = 'admin/settings/islandora_workflow_perms';
+    $edit = array(
+      'permissions_table' => array(
+        COLLECTION . '][' . $this->editorUser->uid => EDITOR_PERMISSION,
+      ),
+
+    );
+    $submit_value = t('Update');
+    $this->drupalPost($path, $edit, $submit_value);
+    // Verify that the 'add' tab can be seen when we view the collection.
+    $this->drupalGet('fedora/repository/' . COLLECTION);
+    $this->assertText('Add');
+  }
+}
