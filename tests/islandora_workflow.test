@@ -39,11 +39,11 @@ class IslandoraWorkflowWebTestCase extends DrupalWebTestCase {
       'jquery_ui',
       'xml_form_elements',
       'xml_forms',
-      'content_model_forms',
+      'islandora_content_model_forms',
       'fedora_repository',
       'islandora_workflow',
       'islandora_workflow_assignment',
-      'pdf_solution_pack',
+      'islandora_pdf_sp',
       'rules',
       'islandora_xacml_api',
       'pdf_solution_pack'
