@@ -15,7 +15,7 @@ class IslandoraWorkflowWebTestCase extends DrupalWebTestCase {
     return array(
       'name' => 'Islandora Workflow',
       'description' => 'Check that Islandora Workflow regulates permissions correctly',
-      'group' => 'Islandora',
+      'group' => 'Islandora Workflow',
     );
   }
 
@@ -26,25 +26,24 @@ class IslandoraWorkflowWebTestCase extends DrupalWebTestCase {
 
     // Enable required modules.
     parent::setUp(
-      'imageapi',
+      // 'imageapi',
       'tabs',
       'php_lib',
       'objective_forms',
-      'xml_schema_api',
-      'xml_form_api',
-      'xml_form_builder',
+      // 'xml_schema_api',
+      // 'xml_form_api',
+      // 'xml_form_builder',
       'jquery_update',
       'jquery_ui',
-      'xml_form_elements',
-      'xml_forms',
-      'islandora_content_model_forms',
+      // 'xml_form_elements',
+      // 'xml_forms',
+      // 'islandora_content_model_forms',
       'fedora_repository',
       'islandora_workflow',
-      'islandora_workflow_assignment',
+      // 'islandora_workflow_assignment',
       'islandora_pdf_sp',
-      'rules',
-      'islandora_xacml_api',
-      'pdf_solution_pack'
+      // 'rules',
+      'islandora_xacml_api'
     );
 
     // Create permissions.
@@ -53,7 +52,14 @@ class IslandoraWorkflowWebTestCase extends DrupalWebTestCase {
     $editor_role = 'islandora_workflow_Editor';
     $submitter_role = 'islandora_workflow_Submitter';
     // Create users.
+    $this->adminUser = $this->drupalCreateUser(array($admin_role));
+    $this->managerUser = $this->drupalCreateUser(array($manager_role));
     $this->editorUser = $this->drupalCreateUser(array($editor_role));
+
+    // Set the Fedora base URL.
+    variable_set('fedora_base_url', 'http://localhost:8080/fedora');
+    // Disable namespace restrictions; otherwise "islandora:" will be ignored.
+    variable_set('fedora_namespace_restriction_enforced', FALSE);
     $this->drupalLogin($this->editorUser);
   }
 
@@ -66,32 +72,53 @@ class IslandoraWorkflowWebTestCase extends DrupalWebTestCase {
 
   /**
    * Test that an editor can add to a collection he has editor permissions for.
+   *
+   * Step 1: Log in as an IW Admin
+   * Step 2: Track a collection for workflow
+   * Step 3: Grant the Editor editor permissions to the collection.
+   * Step 4: Log in as the Editor
+   * Step 5: Navigate to the collection
+   * Assert: The 'Add' tab can be seen
    */
-  function test_islandora_workflow_collectionTabs() {
+  public function testCollectionTabsDisplay() {
     define('COLLECTION', 'islandora:sp_pdf_collection');
     define('EDITOR_PERMISSION', 2);
 
+    // Step 1.
+    $this->drupalLogin($this->adminUser);
+
+    // Step 2.
     // Track the PDF collection (from the Solution Pack) via workflow.
     $path = 'admin/settings/islandora_workflow_collections';
     $edit = array(
-      COLLECTION => 1,
+      COLLECTION => TRUE,
     );
     $submit_value = t('Save collection configuration');
     $this->drupalPost($path, $edit, $submit_value);
 
-    // Give the 'editor' user editor perm's for the newly-created collection.
-    // Remember he's stored in $this->editor_user.
+    // Step 3.
+    // Give the Editor editor permissions for the collection.
+    // First, select the collection.
     $path = 'admin/settings/islandora_workflow_perms';
+    $edit = array('collection' => COLLECTION);
+    $submit_value = t('Select collection');
+    $this->drupalPost($path, $edit, $submit_value);
+    // Next, alter the user permissions.
     $edit = array(
-      'permissions_table' => array(
-        COLLECTION . '][' . $this->editorUser->uid => EDITOR_PERMISSION,
-      ),
-
+      'permissions_table[' . COLLECTION . '][' . $this->editorUser->uid => EDITOR_PERMISSION,
     );
     $submit_value = t('Update');
     $this->drupalPost($path, $edit, $submit_value);
-    // Verify that the 'add' tab can be seen when we view the collection.
+
+    // Step 4.
+    // Log in as the editor user.
+    $this->drupalLogin($this->editorUser);
+
+    // Step 5.
+    // Navigate to the collection.
     $this->drupalGet('fedora/repository/' . COLLECTION);
+
+    // Assert that the 'add' tab can be seen when we view the collection.
     $this->assertText('Add');
   }
 }
