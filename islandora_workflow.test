@@ -109,7 +109,7 @@ class IslandoraWorkflowWebTestCase extends DrupalWebTestCase {
     $this->drupalPost($path, $edit, $submit_value);
     // Next, alter the user permissions.
     $edit = array(
-      'islandora_workflow_collection_permissions_table[' . $this->editorUser->uid . '][' . COLLECTION . ']' => EDITOR_PERMISSION,
+      'islandora_workflow_collection_permissions_table[permissions_table][' . $this->editorUser->uid . '][' . COLLECTION . ']' => EDITOR_PERMISSION,
     );
     $submit_value = t('Update');
     $this->drupalPost($path, $edit, $submit_value);
