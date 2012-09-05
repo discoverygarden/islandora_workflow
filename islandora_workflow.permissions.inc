@@ -589,19 +589,19 @@ function islandora_workflow_get_users_with_module_permissions() {
   /* Modify the returned arrays to include the permission name,
   and merge into one array [role_pid][role_name][0...4]permission. */
   foreach ($admin_users as $user_id => $user_name) {
-    $privileged_users[$user_id][$user_name][] = 'islandora_workflow_Administrator';
+    $privileged_users[$user_id][$user_name]['islandora_workflow_Administrator'] = 'islandora_workflow_Administrator';
   }
 
   foreach ($manager_users as $user_id => $user_name) {
-    $privileged_users[$user_id][$user_name][] = 'islandora_workflow_Manager';
+    $privileged_users[$user_id][$user_name]['islandora_workflow_Manager'] = 'islandora_workflow_Manager';
   }
 
   foreach ($editor_users as $user_id => $user_name) {
-    $privileged_users[$user_id][$user_name][] = 'islandora_workflow_Editor';
+    $privileged_users[$user_id][$user_name]['islandora_workflow_Editor'] = 'islandora_workflow_Editor';
   }
 
   foreach ($submitter_users as $user_id => $user_name) {
-    $privileged_users[$user_id][$user_name][] = 'islandora_workflow_Submitter';
+    $privileged_users[$user_id][$user_name]['islandora_workflow_Submitter'] = 'islandora_workflow_Submitter';
   }
   return $privileged_users;
 }
@@ -632,15 +632,11 @@ function islandora_workflow_get_users_with_module_permissions() {
  *   to the user on the object, or FALSE if there are no permissions
  */
 function islandora_workflow_user_object_permission_check($object_id, $user_in = NULL) {
+
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
+  module_load_include('inc', 'fedora_repository', 'ObjectHelper');
 
   $manager_permissions = islandora_workflow_get_users_collections('islandora_workflow_Manager');
-
-  if (!islandora_workflow_is_collection($object_id)) {
-
-    $pid = islandora_workflow_get_object_parent($object_id);
-
-  }
 
   $parent = islandora_workflow_get_object_parent($object_id);
     // If the user has manager level access return true.
@@ -675,4 +671,30 @@ function islandora_workflow_user_object_permission_check($object_id, $user_in = 
 
   // Permission denied.
   return FALSE;
+}
+
+/**
+ * Check the permissions available to a user for a given collection.
+ *
+ * @global object $user
+ *
+ * @param string $object_id
+ *   The PID of the collection to check.
+ * @param object $account
+ *   The user account to check. If NULL, use the current user.
+ *
+ * @return string
+ *   The maximum permission level for the collection.
+ * @return boolean
+ *   FALSE if the sepcified user has no permissions for this collection.
+ */
+function islandora_workflow_user_collection_permission_check($object_id, $account) {
+
+  GLOBAL $user;
+
+  if (empty($account)) {
+    $account = drupal_clone($user);
+  }
+
+
 }
