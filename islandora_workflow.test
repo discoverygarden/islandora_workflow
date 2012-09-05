@@ -28,20 +28,22 @@ class IslandoraWorkflowWebTestCase extends DrupalWebTestCase {
     parent::setUp(
       // 'imageapi',
       'tabs',
+      /*
       'php_lib',
       'objective_forms',
-      // 'xml_schema_api',
-      // 'xml_form_api',
-      // 'xml_form_builder',
+      'xml_schema_api',
+      'xml_form_api',
+      'xml_form_builder',
       'jquery_update',
       'jquery_ui',
-      // 'xml_form_elements',
-      // 'xml_forms',
-      // 'islandora_content_model_forms',
+      'xml_form_elements',
+      'xml_forms',
+      'islandora_content_model_forms',
+      */
       'fedora_repository',
       'islandora_workflow',
       // 'islandora_workflow_assignment',
-      'islandora_pdf_sp',
+      // 'islandora_pdf_sp',
       // 'rules',
       'islandora_xacml_api'
     );
@@ -82,7 +84,7 @@ class IslandoraWorkflowWebTestCase extends DrupalWebTestCase {
    */
   public function testCollectionTabsDisplay() {
     define('COLLECTION', 'islandora:sp_pdf_collection');
-    define('EDITOR_PERMISSION', 2);
+    define('EDITOR_PERMISSION', 'islandora_workflow_Editor');
 
     // Step 1.
     $this->drupalLogin($this->adminUser);
@@ -100,12 +102,14 @@ class IslandoraWorkflowWebTestCase extends DrupalWebTestCase {
     // Give the Editor editor permissions for the collection.
     // First, select the collection.
     $path = 'admin/settings/islandora_workflow_perms';
-    $edit = array('collection' => COLLECTION);
-    $submit_value = t('Select collection');
+    $edit = array(
+      'islandora_workflow_collection_permissions_table[permissions_table][collection_selector]' => COLLECTION,
+    );
+    $submit_value = t('Select Collection');
     $this->drupalPost($path, $edit, $submit_value);
     // Next, alter the user permissions.
     $edit = array(
-      'permissions_table[' . COLLECTION . '][' . $this->editorUser->uid => EDITOR_PERMISSION,
+      'islandora_workflow_collection_permissions_table[' . $this->editorUser->uid . '][' . COLLECTION . ']' => EDITOR_PERMISSION,
     );
     $submit_value = t('Update');
     $this->drupalPost($path, $edit, $submit_value);
