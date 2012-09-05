@@ -53,11 +53,11 @@ class IslandoraWorkflowWebTestCase extends DrupalWebTestCase {
     $manager_role = 'islandora_workflow_Manager';
     $editor_role = 'islandora_workflow_Editor';
     $submitter_role = 'islandora_workflow_Submitter';
+    $fedora_viewer_role = 'view fedora collection';
     // Create users.
-    $this->adminUser = $this->drupalCreateUser(array($admin_role));
-    $this->managerUser = $this->drupalCreateUser(array($manager_role));
-    $this->editorUser = $this->drupalCreateUser(array($editor_role));
-
+    $this->adminUser = $this->drupalCreateUser(array($admin_role, $fedora_viewer_role));
+    $this->managerUser = $this->drupalCreateUser(array($manager_role, $fedora_viewer_role));
+    $this->editorUser = $this->drupalCreateUser(array($editor_role, $fedora_viewer_role));
     // Set the Fedora base URL.
     variable_set('fedora_base_url', 'http://localhost:8080/fedora');
     // Disable namespace restrictions; otherwise "islandora:" will be ignored.
