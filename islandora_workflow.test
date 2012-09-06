@@ -24,6 +24,7 @@ class IslandoraWorkflowWebTestCase extends DrupalWebTestCase {
    */
   public function setUp() {
 
+    define('SIMPLETEST_PASSWORD', 'abe062e8c05a1be512c3a6ca1fccc432');
     // Enable required modules.
     parent::setUp(
       // 'imageapi',
@@ -58,10 +59,17 @@ class IslandoraWorkflowWebTestCase extends DrupalWebTestCase {
     $this->adminUser = $this->drupalCreateUser(array($admin_role, $fedora_viewer_role));
     $this->managerUser = $this->drupalCreateUser(array($manager_role, $fedora_viewer_role));
     $this->editorUser = $this->drupalCreateUser(array($editor_role, $fedora_viewer_role));
+
     // Set the Fedora base URL.
     variable_set('fedora_base_url', 'http://localhost:8080/fedora');
     // Disable namespace restrictions; otherwise "islandora:" will be ignored.
     variable_set('fedora_namespace_restriction_enforced', FALSE);
+    // Workaround for negotiating the Drupal filter. 
+    // @see ConnectionHelper::getSoapClient()
+    variable_set('simpletest_username', 'admin');
+    variable_set('simpletest_password', SIMPLETEST_PASSWORD);
+
+    date_default_timezone_set('America/Halifax');
     $this->drupalLogin($this->editorUser);
   }
 
