@@ -27,6 +27,7 @@ class IslandoraWorkflowWebTestCase extends DrupalWebTestCase {
     define('SIMPLETEST_PASSWORD', 'abe062e8c05a1be512c3a6ca1fccc432');
     // Enable required modules.
     parent::setUp(
+      'dblog',
       // 'imageapi',
       'tabs',
       /*
