@@ -76,7 +76,9 @@ class IslandoraWorkflowWebTestCase extends DrupalWebTestCase {
     variable_set('simpletest_password', SIMPLETEST_PASSWORD);
     // Set Collection Management tabs to appear.
     variable_set('islandora_add_collection_tabs', TRUE);
-
+    variable_set('fedora_drupal_filter', FALSE);
+    variable_set('fedora_username', 'admin');
+    variable_set('fedora_password', SIMPLETEST_PASSWORD);
     $this->drupalLogin($this->editorUser);
   }
 
