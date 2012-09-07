@@ -46,6 +46,7 @@ class IslandoraWorkflowWebTestCase extends DrupalWebTestCase {
       */
       'fedora_repository',
       'islandora_workflow',
+      'islandora_collection_manager',
       // 'islandora_workflow_assignment',
       // 'islandora_pdf_sp',
       // 'rules',
@@ -58,10 +59,11 @@ class IslandoraWorkflowWebTestCase extends DrupalWebTestCase {
     $editor_role = 'islandora_workflow_Editor';
     $submitter_role = 'islandora_workflow_Submitter';
     $fedora_viewer_role = 'view fedora collection';
+    $collection_manager_role = 'manage collections';
     // Create users.
-    $this->adminUser = $this->drupalCreateUser(array($admin_role, $fedora_viewer_role));
-    $this->managerUser = $this->drupalCreateUser(array($manager_role, $fedora_viewer_role));
-    $this->editorUser = $this->drupalCreateUser(array($editor_role, $fedora_viewer_role));
+    $this->adminUser = $this->drupalCreateUser(array($admin_role, $fedora_viewer_role, $collection_manager_role));
+    $this->managerUser = $this->drupalCreateUser(array($manager_role, $fedora_viewer_role, $collection_manager_role));
+    $this->editorUser = $this->drupalCreateUser(array($editor_role, $fedora_viewer_role, $collection_manager_role));
 
     // Set the Fedora base URL.
     variable_set('fedora_base_url', 'http://localhost:8080/fedora');
@@ -71,6 +73,8 @@ class IslandoraWorkflowWebTestCase extends DrupalWebTestCase {
     // @see ConnectionHelper::getSoapClient()
     variable_set('simpletest_username', 'admin');
     variable_set('simpletest_password', SIMPLETEST_PASSWORD);
+    // Set Collection Management tabs to appear.
+    variable_set('islandora_add_collection_tabs', TRUE);
 
     $this->drupalLogin($this->editorUser);
   }
