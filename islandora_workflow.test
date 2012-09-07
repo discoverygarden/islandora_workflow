@@ -60,10 +60,11 @@ class IslandoraWorkflowWebTestCase extends DrupalWebTestCase {
     $submitter_role = 'islandora_workflow_Submitter';
     $fedora_viewer_role = 'view fedora collection';
     $collection_manager_role = 'manage collections';
+    $ingest_role = 'ingest new fedora objects';
     // Create users.
-    $this->adminUser = $this->drupalCreateUser(array($admin_role, $fedora_viewer_role, $collection_manager_role));
-    $this->managerUser = $this->drupalCreateUser(array($manager_role, $fedora_viewer_role, $collection_manager_role));
-    $this->editorUser = $this->drupalCreateUser(array($editor_role, $fedora_viewer_role, $collection_manager_role));
+    $this->adminUser = $this->drupalCreateUser(array($admin_role, $fedora_viewer_role, $collection_manager_role, $ingest_role));
+    $this->managerUser = $this->drupalCreateUser(array($manager_role, $fedora_viewer_role, $collection_manager_role, $ingest_role));
+    $this->editorUser = $this->drupalCreateUser(array($editor_role, $fedora_viewer_role, $collection_manager_role, $ingest_role));
 
     // Set the Fedora base URL.
     variable_set('fedora_base_url', 'http://localhost:8080/fedora');
@@ -134,7 +135,7 @@ class IslandoraWorkflowWebTestCase extends DrupalWebTestCase {
 
     // Step 5.
     // Navigate to the collection.
-    $this->drupalGet('fedora/repository/' . COLLECTION);
+    $this->drupalGet('fedora/repository/' . COLLECTION . '/-/collection');
 
     // Assert that the 'add' tab can be seen when we view the collection.
     $this->assertText('Add');
