@@ -25,6 +25,8 @@ class IslandoraWorkflowWebTestCase extends DrupalWebTestCase {
   public function setUp() {
 
     define('SIMPLETEST_PASSWORD', 'abe062e8c05a1be512c3a6ca1fccc432');
+    date_default_timezone_set('America/Halifax');
+
     // Enable required modules.
     parent::setUp(
       'dblog',
@@ -70,7 +72,6 @@ class IslandoraWorkflowWebTestCase extends DrupalWebTestCase {
     variable_set('simpletest_username', 'admin');
     variable_set('simpletest_password', SIMPLETEST_PASSWORD);
 
-    date_default_timezone_set('America/Halifax');
     $this->drupalLogin($this->editorUser);
   }
 
