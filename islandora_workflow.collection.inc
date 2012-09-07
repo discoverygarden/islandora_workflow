@@ -117,7 +117,7 @@ function islandora_workflow_is_collection_workflow_tracked($object_pid) {
   $apim_object = new FedoraAPIM();
 
   // Get existing relationshp.
-  $relationships = $apim_object->getRelationships($object_pid, $islandora_workflow_namespace . $relationship_in, $subject);
+  $relationships = $apim_object->getRelationships($object_pid, $islandora_workflow_namespace . $relationship_in);
 
   $relationships_parser = new DOMDocument();
   $relationships_parser->loadXML($relationships->data);

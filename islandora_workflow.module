@@ -1595,7 +1595,7 @@ function islandora_workflow_user_permissions_form_submit($collection_user_permis
       $members = islandora_workflow_get_all_members_of_collection($collection_pid);
     }
 
-    if ($members) {
+    if (!empty($members)) {
       // Remove any published collection members.
       foreach ($members as $pid => $member) {
         if ($member['state'] == 'published') {
@@ -1608,7 +1608,7 @@ function islandora_workflow_user_permissions_form_submit($collection_user_permis
 
     /* If Xacml is used, then we need to update
      * every single member of a collection in a batch*/
-    if (variable_get('islandora_workflow_enforce_security', 0) && module_exists('islandora_xacml_api') && $members) {
+    if (variable_get('islandora_workflow_enforce_security', 0) && module_exists('islandora_xacml_api') && !empty($members)) {
       // Arrrr... tis batch time billy.
       $batch = array(
         'title' => t('Updating XACML Policies'),
