@@ -634,41 +634,67 @@ function islandora_workflow_get_users_with_module_permissions() {
 function islandora_workflow_user_object_permission_check($object_id, $user_in = NULL) {
 
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
-  module_load_include('inc', 'fedora_repository', 'ObjectHelper');
-
+  
   $manager_permissions = islandora_workflow_get_users_collections('islandora_workflow_Manager');
 
   $parent = islandora_workflow_get_object_parent($object_id);
-    // If the user has manager level access return true.
-    if (isset($manager_permissions[$parent])) {
-      return 'islandora_workflow_Manager';
-    }
-    $editor_permissions = islandora_workflow_get_users_collections('islandora_workflow_Editor');
-    $workflow_state = islandora_workflow_get_object_workflow_state($object_id);
 
-    // Editor level.
-    if (isset($editor_permissions[$parent]) && ($workflow_state == 'submitted' || $workflow_state == 'created' || $workflow_state == 'rejected')) {
-      return 'islandora_workflow_Editor';
-    }
+  // If the user has manager level access return true.
+  if (isset($manager_permissions[$parent])) {
+    return 'islandora_workflow_Manager';
+  }
+  $editor_permissions = islandora_workflow_get_users_collections('islandora_workflow_Editor');
+  $workflow_state = islandora_workflow_get_object_workflow_state($object_id);
 
-    // Even more init.
-    $submitter_permissions = islandora_workflow_get_users_collections('islandora_workflow_Submitter');
-    $creator = islandora_workflow_get_object_creator($object_id);
-    $user_name = NULL;
-    // Get user name.
-    if ($user_in == NULL) {
-      global $user;
-      $user_name = $user->name;
-    }
-    else {
-      $user_name = $user_in->name;
-    }
+  // Editor level.
+  if (isset($editor_permissions[$parent]) && ($workflow_state == 'submitted' || $workflow_state == 'created' || $workflow_state == 'rejected')) {
+    return 'islandora_workflow_Editor';
+  }
 
-    // Submitter level.
-    if (isset($submitter_permissions[$parent]) && ($workflow_state == 'created' || $workflow_state == 'rejected') && $user_name == $creator) {
-      return 'islandora_workflow_Submitter';
-    }
+  // Even more init.
+  $submitter_permissions = islandora_workflow_get_users_collections('islandora_workflow_Submitter');
+  $creator = islandora_workflow_get_object_creator($object_id);
+  $user_name = NULL;
+  // Get user name.
+  if ($user_in == NULL) {
+    global $user;
+    $user_name = $user->name;
+  }
+  else {
+    $user_name = $user_in->name;
+  }
 
+  // Submitter level.
+  if (isset($submitter_permissions[$parent]) && ($workflow_state == 'created' || $workflow_state == 'rejected') && $user_name == $creator) {
+    return 'islandora_workflow_Submitter';
+  }
+
+  // Permission denied.
+  return FALSE;
+}
+
+/**
+ * Check the current user's permissions on a given collection.
+ *
+ * @param string $collection_pid
+ *   The PID of the collection.
+ * @return mixed
+ *   The level of permission if one exists, otherwise FALSE.
+ */
+function islandora_workflow_user_collection_permission_check($collection_pid) {
+
+  $manager_permissions = islandora_workflow_get_users_collections('islandora_workflow_Manager');
+  if ($manager_permissions[$collection_pid]) {
+    return 'islandora_workflow_Manager';
+  }
+  $editor_permissions = islandora_workflow_get_users_collections('islandora_workflow_Editor');
+  if ($editor_permissions[$collection_pid]) {
+    return 'islandora_workflow_Editor';
+  }
+  $submitter_permissions = islandora_workflow_get_users_collections('islandora_workflow_Submitter');
+  if ($submitter_permissions[$collection_pid]) {
+    return 'islandora_workflow_Submitter';
+  }
   // Permission denied.
   return FALSE;
 }
