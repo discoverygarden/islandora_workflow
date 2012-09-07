@@ -2259,7 +2259,6 @@ function islandora_workflow_overview_form(&$form_state) {
  */
 function islandora_workflow_islandora_tabs_alter(&$tabs, $params) {
 
-  module_load_include('inc', 'fedora_repository', 'ObjectHelper');
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
 
@@ -2272,11 +2271,12 @@ function islandora_workflow_islandora_tabs_alter(&$tabs, $params) {
       break;
     }
   }
-  if (!$is_collection) {
-    $pid = islandora_workflow_get_object_parent($pid);
+  if ($is_collection) {
+    $permission = islandora_workflow_user_collection_permission_check($pid);
   }
-  $objectHelper = new ObjectHelper();
-  $permission = islandora_workflow_user_object_permission_check($pid);
+  else {
+    $permission = islandora_workflow_user_object_permission_check($pid);
+  }
   
   if (module_exists('islandora_collection_manager')) {
     // Restrict the 'Manage This Collection' tab to managers and above.
