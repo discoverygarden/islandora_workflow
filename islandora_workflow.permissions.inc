@@ -698,29 +698,3 @@ function islandora_workflow_user_collection_permission_check($collection_pid) {
   // Permission denied.
   return FALSE;
 }
-
-/**
- * Check the permissions available to a user for a given collection.
- *
- * @global object $user
- *
- * @param string $object_id
- *   The PID of the collection to check.
- * @param object $account
- *   The user account to check. If NULL, use the current user.
- *
- * @return string
- *   The maximum permission level for the collection.
- * @return boolean
- *   FALSE if the sepcified user has no permissions for this collection.
- */
-function islandora_workflow_user_collection_permission_check($object_id, $account) {
-
-  GLOBAL $user;
-
-  if (empty($account)) {
-    $account = drupal_clone($user);
-  }
-
-
-}
