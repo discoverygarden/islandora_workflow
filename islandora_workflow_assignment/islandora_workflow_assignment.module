@@ -134,7 +134,7 @@ function islandora_workflow_assignment_user_delete_batch(&$edit, &$account) {
  * @return array
  *   An array of batch operations
  */
-function islandora_workflow_assignment_user_edit_batch(&$edit, &$account, $category = NULL) {
+function islandora_workflow_assignment_user_edit_batch($edit, $account, $category = NULL) {
 
   $operations = array();
 

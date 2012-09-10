@@ -2064,7 +2064,7 @@ function islandora_workflow_role_delete_batch($form, $form_state) {
  * @return array
  *   An array of batch operations.
  */
-function islandora_workflow_user_delete_batch(&$edit, &$account, $category = NULL) {
+function islandora_workflow_user_delete_batch($edit, $account, $category = NULL) {
 
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
 
@@ -2104,7 +2104,7 @@ function islandora_workflow_user_delete_batch(&$edit, &$account, $category = NUL
  * @return array
  *   A set of batch operations to be performed.
  */
-function islandora_workflow_user_edit_batch(&$edit, &$account, $category = NULL) {
+function islandora_workflow_user_edit_batch($edit, $account, $category = NULL) {
 
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
 
