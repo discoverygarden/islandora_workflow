@@ -224,7 +224,7 @@ function islandora_workflow_assignment_role_delete_batch($form, $form_state) {
         $perms_intersection = array_intersect($new_perms, $valid_perms);
         if (empty($perms_intersection)) {
           // @TODO make this into a batch job?
-          islandora_workflow_assignment_remove($object_pid, $assignee->name);
+          islandora_workflow_assignment_remove($object->pid, $assignee->name);
         }
       }
     }
@@ -330,7 +330,7 @@ function islandora_workflow_assignment_workflow_permission_change($collection_pi
       // @TODO do we need a sensible default like this?
     }
     if (!in_array($member->assignee, $possible_assignees[$collection_pid][$member->state])) {
-      islandora_workflow_assignment_remove($object_pid, $member->assignee);
+      islandora_workflow_assignment_remove($member->pid, $member->assignee);
     }
   }
 }
