@@ -178,7 +178,7 @@ function islandora_workflow_assignment_user_edit_batch(&$edit, &$account, $categ
  * @param array $form_state
  *   The form state.
  */
-function islandora_workflow_assignment_role_delete_batch(&$form, &$form_state) {
+function islandora_workflow_assignment_role_delete_batch($form, $form_state) {
 
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
 
