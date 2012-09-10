@@ -2036,7 +2036,7 @@ function islandora_workflow_role_delete_batch($form, $form_state) {
     db_query('DELETE FROM {islandora_workflow_role_permissions} WHERE role = %d',
       $form_state['values']['rid']);
 
-    while ($collection = mysql_fetch_assoc($collections)) {
+    while ($collection = db_fetch_array($collections)) {
       $members = islandora_workflow_get_all_members_of_collection($collection['pid']);
       $operations[] = array(
         'islandora_workflow_batch_function',

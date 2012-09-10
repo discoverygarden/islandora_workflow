@@ -105,7 +105,7 @@ function islandora_workflow_assignment_valid_assignee_permissions($state) {
  * @return array
  *   An array of batch operations.
  */
-function islandora_workflow_assignment_user_delete_batch(&$edit, &$account) {
+function islandora_workflow_assignment_user_delete_batch($edit, $account) {
 
   $assigned_objects = islandora_workflow_assignment_by_user($account);
   // @TODO make the following into a batch job.
