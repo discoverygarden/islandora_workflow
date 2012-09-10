@@ -18,7 +18,7 @@ function islandora_workflow_assignment_by_user($account) {
   module_load_include('inc', 'islandora_fedora_api', 'islandora_fedora_api.risearch');
 
   // Get the stored query.
-  $query_file_name = drupal_get_path('module', 'islandora_workflow_assignment') . '/assignee_query.txt';
+  $query_file_name = drupal_get_path('module', 'islandora_workflow_assignment') . '/assignee_query.sparql';
   $query_file_handle = fopen($query_file_name, "r");
   $query_string = fread($query_file_handle, filesize($query_file_name));
   fclose($query_file_handle);
