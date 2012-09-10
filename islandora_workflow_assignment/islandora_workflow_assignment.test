@@ -1,0 +1,90 @@
+<?php
+
+/**
+ * Test case verifying that assignment is removed in response to various events.
+ *
+ * @author djevans
+ */
+
+class IslandoraWorkflowAssignmentWebTestCase extends DrupalWebTestCase {
+
+  public function getInfo() {
+    return array(
+      'name' => 'Islandora Workflow Assignment',
+      'description' => 'Test assignment data is removed in response to various events',
+      'group' => 'Islandora Workflow',
+    );
+  }
+
+  public function setUp() {
+    parent::setUp();
+    $this->editor_name = $this->editorUser->name;
+    $this->member_pid = 'islandora:117';
+    islandora_workflow_assign_object($this->member_pid, $this->editor_name);
+  }
+
+  protected function getAssignees($pid) {
+    module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+
+    $assignees = array();
+    $item = new Fedora_Item($pid);
+    $relationships = $item->get_relationships('assignee');
+    foreach ($relationships as $relationship) {
+      $assignees[] = $relationship['object'];
+    }
+    return $assignees;
+  }
+
+  public function testAssigneeRemovedWhenUserDeleted() {
+    user_delete(array(), $this->editorUser->uid);
+    $this->assertFalse(in_array($this->editor_name, $this->getAssignees($this->member_pid)),
+        'Editor is no longer assigned');
+  }
+
+  public function testAssigneeRemovedWhenTheirRoleChanges() {
+    user_save($this->editorUser, array('roles' => array('view fedora collection')));
+    $this->assertFalse(in_array($this->editor_name, $this->getAssignees($this->member_pid)),
+        'Editor is no longer assigned');
+  }
+
+  public function testAssigneeRemovedWhenRoleWithPermissionsRemoved() {
+    // Find out which role ids has the islandora_workflow_editor permission.
+    // The call to user_roles() returns a $rid => $name associative array.
+    $iw_editor_roles = user_roles($membersonly = TRUE, 'islandora_workflow_Editor');
+    $submit_value = t('Delete role');
+    $roles_to_remove = array_intersect_key($this->editorUser->roles, $iw_editor_roles);
+    foreach ($roles_to_remove as $rid => $name) {
+      $path = 'admin/user/roles/edit/' . $rid;
+      $this->drupalPost($path, array(), $submit_value);
+    }
+    $this->assertFalse(in_array($this->editor_name, $this->getAssignees($this->member_pid)),
+        'Editor is no longer assigned');
+  }
+
+  public function testAssigneeRemovedWhenObjectApproved() {
+    islandora_workflow_approve_object($this->member_pid);
+    $this->assertFalse(in_array($this->editor_name, $this->getAssignees($this->member_pid)),
+        'Editor is no longer assigned');
+  }
+
+  public function testAssigneeRemovedWhenCollectionUserPermissionsChange() {
+
+    // First, select the collection.
+    $path = 'admin/settings/islandora_workflow_perms';
+    $edit = array(
+      'islandora_workflow_collection_permissions_table[permissions_table][collection_selector]' => COLLECTION,
+    );
+    $submit_value = t('Select Collection');
+    $this->drupalPost($path, $edit, $submit_value);
+    // Next, remove the user permissions.
+    $edit = array(
+      'islandora_workflow_collection_permissions_table[permissions_table][' . $this->editorUser->uid . '][' . COLLECTION . ']' => 0,
+    );
+    $submit_value = t('Update');
+    $this->drupalPost($path, $edit, $submit_value);
+
+    $this->assertFalse(in_array($this->editor_name, $this->getAssignees($this->member_pid)),
+        'Editor is no longer assigned');
+  }
+
+}

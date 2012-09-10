@@ -54,23 +54,38 @@ class IslandoraWorkflowWebTestCase extends DrupalWebTestCase {
     );
 
     // Create permissions.
-    $admin_role = 'islandora_workflow_Administrator';
-    $manager_role = 'islandora_workflow_Manager';
-    $editor_role = 'islandora_workflow_Editor';
-    $submitter_role = 'islandora_workflow_Submitter';
-    $fedora_viewer_role = 'view fedora collection';
-    $collection_manager_role = 'manage collections';
-    $ingest_role = 'ingest new fedora objects';
+    $admin_permission = 'islandora_workflow_Administrator';
+    $manager_permission = 'islandora_workflow_Manager';
+    $editor_permission = 'islandora_workflow_Editor';
+    $submitter_permission = 'islandora_workflow_Submitter';
+    $fedora_viewer_permission = 'view fedora collection';
+    $collection_manager_permission = 'manage collections';
+    $ingest_permission = 'ingest new fedora objects';
     // Create users.
-    $this->adminUser = $this->drupalCreateUser(array($admin_role, $fedora_viewer_role, $collection_manager_role, $ingest_role));
-    $this->managerUser = $this->drupalCreateUser(array($manager_role, $fedora_viewer_role, $collection_manager_role, $ingest_role));
-    $this->editorUser = $this->drupalCreateUser(array($editor_role, $fedora_viewer_role, $collection_manager_role, $ingest_role));
+    $this->adminUser = $this->drupalCreateUser(array(
+      $admin_permission,
+      $fedora_viewer_permission,
+      $collection_manager_permission,
+      $ingest_permission,
+    ));
+    $this->managerUser = $this->drupalCreateUser(array(
+      $manager_permission,
+      $fedora_viewer_permission,
+      $collection_manager_permission,
+      $ingest_permission,
+    ));
+    $this->editorUser = $this->drupalCreateUser(array(
+      $editor_permission,
+      $fedora_viewer_permission,
+      $collection_manager_permission,
+      $ingest_permission,
+    ));
 
     // Set the Fedora base URL.
     variable_set('fedora_base_url', 'http://localhost:8080/fedora');
     // Disable namespace restrictions; otherwise "islandora:" will be ignored.
     variable_set('fedora_namespace_restriction_enforced', FALSE);
-    // Workaround for negotiating the Drupal filter. 
+    // Workaround for negotiating the Drupal filter.
     // @see ConnectionHelper::getSoapClient()
     variable_set('simpletest_username', 'admin');
     variable_set('simpletest_password', SIMPLETEST_PASSWORD);
