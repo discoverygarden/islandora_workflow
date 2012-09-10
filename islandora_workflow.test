@@ -44,12 +44,15 @@ class IslandoraWorkflowAbstractTestCase extends DrupalWebTestCase {
     $fedora_viewer_permission = 'view fedora collection';
     $collection_manager_permission = 'manage collections';
     $ingest_permission = 'ingest new fedora objects';
+    $permission_permission = 'administer permissions';
+
     // Create users.
     $this->adminUser = $this->drupalCreateUser(array(
       $admin_permission,
       $fedora_viewer_permission,
       $collection_manager_permission,
       $ingest_permission,
+      $permission_permission,
     ));
     $this->managerUser = $this->drupalCreateUser(array(
       $manager_permission,

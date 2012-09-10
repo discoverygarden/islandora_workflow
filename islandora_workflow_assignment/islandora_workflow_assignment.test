@@ -23,6 +23,7 @@ class IslandoraWorkflowAssignmentWebTestCase extends IslandoraWorkflowAbstractTe
 
     module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
     islandora_workflow_assign_object($this->member_pid, $this->editor_name);
+    $this->drupalLogin($this->adminUser);
   }
 
   protected function getAssignees($pid) {
