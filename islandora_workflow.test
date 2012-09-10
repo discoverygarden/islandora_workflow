@@ -4,26 +4,10 @@
  * Test Islandora Workflow functionality.
  */
 
-class IslandoraWorkflowWebTestCase extends DrupalWebTestCase {
+class IslandoraWorkflowAbstractTestCase extends DrupalTestCase {
 
-  /**
-   * Get information aboout this module's tests.
-   * @return array
-   *   Information about the tests.
-   */
-  public function getInfo() {
-    return array(
-      'name' => 'Islandora Workflow',
-      'description' => 'Check that Islandora Workflow regulates permissions correctly',
-      'group' => 'Islandora Workflow',
-    );
-  }
-
-  /**
-   * Get ready to test.
-   */
-  public function setUp() {
-
+  function setUp() {
+  
     date_default_timezone_set('America/Halifax');
 
     // Enable required modules.
@@ -46,9 +30,9 @@ class IslandoraWorkflowWebTestCase extends DrupalWebTestCase {
       'fedora_repository',
       'islandora_workflow',
       'islandora_collection_manager',
-      // 'islandora_workflow_assignment',
+      'islandora_workflow_assignment',
       // 'islandora_pdf_sp',
-      // 'rules',
+      'rules',
       'islandora_xacml_api'
     );
 
@@ -94,16 +78,26 @@ class IslandoraWorkflowWebTestCase extends DrupalWebTestCase {
     variable_set('fedora_drupal_filter', FALSE);
     variable_set('fedora_user', 'admin');
     variable_set('fedora_password', $simpletest_password);
-    $this->drupalLogin($this->editorUser);
   }
+
+}
+
+class IslandoraWorkflowWebTestCase extends IslandoraWorkflowAbstractTestCase {
 
   /**
-   * Tidy up after ourselves.
+   * Get information aboout this module's tests.
+   * @return array
+   *   Information about the tests.
    */
-  public function tearDown() {
-
+  public function getInfo() {
+    return array(
+      'name' => 'Islandora Workflow',
+      'description' => 'Check that Islandora Workflow regulates permissions correctly',
+      'group' => 'Islandora Workflow',
+    );
   }
 
+  
   /**
    * Test that an editor can add to a collection he has editor permissions for.
    *
