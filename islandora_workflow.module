@@ -1989,7 +1989,7 @@ function islandora_workflow_user($op, &$edit, &$account, $category = NULL) {
 /**
  * Implements hook_form_FORM_ID_alter().
  */
-function islandora_workflow_form_user_admin_role_alter() {
+function islandora_workflow_form_user_admin_role_alter(&$form, &$form_state) {
   array_unshift($form['#submit'], 'islandora_workflow_delete_role');
 }
 
