@@ -20,6 +20,8 @@ class IslandoraWorkflowAssignmentWebTestCase extends IslandoraWorkflowWebTestCas
     parent::setUp();
     $this->editor_name = $this->editorUser->name;
     $this->member_pid = 'islandora:117';
+
+    module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
     islandora_workflow_assign_object($this->member_pid, $this->editor_name);
   }
 
