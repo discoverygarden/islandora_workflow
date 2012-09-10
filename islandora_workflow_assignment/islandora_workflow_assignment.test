@@ -45,7 +45,7 @@ class IslandoraWorkflowAssignmentWebTestCase extends IslandoraWorkflowAbstractTe
   }
 
   public function testAssigneeRemovedWhenTheirRoleChanges() {
-    $temp_role = $this->drupalCreateRole('view fedora collection');
+    $temp_role = $this->drupalCreateRole(array('view fedora collection'));
     user_save($this->editorUser, array('roles' => array($temp_role)));
     $this->assertFalse(in_array($this->editor_name, $this->getAssignees($this->member_pid)),
         'Editor is no longer assigned');
