@@ -24,7 +24,6 @@ class IslandoraWorkflowWebTestCase extends DrupalWebTestCase {
    */
   public function setUp() {
 
-    define('SIMPLETEST_PASSWORD', 'abe062e8c05a1be512c3a6ca1fccc432');
     date_default_timezone_set('America/Halifax');
 
     // Enable required modules.
@@ -88,12 +87,13 @@ class IslandoraWorkflowWebTestCase extends DrupalWebTestCase {
     // Workaround for negotiating the Drupal filter.
     // @see ConnectionHelper::getSoapClient()
     variable_set('simpletest_username', 'admin');
-    variable_set('simpletest_password', SIMPLETEST_PASSWORD);
+    $simpletest_password = 'abe062e8c05a1be512c3a6ca1fccc432';
+    variable_set('simpletest_password', $simpletest_password);
     // Set Collection Management tabs to appear.
     variable_set('islandora_add_collection_tabs', TRUE);
     variable_set('fedora_drupal_filter', FALSE);
     variable_set('fedora_user', 'admin');
-    variable_set('fedora_password', SIMPLETEST_PASSWORD);
+    variable_set('fedora_password', $simpletest_password);
     $this->drupalLogin($this->editorUser);
   }
 
