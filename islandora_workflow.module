@@ -1028,7 +1028,8 @@ function islandora_workflow_preprocess_workflow_table(&$vars) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_collection');
 
   $vars['collections'] = islandora_workflow_get_users_collections('all');
-  foreach ($vars['collections'] as $collection_id => $collection_name) {
+  foreach ($vars['collections'] as $collection_id => $collection_information) {
+    $collection_name = $collection_information['label'];
     $collection_members = islandora_workflow_get_all_members_of_collection($collection_id);
     if ($collection_members) {
       /* Makes it useful for theme as a list off all the
