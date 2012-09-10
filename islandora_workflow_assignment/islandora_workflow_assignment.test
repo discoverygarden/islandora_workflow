@@ -6,7 +6,7 @@
  * @author djevans
  */
 
-class IslandoraWorkflowAssignmentWebTestCase extends IslandoraWorkflowWebTestCase {
+class IslandoraWorkflowAssignmentWebTestCase extends IslandoraWorkflowAbstractTestCase {
 
   public function getInfo() {
     return array(
