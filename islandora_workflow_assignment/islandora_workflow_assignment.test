@@ -72,16 +72,17 @@ class IslandoraWorkflowAssignmentWebTestCase extends IslandoraWorkflowAbstractTe
 
   public function testAssigneeRemovedWhenCollectionUserPermissionsChange() {
 
+    $collection = 'islandora:sp_pdf_collection';
     // First, select the collection.
     $path = 'admin/settings/islandora_workflow_perms';
     $edit = array(
-      'islandora_workflow_collection_permissions_table[permissions_table][collection_selector]' => COLLECTION,
+      'islandora_workflow_collection_permissions_table[permissions_table][collection_selector]' => $collection,
     );
     $submit_value = t('Select Collection');
     $this->drupalPost($path, $edit, $submit_value);
     // Next, remove the user permissions.
     $edit = array(
-      'islandora_workflow_collection_permissions_table[permissions_table][' . $this->editorUser->uid . '][' . COLLECTION . ']' => 0,
+      'islandora_workflow_collection_permissions_table[permissions_table][' . $this->editorUser->uid . '][' . $collection . ']' => 0,
     );
     $submit_value = t('Update');
     $this->drupalPost($path, $edit, $submit_value);
