@@ -2066,6 +2066,7 @@ function islandora_workflow_role_delete_batch($form, $form_state) {
  */
 function islandora_workflow_user_delete_batch($edit, $account, $category = NULL) {
 
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
 
   // Get all the objects for which this user has permissions.
