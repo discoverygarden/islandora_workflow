@@ -109,11 +109,11 @@ function islandora_workflow_assignment_user_delete_batch($edit, $account) {
 
   $assigned_objects = islandora_workflow_assignment_by_user($account);
   // @TODO make the following into a batch job.
-  foreach ($assigned_objects as $object_pid) {
+  foreach ($assigned_objects as $object) {
     // Remove the assignment from each object.
     $operations[] = array(
       'islandora_workflow_assignment_remove',
-      array($object_pid, $account->name),
+      array($object->pid, $account->name),
     );
   }
   return $operations;
