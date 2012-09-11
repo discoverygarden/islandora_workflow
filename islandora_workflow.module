@@ -1208,6 +1208,10 @@ function islandora_workflow_role_permissions_form() {
       if ($current_collection_permissions[$role_id][$collection_id] == 'islandora_workflow_Submitter') {
         $current_collection_permissions[$role_id][$collection_id] = 'Submitter';
       }
+      $default_value = array_search($current_collection_permissions[$role_id][$collection_id], $current_module_permissions[$role_id][key($role_name)]);
+    }
+    else {
+      $default_value = '';
     }
     // Drupal made me do it...
     $collection_role_permissions_form['islandora_workflow_collection_permissions_table']['permissions_table'][$role_id][$collection_id] = array(
@@ -1218,7 +1222,7 @@ function islandora_workflow_role_permissions_form() {
        * make this into whatever the current setting
        * is for that collection/role
        * what are available to the current role*/
-      '#default_value' => array_search($current_collection_permissions[$role_id][$collection_id], $current_module_permissions[$role_id][key($role_name)]),
+      '#default_value' => $default_value,
       '#options' => $current_module_permissions[$role_id][key($role_name)],
     );
   }
@@ -1475,6 +1479,10 @@ function islandora_workflow_user_permissions_form() {
       if ($current_collection_permissions[$user_id][$collection_id] == 'islandora_workflow_Submitter') {
         $current_collection_permissions[$user_id][$collection_id] = 'Submitter';
       }
+      $default_value = array_search($current_collection_permissions[$user_id][$collection_id], $current_module_permissions[$user_id][key($user_name)]);
+    }
+    else {
+      $default_value = '';
     }
     // Drupal made me do it...
     $collection_user_permissions_form['islandora_workflow_collection_permissions_table']['permissions_table'][$user_id][$collection_id] = array(
@@ -1483,7 +1491,7 @@ function islandora_workflow_user_permissions_form() {
        * do not go back to the default... navigating away does reset the value
        * Make this into whatever the current setting
        * is for that collection/user.*/
-      '#default_value' => array_search($current_collection_permissions[$user_id][$collection_id], $current_module_permissions[$user_id][key($user_name)]),
+      '#default_value' => $default_value,
       // What are available to the current user.
       '#options' => $current_module_permissions[$user_id][key($user_name)],
     );
