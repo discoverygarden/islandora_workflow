@@ -8,4 +8,5 @@ WHERE {
   OPTIONAL {
 		?pid workflow:state ?state .
 	}
+  FILTER (?assignee = ?username)
 }
