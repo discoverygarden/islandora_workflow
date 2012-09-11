@@ -1198,7 +1198,7 @@ function islandora_workflow_role_permissions_form() {
     $collection_id = $_SESSION['workflow_permissions_page']['active_collection'];
     /* Change the default permission
      * string to be inline with the user friendly strings.*/
-    if (array_key_exists(role_id, $current_collection_permissions)) {
+    if (array_key_exists($role_id, $current_collection_permissions)) {
       if ($current_collection_permissions[$role_id][$collection_id] == 'islandora_workflow_Manager') {
         $current_collection_permissions[$role_id][$collection_id] = 'Manager';
       }
