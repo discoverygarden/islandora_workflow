@@ -2079,7 +2079,8 @@ function islandora_workflow_user_delete_batch($edit, $account, $category = NULL)
     $permission = $row['permission'];
 
     $permissions_delete = db_query("DELETE FROM {islandora_workflow_user_permissions}
-      WHERE collection = '%s' and permission = '%s'", $collection_pid, $permission);
+      WHERE user = %d AND collection = '%s' AND permission = '%s'",
+        $account->uid, $collection_pid, $permission);
     db_query($permissions_delete);
 
     // Perform batch operations.
