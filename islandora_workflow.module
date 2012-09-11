@@ -1198,14 +1198,16 @@ function islandora_workflow_role_permissions_form() {
     $collection_id = $_SESSION['workflow_permissions_page']['active_collection'];
     /* Change the default permission
      * string to be inline with the user friendly strings.*/
-    if ($current_collection_permissions[$role_id][$collection_id] == 'islandora_workflow_Manager') {
-      $current_collection_permissions[$role_id][$collection_id] = 'Manager';
-    }
-    if ($current_collection_permissions[$role_id][$collection_id] == 'islandora_workflow_Editor') {
-      $current_collection_permissions[$role_id][$collection_id] = 'Editor';
-    }
-    if ($current_collection_permissions[$role_id][$collection_id] == 'islandora_workflow_Submitter') {
-      $current_collection_permissions[$role_id][$collection_id] = 'Submitter';
+    if (array_key_exists(role_id, $current_collection_permissions)) {
+      if ($current_collection_permissions[$role_id][$collection_id] == 'islandora_workflow_Manager') {
+        $current_collection_permissions[$role_id][$collection_id] = 'Manager';
+      }
+      if ($current_collection_permissions[$role_id][$collection_id] == 'islandora_workflow_Editor') {
+        $current_collection_permissions[$role_id][$collection_id] = 'Editor';
+      }
+      if ($current_collection_permissions[$role_id][$collection_id] == 'islandora_workflow_Submitter') {
+        $current_collection_permissions[$role_id][$collection_id] = 'Submitter';
+      }
     }
     // Drupal made me do it...
     $collection_role_permissions_form['islandora_workflow_collection_permissions_table']['permissions_table'][$role_id][$collection_id] = array(
