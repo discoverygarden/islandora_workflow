@@ -63,7 +63,7 @@ function _islandora_workflow_base_rule($options) {
 function islandora_workflow_rules_defaults() {
 
   $approved_options = array(
-    'set' => 'islandora_workflow_rules_approve_object',
+    'set' => 'event_islandora_workflow_rules_approve_object',
     'label' => 'A Fedora object is approved',
     'action_label' => 'Send email notifications',
     'object_label' => 'The object that has been approved',
@@ -74,7 +74,7 @@ function islandora_workflow_rules_defaults() {
     ),
   );
   $rejected_options = array(
-    'set' => 'islandora_workflow_rules_reject_object',
+    'set' => 'event_islandora_workflow_rules_reject_object',
     'label' => 'A Fedora object is rejected',
     'action_label' => 'Send email notifications',
     'object_label' => 'The object that has been rejected',
@@ -85,7 +85,7 @@ function islandora_workflow_rules_defaults() {
     ),
   );
   $submitted_options = array(
-    'set' => 'islandora_workflow_rules_submit_object',
+    'set' => 'event_islandora_workflow_rules_submit_object',
     'label' => 'A Fedora object is submitted',
     'action_label' => 'Send email notifications',
     'object_label' => 'The object that has been submitted',
@@ -96,7 +96,7 @@ function islandora_workflow_rules_defaults() {
     ),
   );
   $assigned_options = array(
-    'set' => 'islandora_workflow_rules_assign_object',
+    'set' => 'event_islandora_workflow_rules_assign_object',
     'label' => 'A Fedora object is assigned',
     'action_label' => 'Send email notifications',
     'object_label' => 'The object that has been assigned',
