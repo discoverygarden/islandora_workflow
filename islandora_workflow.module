@@ -2335,6 +2335,9 @@ function islandora_workflow_islandora_tabs_alter(&$tabs, $params) {
  *   An array of PIDs.
  */
 function islandora_workflow_get_subcollections($collection_id) {
+
+  module_load_include('inc', 'islandora_fedora_api', 'islandora_fedora_api.risearch');
+
   $query_file_name = drupal_get_path('module', 'islandora_workflow') . '/subcollection_query.sparql';
   $query_file_handle = fopen($query_file_name, "r");
   $query_string = fread($query_file_handle, filesize($query_file_name));
