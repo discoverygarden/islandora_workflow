@@ -2345,7 +2345,11 @@ function islandora_workflow_get_subcollections($collection_id) {
   fclose($query_file_handle);
 
   if (!empty($collection_id)) {
-    $query_string = preg_replace('/\?collection/', $collection_id, $query_string);
+    // Prepend 'info:fedora/' to the PID if it's not there already.
+    if (!preg_match('/^info:fedora\//', $collection_id)) {
+      $collection_id = 'info:fedora/' . $collection_id;
+    }
+    $query_string = preg_replace('/\?collection/', "<{$collection_id}>", $query_string);
   }
 
   $query_return_string = query_resource_index($query_string);
