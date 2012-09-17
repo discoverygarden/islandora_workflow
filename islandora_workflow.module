@@ -171,6 +171,9 @@ function islandora_workflow_work_form(&$form_state, $tab) {
 
   $users_collections = islandora_workflow_get_users_collections('all');
   $possible_assignee_matrix = get_possible_assignees(array_keys($users_collections), array(), $format = TRUE);
+
+  $subcollections = islandora_workflow_get_subcollections();
+
   // @TODO: use the assignee matrix in the slects for assignees
   // Pager init stuff.
   global $pager_page_array, $pager_total;
@@ -276,6 +279,8 @@ function islandora_workflow_work_form(&$form_state, $tab) {
       // Get all objects in collection.
       $collection_members = islandora_workflow_get_all_members_of_collection($collection_id);
       if ($collection_members) {
+        $subcollections = islandora_workflow_get_subcollections($collection_id);
+        $collection_members = array_diff_key($collection_members, $subcollections);
         // Filter collection items if in workflow tab.
         if ($tab == 'workflow') {
           foreach ($collection_members as $member => $member_attributes) {
@@ -330,8 +335,9 @@ function islandora_workflow_work_form(&$form_state, $tab) {
       if (!isset($users_manager_collections[$collection_id])) {
         // Get all objects in collection.
         $collection_members = islandora_workflow_get_all_members_of_collection($collection_id);
-
         if ($collection_members) {
+          $subcollections = islandora_workflow_get_subcollections($collection_id);
+          $collection_members = array_diff_key($collection_members, $subcollections);
           // Filter collection items if in workflow tab.
           if ($tab == 'workflow') {
             foreach ($collection_members as $member => $member_attributes) {
@@ -384,6 +390,8 @@ function islandora_workflow_work_form(&$form_state, $tab) {
          * that they are submitters (only) in collection.*/
         $collection_members = islandora_workflow_get_all_members_of_collection($collection_id);
         if ($collection_members) {
+          $subcollections = islandora_workflow_get_subcollections($collection_id);
+          $collection_members = array_diff_key($collection_members, $subcollections);
           // Filter collection items if in workflow tab.
           if ($tab == 'workflow') {
             foreach ($collection_members as $member => $member_attributes) {
