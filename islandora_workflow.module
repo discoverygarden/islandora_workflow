@@ -2324,3 +2324,43 @@ function islandora_workflow_islandora_tabs_alter(&$tabs, $params) {
   }
 
 }
+
+/**
+ * Get children of a given collection who have the islandora:collectionCModel.
+ * 
+ * @param type $collection_id 
+ *   The parent collection's PID.
+ * 
+ * @return array
+ *   An array of PIDs.
+ */
+function islandora_workflow_get_subcollections($collection_id) {
+  $query_file_name = drupal_get_path('module', 'islandora_workflow') . '/subcollection_query.sparql';
+  $query_file_handle = fopen($query_file_name, "r");
+  $query_string = fread($query_file_handle, filesize($query_file_name));
+  fclose($query_file_handle);
+
+  $query_return_string = query_resource_index($query_string);
+
+  if ($query_return_string) {
+    $query_return_dom = DOMDocument::loadXML($query_return_string);
+  }
+
+  $subcollections = array();
+
+  $result_nodes = $query_return_dom->getElementsByTagName('result');
+  $result_nodes_length = $result_nodes->length;
+  if ($result_nodes_length > 0) {
+    for ($i = 0; $i < $result_nodes_length; $i++) {
+      $result_node = $result_nodes->item($i);
+      $subcollection_object_uri = $collection_pid_element->getAttribute('uri');
+      // Removing: info:fedora/ is 12 chars.
+      $subcollection_object_pid = substr($collection_object_uri, 12, strlen($collection_object_uri));
+      // Need to extract the pid.
+      $subcollections[$subcollection_object_pid] = $subcollection_object_pid;
+    }
+  }
+  // Strip out non-applicable collections via namespace.
+  $subcollections = islandora_workflow_limit_collections_by_namespace($subcollections);
+  return $subcollections;
+}
