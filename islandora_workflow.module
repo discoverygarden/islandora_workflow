@@ -2336,6 +2336,7 @@ function islandora_workflow_islandora_tabs_alter(&$tabs, $params) {
  */
 function islandora_workflow_get_subcollections($collection_id) {
 
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
   module_load_include('inc', 'islandora_fedora_api', 'islandora_fedora_api.risearch');
 
   $query_file_name = drupal_get_path('module', 'islandora_workflow') . '/subcollection_query.sparql';
