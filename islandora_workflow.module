@@ -1420,11 +1420,11 @@ function islandora_workflow_user_permissions_form() {
 
   // Collection selector and submit button.
   $my_collections_ids = array();
-  foreach ($my_collections as $collection_id => $collection_name) {
+  foreach ($my_collections as $collection_id => $collection_information) {
     if (!isset($_SESSION['workflow_permissions_page']['active_collection'])) {
       $_SESSION['workflow_permissions_page']['active_collection'] = $collection_id;
     }
-    $my_collections_ids[$collection_id] = $collection_name . ' ['. $collection_id .']';
+    $my_collections_ids[$collection_id] = $collection_information['label'] . ' ['. $collection_id .']';
   }
   $collection_user_permissions_form['islandora_workflow_collection_permissions_table']['permissions_table']['collection_selector'] = array(
     '#type' => 'select',
