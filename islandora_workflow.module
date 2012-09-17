@@ -2365,7 +2365,7 @@ function islandora_workflow_get_subcollections($collection_id) {
       // Match the URI after "info:fedora/".
       preg_match('/info:fedora\/(.*)$/', $subcollection_uri, $matches);
       $subcollection_pid = $matches[1];
-      // Need to extract the pid.
+      // Add to the array as a key => value pair for convenience.
       $subcollections[$subcollection_pid] = $subcollection_pid;
     }
   }
