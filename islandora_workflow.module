@@ -2326,7 +2326,7 @@ function islandora_workflow_islandora_tabs_alter(&$tabs, $params) {
 }
 
 /**
- * Get children of a given collection who have the islandora:collectionCModel.
+ * Get children (optionally of a given collection) with the islandora:collectionCModel.
  * 
  * @param type $collection_id 
  *   The parent collection's PID.
@@ -2334,7 +2334,7 @@ function islandora_workflow_islandora_tabs_alter(&$tabs, $params) {
  * @return array
  *   An array of PIDs.
  */
-function islandora_workflow_get_subcollections($collection_id) {
+function islandora_workflow_get_subcollections($collection_id = NULL) {
 
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
   module_load_include('inc', 'islandora_fedora_api', 'islandora_fedora_api.risearch');
