@@ -2366,7 +2366,7 @@ function islandora_workflow_get_subcollections($collection_id) {
       preg_match('/info:fedora\/(.*)$/', $subcollection_uri, $matches);
       $subcollection_pid = $matches[1];
       // Need to extract the pid.
-      $subcollections[$subcollection_object_pid] = $subcollection_object_pid;
+      $subcollections[$subcollection_pid] = $subcollection_pid;
     }
   }
   // Strip out non-applicable collections via namespace.
