@@ -1,4 +1,4 @@
-SELECT ?subcollection ?collection
+SELECT ?subcollection
 WHERE {
  {?subcollection <fedora-rels-ext:isMemberOf> ?collection}
  UNION
