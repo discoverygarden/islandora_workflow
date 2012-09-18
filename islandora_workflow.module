@@ -185,7 +185,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
     $pager_index = 1;
   }
   // Set the current page.
-  $page = isset($_GET['page']) ? $_GET['page'] : '';
+  $page = isset($_GET['page']) ? $_GET['page'] : '0,0';
   $pager_page_array = explode(',', $page);
   // Control the objects displayed on each page.
   $objects_per_page = 10;
