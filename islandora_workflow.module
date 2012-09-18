@@ -2195,7 +2195,6 @@ function islandora_workflow_work_form_page_two(&$form_state, $tab) {
       if (!empty($attributes['Selecter'])) {
         $form['assignees'][$collection_pid][$object_pid]['Assign'] = array(
           '#type' => 'select',
-          '#title' => $object_pid,
           '#options' => array_combine($options, $options),
           '#default_value' => '',
         );
