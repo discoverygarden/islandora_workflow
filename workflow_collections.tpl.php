@@ -5,7 +5,7 @@
  */
 
   foreach ($collections as $collection_pid => $collection_information) :
-    print($vars['list']['collection_checkboxes'][$collection_pid]);
+    print($list['collection_checkboxes'][$collection_pid]);
   endforeach;
-  print($vars['list']['submit']);
+  print($list['submit']);
 ?>
