@@ -446,7 +446,7 @@ function islandora_workflow_overview_items(&$form_state) {
  * @return array
  *   $form the array containing the appropriate form
  */
-function islandora_workflow_old_work_form(&$form_state, $tab) {
+function islandora_workflow_work_form(&$form_state, $tab, $page) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
   // For getting workflow info.
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
@@ -459,296 +459,28 @@ function islandora_workflow_old_work_form(&$form_state, $tab) {
   switch ($form_state['storage']['step']) {
     case 2:
       return islandora_workflow_work_form_page_two($form_state, $tab);
-    break;
-    default:
-      // Do nothing.
       break;
+    case 1:
+      return islandora_workflow_work_form_page_one($form_state, $tab, $page);
+      break;
+    default:
+      drupal_not_found();
+      exit;
   }
-
-  $users_manager_collections = islandora_workflow_get_users_collections();
-  $users_editor_collections = islandora_workflow_get_users_collections('islandora_workflow_Editor');
-  $users_submitter_collections = islandora_workflow_get_users_collections('islandora_workflow_Submitter');
-
-  $users_collections = islandora_workflow_get_users_collections('all');
-  $possible_assignee_matrix = get_possible_assignees(array_keys($users_collections), array(), $format = TRUE);
-
-  $subcollections = islandora_workflow_get_subcollections();
-
-  // @TODO: use the assignee matrix in the slects for assignees
-  // Pager init stuff.
-  global $pager_page_array, $pager_total;
-  // Which pager applies to this tab?
-  if ($tab == 'workflow') {
-    $pager_index = 0;
-  }
-  if ($tab == 'overview') {
-    $pager_index = 1;
-  }
-  // Set the current page.
-  $page = isset($_GET['page']) ? $_GET['page'] : '0,0';
-  $pager_page_array = explode(',', $page);
-  // Control the objects displayed on each page.
-  $objects_per_page = 10;
-  $object_count = 0;
-  $object_lower_bound = $pager_page_array[$pager_index] * $objects_per_page;
-  $object_upper_bound = $object_lower_bound + $objects_per_page;
-  /* Record the current $pager_page_array for comparison with
-  the next time the page loads [to pick the tab to display].
-  @todo: fix we should be re setting this session variable when the user changes tabs*/
-
-  $_SESSION['workflow_page']['pager_page_array'] = $pager_page_array;
-  /* Populate an array of all users in relevent collections,
-   *  to be used in the assign-to-user drop down.*/
-  $users_collections_members = islandora_workflow_get_all_users_with_collection_permissions(array_keys($users_collections));
-
-  // Submit_function declaration.
-  $workflow_tabs_form['#submit'] = array('islandora_workflow_work_form_submit');
-
-  // Tab forms.
-  $workflow_tabs_form['objects_form'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Workflow'),
-    '#collapsible' => FALSE,
-    '#collapsed' => FALSE,
-    '#tree' => TRUE,
-    '#description' => t('Perform work on objects you have access to.'),
-  );
-  $workflow_tabs_form['objects_form']['objects_form_elems'] = array('#theme' => 'workflow_table');
-
-  // Submit button.
-  $workflow_tabs_form['Submit'] = array(
-    '#type' => 'submit',
-    '#weight' => '1',
-    '#value' => t('Submit'),
-  );
-  // Approve button.
-  if (user_access('islandora_workflow_Administrator') || $users_manager_collections || $users_editor_collections || user_access('administer')) {
-    $workflow_tabs_form['Approve'] = array(
-      '#type' => 'submit',
-      '#weight' => '2',
-      '#value' => t('Approve'),
-    );
-  }
-  // Publish button.
-  if (user_access('islandora_workflow_Administrator') || $users_manager_collections || user_access('administer')) {
-    $workflow_tabs_form['Publish'] = array(
-      '#type' => 'submit',
-      '#weight' => '3',
-      '#value' => t('Publish'),
-    );
-  }
-  // Reject button.
-  if (user_access('islandora_workflow_Administrator') || $users_manager_collections || $users_editor_collections || user_access('administer')) {
-    $workflow_tabs_form['Reject'] = array(
-      '#type' => 'submit',
-      '#weight' => '4',
-      '#value' => t('Reject...'),
-    );
-  }
-  // Claim button.
-  $workflow_tabs_form['Claim'] = array(
-    '#type' => 'submit',
-    '#weight' => '5',
-    '#value' => t('Claim'),
-  );
-  // Assign button.
-  $workflow_tabs_form['Assign'] = array(
-    '#type' => 'submit',
-    '#weight' => '6',
-    '#value' => t('Assign'),
-  );
-  // Delete button.
-  $workflow_tabs_form['Delete'] = array(
-    '#type' => 'submit',
-    '#weight' => '7',
-    '#value' => t('Delete'),
-  );
-
   /*
-   * setting the name as $member for edit and manage
-   * buttons is against the forms api
-   * but neccessary to get around a drupalism that
-   * has submit buttons with the same name
-   * reporting an incorrect parent
+  // Keeping track of objects to show.
+  if ($object_count > $object_lower_bound && $object_count <= $object_upper_bound) {
+    $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selecter'] = array(
+      '#type' => 'checkbox',
+      '#title' => t(''),
+    );
+    $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Assign'] = array(
+      '#type' => 'select',
+      '#default_value' => isset($member_attributes['assignee']) ? $member_attributes['assignee'] : '',
+      '#options' => $possible_assignee_matrix[$collection_id][$member_attributes['state']],
+    );
+  }
    */
-  // @TODO: the following code is a nightmare and needs to be cleaned.
-  // Populate tab for viewing objects.
-  // Get all members of the collections the user has manager/admin access to.
-  if ($users_manager_collections) {
-    foreach ($users_manager_collections as $collection_id => $collection_name) {
-      // Get all objects in collection.
-      $collection_members = islandora_workflow_get_all_members_of_collection($collection_id);
-      if ($collection_members) {
-        $subcollections = islandora_workflow_get_subcollections($collection_id);
-        $collection_members = array_diff_key($collection_members, $subcollections);
-        // Filter collection items if in workflow tab.
-        if ($tab == 'workflow') {
-          foreach ($collection_members as $member => $member_attributes) {
-            // Show things in approved state.
-            if ($member_attributes['state'] != 'approved') {
-              unset($collection_members[$member]);
-            }
-          }
-        }
-        // Filter collection items if in overview tab.
-        if ($tab == 'overview') {
-          foreach ($collection_members as $member => $member_attributes) {
-            /* Filter collection items if the user
-             *  has manager level access to the collection.*/
-            $workflow_state = $member_attributes['state'];
-            // Remove everything not in a workflow state.
-            if (!$workflow_state) {
-              unset($collection_members[$member]);
-            }
-            // Filter collection items if the user is not an admin.
-            if (!user_access('islandora_workflow_Administrator') && !user_access('administer')) {
-              // Show things not in published state.
-              if ($workflow_state == 'published') {
-                unset($collection_members[$member]);
-              }
-            }
-          }
-        }
-        foreach ($collection_members as $member => $member_attributes) {
-          // Keeping track of objects to show.
-          $object_count++;
-          if ($object_count > $object_lower_bound && $object_count <= $object_upper_bound) {
-            $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selecter'] = array(
-              '#type' => 'checkbox',
-              '#title' => t(''),
-            );
-            $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Assign'] = array(
-              '#type' => 'select',
-              '#default_value' => isset($member_attributes['assignee']) ? $member_attributes['assignee'] : '',
-              '#options' => $possible_assignee_matrix[$collection_id][$member_attributes['state']],
-            );
-          }
-        }
-      }
-    }
-  }
-  /* Get all members of the collections the user has editor
-   * level for, excluding those that the user has.*/
-  if ($users_editor_collections) {
-    foreach ($users_editor_collections as $collection_id => $collection_name) {
-      // Exclude higher level permissions in the same collection.
-      if (!isset($users_manager_collections[$collection_id])) {
-        // Get all objects in collection.
-        $collection_members = islandora_workflow_get_all_members_of_collection($collection_id);
-        if ($collection_members) {
-          $subcollections = islandora_workflow_get_subcollections($collection_id);
-          $collection_members = array_diff_key($collection_members, $subcollections);
-          // Filter collection items if in workflow tab.
-          if ($tab == 'workflow') {
-            foreach ($collection_members as $member => $member_attributes) {
-              // Show things in approved state.
-              if ($member_attributes['state'] != 'submitted') {
-                unset($collection_members[$member]);
-              }
-            }
-          }
-          // Filter collection items if in overview tab.
-          if ($tab == 'overview') {
-            foreach ($collection_members as $member => $member_attributes) {
-              // Filter collection items if the user is not an admin.
-              if (!user_access('islandora_workflow_Administrator') && !user_access('administer')) {
-                // Show things not in published state.
-                $workflow_state = $member_attributes['state'];
-                if ($workflow_state == 'published' || $workflow_state == 'approved') {
-                  unset($collection_members[$member]);
-                }
-              }
-            }
-          }
-
-          foreach ($collection_members as $member => $member_attributes) {
-            $object_count++;
-            // Keeping track of objects to show.
-            if ($object_count > $object_lower_bound && $object_count <= $object_upper_bound) {
-              $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selecter'] = array(
-                '#type' => 'checkbox',
-                '#title' => t(''),
-              );
-              $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Assign'] = array(
-                '#type' => 'select',
-                '#default_value' => isset($member_attributes['assignee']) ? $member_attributes['assignee'] : '',
-                '#options' => $possible_assignee_matrix[$collection_id][$member_attributes['state']],
-              );
-            }
-          }
-        }
-      }
-    }
-  }
-  /* get all members of the collections the user has submitter level for,
-   *  excluding those that the user has manager/editor level*/
-  if ($users_submitter_collections) {
-    foreach ($users_submitter_collections as $collection_id => $collection_name) {
-      // Exclude higher level permissions in the same collection.
-      if ((!isset($users_manager_collections[$collection_id])) && (!isset($users_editor_collections[$collection_id]))) {
-        /* Get all objects in those collections
-         * that they are submitters (only) in collection.*/
-        $collection_members = islandora_workflow_get_all_members_of_collection($collection_id);
-        if ($collection_members) {
-          $subcollections = islandora_workflow_get_subcollections($collection_id);
-          $collection_members = array_diff_key($collection_members, $subcollections);
-          // Filter collection items if in workflow tab.
-          if ($tab == 'workflow') {
-            foreach ($collection_members as $member => $member_attributes) {
-              // Show things in created state.
-              global $user;
-              if ($member_attributes['state'] != 'created' || $member_attributes['owner'] != $user->name) {
-                unset($collection_members[$member]);
-              }
-            }
-          }
-          // Filter collection items if in overview tab.
-          if ($tab == 'overview') {
-            foreach ($collection_members as $member => $member_attributes) {
-              // Filter collection items if the user is not an admin.
-              if (!user_access('islandora_workflow_Administrator') && !user_access('administer')) {
-                // Show things not in published state.
-                global $user;
-                if ($member_attributes['owner'] != $user->name || $member_attributes['state'] == 'published') {
-                  unset($collection_members[$member]);
-                }
-              }
-            }
-          }
-          foreach ($collection_members as $member => $member_attributes) {
-            // Keeping track of objects to show.
-            $object_count++;
-            if ($object_count > $object_lower_bound && $object_count <= $object_upper_bound) {
-              $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selecter'] = array(
-                '#type' => 'checkbox',
-                '#title' => t(''),
-              );
-              $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Assign'] = array(
-                '#type' => 'select',
-                '#default_value' => isset($member_attributes['assignee']) ? $member_attributes['assignee'] : '',
-                '#options' => $possible_assignee_matrix[$collection_id][$member_attributes['state']],
-              );
-            }
-          }
-        }
-      }
-    }
-  }
-  /* Include the tab in the form array so that the
-   * preprocessor/theme can be aware of the tab it is.*/
-  // Drupal hack to pass a variable to my preprocessor function.
-  $workflow_tabs_form['objects_form']['objects_form_elems']['tab'] = array(
-    '#type' => 'textfield',
-    '#default_value' => $pager_index,
-    '#access' => FALSE,
-  );
-
-  // Set pager total now that we know how many objects there are.
-  $pager_total[$pager_index] = ceil($object_count / $objects_per_page);
-
-  // Set a validation function for the first step of the form.
-  $workflow_tabs_form['#validate'][] = 'islandora_workflow_work_form_validate';
-  return $workflow_tabs_form;
 }
 
 /**
