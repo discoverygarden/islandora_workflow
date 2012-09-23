@@ -227,6 +227,8 @@ function islandora_workflow_work_form_page_one(&$form_state, $tab, $page) {
   $items_per_page = variable_get('islandora_workflow_items_per_page', 10);
   $offset = ($page - 1) * $items_per_page;
 
+  $items = array();
+      
   $users_collections = islandora_workflow_get_users_collections('all');
   /* Populate an array of all users in relevant collections,
    *  to be used in the assign-to-user drop down. */
