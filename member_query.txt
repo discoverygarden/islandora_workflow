@@ -15,6 +15,7 @@ WHERE {
   }
   $member_object workflow:state $state .
   $member_object fedora_model:state $obj_state .
+  $member_object fedora_model:ownerId $owner .
   FILTER (regex(str($obj_state), "info:fedora/fedora-system:def/model#Active") || regex(str($obj_state), "info:fedora/fedora-system:def/model#Inactive"))
   OPTIONAL
   {
@@ -27,10 +28,6 @@ WHERE {
   OPTIONAL
   {
     $member_object fedora_model:createdDate $created_date
-  }
-  OPTIONAL
-  {
-    $member_object fedora_model:ownerId $owner
   }
   OPTIONAL
   {
