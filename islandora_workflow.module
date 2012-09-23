@@ -225,6 +225,8 @@ function islandora_workflow_work_form_page_one(&$form_state, $tab, $page) {
 
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
 
+  GLOBAL $user;
+  
   $items_per_page = variable_get('islandora_workflow_items_per_page', 10);
   $offset = ($page - 1) * $items_per_page;
 
@@ -245,11 +247,10 @@ function islandora_workflow_work_form_page_one(&$form_state, $tab, $page) {
   switch($tab) {
     case 'overview':
       // @TODO make this function accept offsets and limits.
-      $items = _islandora_workflow_get_created_items($account, $offset, $limit = $items_per_page);
+      $items = _islandora_workflow_get_created_items($user, $limit = $items_per_page, $offset);
       break;
     case 'assigned':
-      // @TODO make this function accept offsets and limits.
-      $items = islandora_workflow_assignment_by_user($user, $offset, $limit = $items_per_page);
+      $items = islandora_workflow_assignment_by_user($user, $limit = $items_per_page, $offset);
       break;
     case 'my-work':
       $manager_collections = islandora_workflow_get_users_collections('islandora_workflow_Manager');
@@ -395,21 +396,25 @@ function islandora_workflow_work_form_page_two(&$form_state, $tab) {
   return $form;
 }
 
-function _islandora_workflow_get_created_items($account) {
+function _islandora_workflow_get_created_items($account, $limit = -1, $offset = 0) {
 
   module_load_include('inc', 'islandora_fedora_api', 'islandora_fedora_api.risearch');
 
-  GLOBAL $user;
+  // Get the stored query.
+  $query_file_name = drupal_get_path('module', 'islandora_workflow') . '/assignee_query.sparql';
+  $query_file_handle = fopen($query_file_name, "r");
+  $query_string = fread($query_file_handle, filesize($query_file_name));
+  fclose($query_file_handle);
 
-  $items = array();
-  if (empty($account)) {
-    $account = drupal_clone($user);
+  $query = preg_replace('/\?username/', '"' . $account->name . '"', $query_string);
+  $query_return_json = query_resource_index($query, $limit, $offset, $format = 'json');
+
+  if ($query_return_json) {
+    $query_return = json_decode($query_return_json);
+    return $query_return->results;
   }
-  // get 'created by' query
-  preg_replace($pattern, $replacement, $subject);
-  // Execute query
-  // Return results
-  return $items;
+  return array();
+
 
 }
 

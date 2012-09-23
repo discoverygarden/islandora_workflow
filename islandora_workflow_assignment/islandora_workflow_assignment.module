@@ -13,7 +13,7 @@
  * @return array
  *   an array of results.
  */
-function islandora_workflow_assignment_by_user($account) {
+function islandora_workflow_assignment_by_user($account, $limit = -1, $offset = 0) {
 
   module_load_include('inc', 'islandora_fedora_api', 'islandora_fedora_api.risearch');
 
@@ -24,8 +24,7 @@ function islandora_workflow_assignment_by_user($account) {
   fclose($query_file_handle);
 
   $query = preg_replace('/\?username/', '"' . $account->name . '"', $query_string);
-  $limit = -1;
-  $query_return_json = query_resource_index($query, $limit, $offset = 0, $format = 'json');
+  $query_return_json = query_resource_index($query, $limit, $offset, $format = 'json');
 
   if ($query_return_json) {
     $query_return = json_decode($query_return_json);

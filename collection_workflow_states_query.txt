@@ -1,4 +1,3 @@
-PREFIX workflow: <info:islandora/islandora-system:def/islandora_workflow#>
 PREFIX fedora_relations: <info:fedora/fedora-system:def/relations-external#>
 PREFIX fedora_model: <info:fedora/fedora-system:def/model#>
 PREFIX workflow: <info:islandora/islandora-system:def/islandora_workflow#>
