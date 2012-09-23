@@ -400,9 +400,15 @@ function islandora_workflow_work_form_page_two(&$form_state, $tab) {
   return $form;
 }
 
-function _islandora_workflow_get_created_items($account, $limit = -1, $offset = 0) {
+function _islandora_workflow_get_created_items($account = NULL, $limit = -1, $offset = 0) {
 
   module_load_include('inc', 'islandora_fedora_api', 'islandora_fedora_api.risearch');
+
+  GLOBAL $user;
+
+  if (empty($account)) {
+    $account = drupal_clone($user);
+  }
 
   // Get the stored query.
   $query_file_name = drupal_get_path('module', 'islandora_workflow') . '/member_query.txt';
@@ -418,7 +424,6 @@ function _islandora_workflow_get_created_items($account, $limit = -1, $offset = 
     return $query_return->results;
   }
   return array();
-
 
 }
 
