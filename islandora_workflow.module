@@ -256,18 +256,18 @@ function islandora_workflow_work_form_page_one(&$form_state, $tab, $page) {
       $submitter_collections = array_diff_key($submitter_collections, $manager_collections, $editor_collections);
 
       foreach ($manager_collections as $manager_collection) {
-        $members = iw_tracked_collection_members($manager_collection);
+        $members = islandora_workflow_tracked_collection_members($manager_collection);
         $items += array_filter($members, 'iw_actionable_by_manager');
       }
       if (count($items) < $items_per_page) {
         foreach ($editor_collections as $editor_collection) {
-          $members = iw_tracked_collection_members($editor_collection);
+          $members = islandora_workflow_tracked_collection_members($editor_collection);
           $items += array_filter($members, 'iw_actionable_by_editor');
         }
       }
       if (count($items) < $items_per_page) {
         foreach ($submitter_collections as $submitter_collection) {
-          $members = iw_tracked_collection_members($submitter_collection);
+          $members = islandora_workflow_tracked_collection_members($submitter_collection);
           $items += array_filter($members, 'iw_actionable_by_submitter');
         }
       }
