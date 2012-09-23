@@ -245,7 +245,7 @@ function islandora_workflow_work_form_page_one(&$form_state, $tab, $page) {
   $possible_assignee_matrix = get_possible_assignees(array_keys($users_collections), array(), $format = TRUE);
 
   $form = array();
-  $form['workflow'] = islandora_workflow_work_form_common($form_state, $tab, $page);
+  $form = islandora_workflow_work_form_common($form_state, $tab, $page);
 
   // Get items.
   switch($tab) {
