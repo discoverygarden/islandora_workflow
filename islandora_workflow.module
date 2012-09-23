@@ -285,7 +285,7 @@ function islandora_workflow_work_form_page_one(&$form_state, $tab, $page) {
       exit;
       break;
   }
-  $form['elements'] = array_slice($items, $offset, $items_per_page);
+  $form['workflow']['elements'] += array_slice($items, $offset, $items_per_page);
   // Perform additional processing (like filling in possible assignees).
   // Set pager total now that we know how many objects there are.
   // $pager_total[$pager_index] = ceil($object_count / $objects_per_page);
