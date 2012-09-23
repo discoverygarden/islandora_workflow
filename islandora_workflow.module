@@ -196,6 +196,7 @@ function islandora_workflow_work_form_common(&$form_state, $tab, $page) {
  */
 function islandora_workflow_tracked_collection_members($collection_id) {
 
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow.collection');
 
   $members = islandora_workflow_get_all_members_of_collection($collection_id);
@@ -210,6 +211,7 @@ function islandora_workflow_tracked_collection_members($collection_id) {
   foreach ($members as $object_pid => $attributes) {
     if (isset($attributes['state'])) {
       $tracked_members[$object_pid] = $members[$object_pid];
+      $tracked_members[$object_pid]['collection_pid'] = $collection_id;
     }
   }
   return $tracked_members;
@@ -285,7 +287,23 @@ function islandora_workflow_work_form_page_one(&$form_state, $tab, $page) {
       exit;
       break;
   }
-  $form['workflow']['elements'] += array_slice($items, $offset, $items_per_page);
+
+  $elements = array_slice($items, $offset, $items_per_page);
+  foreach ($elements as $object_pid => $attributes) {
+    $collection_pid = $attributes['collection_pid'];
+    $form['workflow']['elements'][$collection_pid][$object_pid] = array(
+      'Selecter' => array(
+        '#type' => 'checkbox',
+        '#title' => '',
+      ),
+      'Assign' => array(
+        '#type' => 'select',
+        '#default_value' => isset($attributes['assignee'])? $attributes['assignee']: '',
+        '#options' => $possible_assignee_matrix[$collection_pid][$attributes['state']],
+      ),
+    );
+  }
+
   // Perform additional processing (like filling in possible assignees).
   // Set pager total now that we know how many objects there are.
   // $pager_total[$pager_index] = ceil($object_count / $objects_per_page);
