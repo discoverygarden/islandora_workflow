@@ -202,6 +202,7 @@ function islandora_workflow_tracked_collection_members($collection_id) {
   $subcollections = islandora_workflow_get_subcollections($collection_id);
 
   $members = array_diff_key($members, $subcollections);
+  $tracked_members = array();
   foreach ($members as $object_pid => $attributes) {
     if (isset($attributes['state'])) {
       $tracked_members[$object_pid] = $members[$object_pid];
