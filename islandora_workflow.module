@@ -424,7 +424,10 @@ function _islandora_workflow_get_created_items($account = NULL, $limit = -1, $of
     $results = $query_return->results;
     foreach ($results as $result) {
       $index = preg_replace('/^info:fedora\//', '', $result->member_object);
-      $return_results[$index] = (array) $result;
+      $temp_result = (array) $result;
+      $temp_result['islandora_workflow_modified'] = $temp_result['timestamp'];
+      unset($temp_result['timestamp']);
+      $return_results[$index] = $temp_result;
     }
     return $return_results;
   }
