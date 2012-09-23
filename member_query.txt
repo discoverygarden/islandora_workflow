@@ -6,43 +6,40 @@ PREFIX fedora_view: <info:fedora/fedora-system:def/view#>
 SELECT $label $member_object $state $obj_state $assignee $created_date $owner $timestamp $subject
 FROM <#ri>
 WHERE {
-{
-$member_object fedora_relations:isMemberOf $collection_object .
-$member_object workflow:state $state .
-$member_object fedora_model:state $obj_state .
-FILTER (regex(str($obj_state), "info:fedora/fedora-system:def/model#Active") || regex(str($obj_state), "info:fedora/fedora-system:def/model#Inactive"))
-}
-UNION
-{
-$member_object fedora_relations:isMemberOfCollection $collection_object .
-$member_object workflow:state $state .
-$member_object fedora_model:state $obj_state .
-FILTER (regex(str($obj_state), "info:fedora/fedora-system:def/model#Active") || regex(str($obj_state), "info:fedora/fedora-system:def/model#Inactive"))
-}
-OPTIONAL
-{
-$member_object workflow:assignee $assignee
-}
-OPTIONAL
-{
-$member_object fedora_model:label $label
-}
-OPTIONAL
-{
-$member_object fedora_model:createdDate $created_date
-}
-OPTIONAL
-{
-$member_object fedora_model:ownerId $owner
-}
-OPTIONAL
-{
-$member_object fedora_view:disseminates $datastream .
-$datastream workflow:has_note_subject $subject
-}
-OPTIONAL
-{
-$member_object fedora_view:disseminates $datastream .
-$datastream workflow:has_workflow_timestamp $timestamp
-}
+  {
+    $member_object fedora_relations:isMemberOf $collection_object .
+  }
+  UNION
+  {
+    $member_object fedora_relations:isMemberOfCollection $collection_object .
+  }
+  $member_object workflow:state $state .
+  $member_object fedora_model:state $obj_state .
+  FILTER (regex(str($obj_state), "info:fedora/fedora-system:def/model#Active") || regex(str($obj_state), "info:fedora/fedora-system:def/model#Inactive"))
+  OPTIONAL
+  {
+    $member_object workflow:assignee $assignee
+  }
+  OPTIONAL
+  {
+    $member_object fedora_model:label $label
+  }
+  OPTIONAL
+  {
+    $member_object fedora_model:createdDate $created_date
+  }
+  OPTIONAL
+  {
+    $member_object fedora_model:ownerId $owner
+  }
+  OPTIONAL
+  {
+    $member_object fedora_view:disseminates $datastream .
+    $datastream workflow:has_note_subject $subject
+  }
+  OPTIONAL
+  {
+    $member_object fedora_view:disseminates $datastream .
+    $datastream workflow:has_workflow_timestamp $timestamp
+  }
 }

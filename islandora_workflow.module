@@ -186,16 +186,43 @@ function islandora_workflow_work_form_common(&$form_state, $tab, $page) {
 }
 
 /**
+ * Get a list of items within a given collection that are tracked by workflow.
+ * 
+ * @param string $collection_id
+ *   The PID of the parent collection.
+ * 
+ * @return array
+ *   An array of collection member PIDs.
+ */
+function islandora_workflow_tracked_collection_members($collection_id) {
+
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow.collection');
+
+  $members = islandora_workflow_get_all_members_of_collection($collection_id);
+  $subcollections = islandora_workflow_get_subcollections($collection_id);
+
+  $members = array_diff_key($members, $subcollections);
+  foreach ($members as $object_pid => $attributes) {
+    if (isset($attributes['state'])) {
+      $tracked_members[$object_pid] = $members[$object_pid];
+    }
+  }
+  return $tracked_members;
+}
+
+/**
  * Form definition.
  *
- * @param type $form_state
- * @param type $tab
- * @param type $page
+ * @param array $form_state
+ * @param string $tab
+ * @param int $page
  *
  * @return array
  *   A form definition.
  */
 function islandora_workflow_work_form_page_one(&$form_state, $tab, $page) {
+
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
 
   $items_per_page = variable_get('islandora_workflow_items_per_page', 10);
   $offset = ($page - 1) * $items_per_page;
@@ -214,16 +241,18 @@ function islandora_workflow_work_form_page_one(&$form_state, $tab, $page) {
   // Get items.
   switch($tab) {
     case 'overview':
-      $items = iw_get_created_items($user, $$offset, $limit = $items_per_page);
+      // @TODO make this function accept offsets and limits.
+      $items = _islandora_workflow_get_created_items($account, $offset, $limit = $items_per_page);
       break;
     case 'assigned':
-      $items = iw_assignment_by_user($user, $offset, $limit = $items_per_page);
+      // @TODO make this function accept offsets and limits.
+      $items = islandora_workflow_assignment_by_user($user, $offset, $limit = $items_per_page);
       break;
     case 'my-work':
-      $manager_collections = iw_get_users_collections('islandora_workflow_Manager');
-      $editor_collections = iw_get_users_collections('islandora_workflow_Editor');
+      $manager_collections = islandora_workflow_get_users_collections('islandora_workflow_Manager');
+      $editor_collections = islandora_workflow_get_users_collections('islandora_workflow_Editor');
       $editor_collections = array_diff_key($editor_collections, $manager_collections);
-      $submitter_collections = iw_get_users_collections('islandora_workflow_Submitter');
+      $submitter_collections = islandora_workflow_get_users_collections('islandora_workflow_Submitter');
       $submitter_collections = array_diff_key($submitter_collections, $manager_collections, $editor_collections);
 
       foreach ($manager_collections as $manager_collection) {
@@ -245,7 +274,7 @@ function islandora_workflow_work_form_page_one(&$form_state, $tab, $page) {
       break;
     default:
       drupal_not_found();
-      exit();
+      exit;
       break;
   }
   $form['elements'] = array_slice($items, $offset, $items_per_page);
@@ -262,19 +291,19 @@ function islandora_workflow_work_form_page_one(&$form_state, $tab, $page) {
     '#type' => 'submit',
     '#weight' => '2',
     '#value' => t('Approve'),
-    '#access' => iw_reject_access(),
+    '#access' => _islandora_workflow_reject_access(),
   );
   $form['Publish'] = array(
     '#type' => 'submit',
     '#weight' => '3',
     '#value' => t('Publish'),
-    '#access' => iw_publish_access(),
+    '#access' => _islandora_workflow_publish_access(),
   );
   $form['Reject'] = array(
     '#type' => 'submit',
     '#weight' => '4',
     '#value' => t('Reject ...'),
-    '#access' => iw_reject_access(),
+    '#access' => _islandora_workflow_reject_access(),
   );
   $form['Claim'] = array(
     '#type' => 'submit',
