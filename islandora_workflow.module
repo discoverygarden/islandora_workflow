@@ -249,13 +249,22 @@ function islandora_workflow_work_form_page_one(&$form_state, $tab, $page) {
   $form = array();
   $form = islandora_workflow_work_form_common($form_state, $tab, $page);
 
+  $elements = array();
+
   // Get items.
   switch($tab) {
     case 'overview':
       $items = _islandora_workflow_get_created_items($user, $limit = $items_per_page, $offset);
+      // If $items isn't full, fill it with assigned items up to the limit.
+      $item_count = count($items);
+      if ($item_count < $items_per_page) {
+        $items += islandora_workflow_assignment_by_user($user, $items_per_page - $item_count, $item_count);
+      }
+      $elements = array_slice($items, 0, $items_per_page);
       break;
     case 'assigned':
       $items = islandora_workflow_assignment_by_user($user, $limit = $items_per_page, $offset);
+      $elements = array_slice($items, 0, $items_per_page);
       break;
     case 'my-work':
       $manager_collections = islandora_workflow_get_users_collections('islandora_workflow_Manager');
@@ -268,18 +277,19 @@ function islandora_workflow_work_form_page_one(&$form_state, $tab, $page) {
         $members = islandora_workflow_tracked_collection_members($collection_pid);
         $items += array_filter($members, '_islandora_workflow_actionable_by_manager');
       }
-      if (count($items) < $items_per_page) {
+      if (count($items) < $offset + $items_per_page) {
         foreach ($editor_collections as $collection_pid => $attributes) {
           $members = islandora_workflow_tracked_collection_members($collection_pid);
           $items += array_filter($members, '_islandora_workflow_actionable_by_editor');
         }
       }
-      if (count($items) < $items_per_page) {
+      if (count($items) < $offset + $items_per_page) {
         foreach ($submitter_collections as $collection_pid => $attributes) {
           $members = islandora_workflow_tracked_collection_members($collection_pid);
           $items += array_filter($members, '_islandora_workflow_actionable_by_submitter');
         }
       }
+      $elements = array_slice($items, $offset, $items_per_page);
       break;
     default:
       drupal_not_found();
@@ -287,7 +297,6 @@ function islandora_workflow_work_form_page_one(&$form_state, $tab, $page) {
       break;
   }
 
-  $elements = array_slice($items, $offset, $items_per_page);
   foreach ($elements as $object_pid => $attributes) {
     $collection_pid = preg_replace('/^info:fedora\//', '', $attributes['collection_object']);
     $form['workflow']['elements'][$collection_pid][$object_pid] = array(
