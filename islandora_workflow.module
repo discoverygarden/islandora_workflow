@@ -1971,8 +1971,8 @@ function islandora_workflow_work_form_submit($form, &$form_state) {
     }
   }
   elseif ($clicked_button == 'Reject...') {
-    $work_form_state['storage']['step'] += 1;
-    $work_form_state['rebuild'] = TRUE;
+    $form_state['storage']['step'] += 1;
+    $form_state['rebuild'] = TRUE;
   }
   elseif ($clicked_button == 'Approve') {
     foreach ($selected_object_ids as $object_id) {
@@ -2000,7 +2000,7 @@ function islandora_workflow_work_form_submit($form, &$form_state) {
  * Form submit handler.
  *
  * This function handles the submission of the note edit form
- *
+ *s
  * @param array $edit_note_form
  *   Holds all the data on the state  of the form submitted
  * @param array $edit_note_form_state
