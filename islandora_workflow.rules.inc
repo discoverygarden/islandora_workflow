@@ -41,7 +41,7 @@ function islandora_workflow_rules_action_info() {
  */
 function islandora_workflow_rules_email_recipients($object, $settings) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
-
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
   $recipients = array();
   // Get everyone who has the given workflow roles for the parent collection.
   $collections = array();
