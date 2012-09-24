@@ -167,6 +167,7 @@ function islandora_workflow_get_all_members_of_collection($collection_id) {
   if ($query_return_json) {
     $query_return = json_decode($query_return_json);
     $results = $query_return->results;
+    $return_results = array();
     foreach ($results as $result) {
       $index = preg_replace('/^info:fedora\//', '', $result->member_object);
       $temp_result = (array) $result;
