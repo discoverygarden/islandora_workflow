@@ -1934,19 +1934,19 @@ function islandora_workflow_work_form_validate($form, &$form_state) {
  * This function handles all of the possible submits
  * from the workflow work form (overview and workflow)
  *
- * @param array $work_form
+ * @param array $form
  *   Holds all the data on the state  of the form submitted
- * @param array $work_form_state
+ * @param array $form_state
  *   An easier to use version of $work_form_form
  */
-function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
-  $clicked_button = $work_form_state['clicked_button']['#value'];
+function islandora_workflow_work_form_submit($form, &$form_state) {
+  $clicked_button = $form_state['clicked_button']['#value'];
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
   $selected_object_ids = array();
   $assignees = array();
   $assignee_indexes = array();
   // Get selected objects.
-  foreach ($work_form_state['values']['workflow']['elements'] as $collection) {
+  foreach ($form_state['values']['workflow']['elements'] as $collection) {
     // Prevent a warning.
     if (is_array($collection)) {
       foreach ($collection as $object_id => $object_form_elements) {
