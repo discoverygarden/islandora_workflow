@@ -640,7 +640,7 @@ function islandora_workflow_menu() {
     'title' => 'My Islandora work',
     'description' => 'This is the main access point to islandora_workflow',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('islandora_workflow_work_form','my-work'),
+    'page arguments' => array('islandora_workflow_work_form','wip'),
     'access callback' => 'islandora_workflow_check_permissions',
     'access arguments' => array(islandora_workflow_perm()),
     'type' => MENU_NORMAL_ITEM,
