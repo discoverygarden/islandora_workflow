@@ -253,7 +253,7 @@ function islandora_workflow_work_form_page_one(&$form_state, $tab, $page) {
 
   // Get items.
   switch($tab) {
-    case 'overview':
+    case 'wip':
       $items = _islandora_workflow_get_created_items($user, $limit = $items_per_page, $offset);
       // If $items isn't full, fill it with assigned items up to the limit.
       $item_count = count($items);
@@ -266,7 +266,7 @@ function islandora_workflow_work_form_page_one(&$form_state, $tab, $page) {
       $items = islandora_workflow_assignment_by_user($user, $limit = $items_per_page, $offset);
       $elements = array_slice($items, 0, $items_per_page);
       break;
-    case 'my-work':
+    case 'unpublished':
       $manager_collections = islandora_workflow_get_users_collections('islandora_workflow_Manager');
       $editor_collections = islandora_workflow_get_users_collections('islandora_workflow_Editor');
       $editor_collections = array_diff_key($editor_collections, $manager_collections);
@@ -510,7 +510,7 @@ function islandora_workflow_overview_items(&$form_state) {
  * @param array $form_state
  *   The current state of the form.
  * @param string $tab
- *   which tab is calling the form, iether 'overview' or 'workflow'
+ *   which tab is calling the form, either 'wip', 'assigned' or 'unpublished'
  *
  * @return array
  *   $form the array containing the appropriate form
@@ -550,6 +550,7 @@ function islandora_workflow_work_form(&$form_state, $tab, $page = 1) {
  *   $form_info an associative array containing the
  *   form_id callback and arguments
  */
+/*
 function islandora_workflow_forms($form_id, $args) {
 
   $form_info['islandora_workflow_workflow_form'] = array('callback' => 'islandora_workflow_work_form', 'callback arguments' => array('workflow'));
@@ -557,6 +558,8 @@ function islandora_workflow_forms($form_id, $args) {
 
   return $form_info;
 }
+ * 
+ */
 
 /**
  * Implements hook_form_FORM_ID_alter().
@@ -642,10 +645,10 @@ function islandora_workflow_menu() {
     'access arguments' => array(islandora_workflow_perm()),
     'type' => MENU_NORMAL_ITEM,
   );
-  $menu_entries['islandora_workflow/my-work'] = array(
+  $menu_entries['islandora_workflow/work_in_progress'] = array(
     'title' => 'Work In Progress',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('islandora_workflow_work_form', 'my-work'),
+    'page arguments' => array('islandora_workflow_work_form', 'wip'),
     'access callback' => 'islandora_workflow_check_permissions',
     'access arguments' => array(islandora_workflow_perm()),
     'type' => MENU_DEFAULT_LOCAL_TASK,
@@ -660,10 +663,10 @@ function islandora_workflow_menu() {
     'type' => MENU_LOCAL_TASK,
     'weight' => 2,
   );
-  $menu_entries['islandora_workflow/overview'] = array(
+  $menu_entries['islandora_workflow/unpublished'] = array(
     'title' => 'Unpublished Objects',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('islandora_workflow_work_form', 'overview'),
+    'page arguments' => array('islandora_workflow_work_form', 'unpublished'),
     'access callback' => 'islandora_workflow_check_permissions',
     'access arguments' => array(islandora_workflow_perm()),
     'type' => MENU_LOCAL_TASK,
@@ -2316,7 +2319,7 @@ function islandora_workflow_my_work_form(&$form_state) {
  *   The workflow form.
  */
 function islandora_workflow_overview_form(&$form_state) {
-  return islandora_workflow_work_form($form_state, 'overview');
+  return islandora_workflow_work_form($form_state, 'unpublished');
 }
 
 /**
