@@ -1946,7 +1946,7 @@ function islandora_workflow_work_form_submit($work_form, &$work_form_state) {
   $assignees = array();
   $assignee_indexes = array();
   // Get selected objects.
-  foreach ($work_form_state['values']['objects_form']['objects_form_elems'] as $collection) {
+  foreach ($work_form_state['values']['workflow']['elements'] as $collection) {
     // Prevent a warning.
     if (is_array($collection)) {
       foreach ($collection as $object_id => $object_form_elements) {
