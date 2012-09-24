@@ -211,7 +211,7 @@ function islandora_workflow_tracked_collection_members($collection_id) {
   foreach ($members as $object_pid => $attributes) {
     if (isset($attributes['state'])) {
       $tracked_members[$object_pid] = $members[$object_pid];
-      $tracked_members[$object_pid]['collection_pid'] = $collection_id;
+      // $tracked_members[$object_pid]['collection_pid'] = $collection_id;
     }
   }
   return $tracked_members;
@@ -290,7 +290,7 @@ function islandora_workflow_work_form_page_one(&$form_state, $tab, $page) {
 
   $elements = array_slice($items, $offset, $items_per_page);
   foreach ($elements as $object_pid => $attributes) {
-    $collection_pid = $attributes['collection_pid'];
+    $collection_pid = preg_replace('/^info:fedora\//', '', $attributes['collection_object']);
     $form['workflow']['elements'][$collection_pid][$object_pid] = array(
       'Selecter' => array(
         '#type' => 'checkbox',
