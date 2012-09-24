@@ -1904,7 +1904,7 @@ function islandora_workflow_work_form_validate($form, &$form_state) {
     case 'Delete':
       $selected_object_ids = array();
       // Get selected objects.
-      $elements = $form_state['values']['objects_form']['objects_form_elems'];
+      $elements = $form_state['values']['workflow']['elements'];
       foreach ($elements as $collection) {
         // Prevent a warning.
         if (is_array($collection)) {
@@ -1916,7 +1916,7 @@ function islandora_workflow_work_form_validate($form, &$form_state) {
         }
       }
       if (empty($selected_object_ids)) {
-        form_set_error('objects_form][objects_form_elems',
+        form_set_error('workflow][elements',
             'No objects selected.'
         );
       }
