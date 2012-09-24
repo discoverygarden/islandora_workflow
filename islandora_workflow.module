@@ -327,7 +327,7 @@ function islandora_workflow_work_form_page_one(&$form_state, $tab, $page) {
   $form['Reject'] = array(
     '#type' => 'submit',
     '#weight' => '4',
-    '#value' => t('Reject ...'),
+    '#value' => t('Reject...'),
     '#access' => _islandora_workflow_reject_access(),
   );
   $form['Claim'] = array(
