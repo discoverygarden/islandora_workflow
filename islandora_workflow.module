@@ -389,7 +389,7 @@ function islandora_workflow_work_form_page_two(&$form_state, $tab) {
     '#theme' => 'workflow_table',
     '#tree' => TRUE,
   );
-  $form['workflow'] = islandora_workflow_work_form_common($form_state, $tab);
+  // $form['workflow'] = islandora_workflow_work_form_common($form_state, $tab);
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Reject and Assign'),
