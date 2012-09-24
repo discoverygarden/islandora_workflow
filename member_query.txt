@@ -39,4 +39,6 @@ WHERE {
     $member_object fedora_view:disseminates $datastream .
     $datastream workflow:has_workflow_timestamp $timestamp
   }
+  FILTER(REGEX(STR($owner),'.'))
+  FILTER(REGEX(STR($collection_object),'.'))
 }

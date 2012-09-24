@@ -148,7 +148,10 @@ function islandora_workflow_get_all_members_of_collection($collection_id) {
   $query_url = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
 
   // Inject collection value into the query.
-  $query = preg_replace('/\$collection_object/', '<info:fedora/' . $collection_id . '>', $query);
+  $pattern = '/(REGEX.+collection_object.+?\')(\.)(\')/';
+  $replacement = '\1' . $collection_id .'\3';
+
+  $query = preg_replace($pattern, $replacement, $query);
 
   // Run query.
   $query_url .= "?type=tuples&flush=TRUE&format=Sparql". (($limit > 0)? "&limit=$limit" : "") ."&offset=$offset&lang=$type&query=". urlencode($query);
@@ -156,7 +159,6 @@ function islandora_workflow_get_all_members_of_collection($collection_id) {
   if ($query_return_string) {
     $query_return_dom = DOMDocument::loadXML($query_return_string);
   }
-
 
   // Format query results for use (xml->array).
   $result_nodes = $query_return_dom->getElementsByTagName('result');
