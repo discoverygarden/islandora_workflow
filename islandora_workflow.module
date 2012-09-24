@@ -652,7 +652,7 @@ function islandora_workflow_menu() {
     'weight' => 2,
   );
   $menu_entries['islandora_workflow/overview'] = array(
-    'title' => 'Overview',
+    'title' => 'Unpublished Objects',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('islandora_workflow_work_form', 'overview'),
     'access callback' => 'islandora_workflow_check_permissions',
