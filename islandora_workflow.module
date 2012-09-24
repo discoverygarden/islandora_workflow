@@ -253,7 +253,7 @@ function islandora_workflow_work_form_page_one(&$form_state, $tab, $page) {
 
   // Get items.
   switch($tab) {
-    case 'wip':
+    case 'work_in_progress':
       $items = _islandora_workflow_get_created_items($user, $limit = $items_per_page, $offset);
       // If $items isn't full, fill it with assigned items up to the limit.
       $item_count = count($items);
@@ -510,7 +510,7 @@ function islandora_workflow_overview_items(&$form_state) {
  * @param array $form_state
  *   The current state of the form.
  * @param string $tab
- *   which tab is calling the form, either 'wip', 'assigned' or 'unpublished'
+ *   which tab is calling the form, either 'work_in_progress', 'assigned' or 'unpublished'
  *
  * @return array
  *   $form the array containing the appropriate form
@@ -640,7 +640,7 @@ function islandora_workflow_menu() {
     'title' => 'My Islandora work',
     'description' => 'This is the main access point to islandora_workflow',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('islandora_workflow_work_form','wip'),
+    'page arguments' => array('islandora_workflow_work_form', 'work_in_progress'),
     'access callback' => 'islandora_workflow_check_permissions',
     'access arguments' => array(islandora_workflow_perm()),
     'type' => MENU_NORMAL_ITEM,
@@ -648,7 +648,7 @@ function islandora_workflow_menu() {
   $menu_entries['islandora_workflow/work_in_progress'] = array(
     'title' => 'Work In Progress',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('islandora_workflow_work_form', 'wip'),
+    'page arguments' => array('islandora_workflow_work_form', 'work_in_progress'),
     'access callback' => 'islandora_workflow_check_permissions',
     'access arguments' => array(islandora_workflow_perm()),
     'type' => MENU_DEFAULT_LOCAL_TASK,
