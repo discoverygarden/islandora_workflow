@@ -472,20 +472,6 @@ function _islandora_workflow_actionable_by_submitter($item) {
   return 'created' == $item['state'];
 }
 
-function _islandora_workflow_tracked_collection_members($collection_pid) {
-
-  module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
-
-  $tracked_members = array();
-  $all_members = islandora_workflow_get_all_members_of_collection($collection_pid);
-  foreach ($all_members as $member => $attributes) {
-    if (!empty($attributes['state'])) {
-      $tracked_members[] = $member;
-    }
-  }
-  return $tracked_members;
-}
-
 function islandora_workflow_overview_items(&$form_state) {
   $manager_collections = islandora_workflow_get_users_collections('islandora_workflow_Manager');
   $editor_collections = islandora_workflow_get_users_collections('islandora_workflow_Editor');
