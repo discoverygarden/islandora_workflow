@@ -390,7 +390,7 @@ function islandora_workflow_reject_object($object_id) {
   // Permission check.
   $tmp = islandora_workflow_user_object_permission_check($object_id);
   if ($tmp != 'islandora_workflow_Editor' && $tmp != 'islandora_workflow_Manager') {
-    drupal_set_message(t('The object %pid could not be rejected, you do not have the necessary permissions.', array('pid' => $object_id)));
+    drupal_set_message(t('The object %pid could not be rejected, you do not have the necessary permissions.', array('%pid' => $object_id)));
     return FALSE;
   }
 

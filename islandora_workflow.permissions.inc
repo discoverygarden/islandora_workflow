@@ -623,7 +623,7 @@ function islandora_workflow_get_users_with_module_permissions() {
  * @param string $object_id
  *   The object that we are looking for permissions on
  *
- * @param object $user_in
+ * @param object $account
  *   The Drupal user whose permissions we are
  *   checking; NULL for the current user
  *
@@ -631,11 +631,17 @@ function islandora_workflow_get_users_with_module_permissions() {
  *   Either the string of the highest available permission
  *   to the user on the object, or FALSE if there are no permissions
  */
-function islandora_workflow_user_object_permission_check($object_id, $user_in = NULL) {
+function islandora_workflow_user_object_permission_check($object_id, $account = NULL) {
 
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
-  
-  $manager_permissions = islandora_workflow_get_users_collections('islandora_workflow_Manager');
+
+  GLOBAL $user;
+
+  if (empty($account)) {
+    $account = drupal_clone($user);
+  }
+
+  $manager_permissions = islandora_workflow_get_users_collections('islandora_workflow_Manager', $account);
 
   $parent = islandora_workflow_get_object_parent($object_id);
 
@@ -643,7 +649,7 @@ function islandora_workflow_user_object_permission_check($object_id, $user_in = 
   if (isset($manager_permissions[$parent])) {
     return 'islandora_workflow_Manager';
   }
-  $editor_permissions = islandora_workflow_get_users_collections('islandora_workflow_Editor');
+  $editor_permissions = islandora_workflow_get_users_collections('islandora_workflow_Editor', $account);
   $workflow_state = islandora_workflow_get_object_workflow_state($object_id);
 
   // Editor level.
@@ -652,20 +658,11 @@ function islandora_workflow_user_object_permission_check($object_id, $user_in = 
   }
 
   // Even more init.
-  $submitter_permissions = islandora_workflow_get_users_collections('islandora_workflow_Submitter');
+  $submitter_permissions = islandora_workflow_get_users_collections('islandora_workflow_Submitter', $account);
   $creator = islandora_workflow_get_object_creator($object_id);
-  $user_name = NULL;
-  // Get user name.
-  if ($user_in == NULL) {
-    global $user;
-    $user_name = $user->name;
-  }
-  else {
-    $user_name = $user_in->name;
-  }
-
+  
   // Submitter level.
-  if (isset($submitter_permissions[$parent]) && ($workflow_state == 'created' || $workflow_state == 'rejected') && $user_name == $creator) {
+  if (isset($submitter_permissions[$parent]) && ($workflow_state == 'created' || $workflow_state == 'rejected') && $account->name == $creator) {
     return 'islandora_workflow_Submitter';
   }
 
