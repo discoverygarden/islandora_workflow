@@ -964,7 +964,7 @@ function islandora_workflow_set_object_relationship($object_id, $relationship_in
     }
   }
   // Set new relationship.
-  $apim_object->addRelationship($object_id, $islandora_workflow_namespace . $relationship_in, $target, array('isLiteral' => 'true', 'subject' => $subject));
+  return $apim_object->addRelationship($object_id, $islandora_workflow_namespace . $relationship_in, $target, array('isLiteral' => 'true', 'subject' => $subject));
 }
 
 /**
