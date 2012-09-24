@@ -154,12 +154,31 @@ function islandora_workflow_get_all_members_of_collection($collection_id) {
   $query = preg_replace($pattern, $replacement, $query);
 
   // Run query.
+  /*
   $query_url .= "?type=tuples&flush=TRUE&format=Sparql". (($limit > 0)? "&limit=$limit" : "") ."&offset=$offset&lang=$type&query=". urlencode($query);
   $query_return_string = do_curl($query_url);
   if ($query_return_string) {
     $query_return_dom = DOMDocument::loadXML($query_return_string);
   }
+   */
 
+  $query_return_json = query_resource_index($query, $limit, $offset, $format = 'json');
+
+  if ($query_return_json) {
+    $query_return = json_decode($query_return_json);
+    $results = $query_return->results;
+    foreach ($results as $result) {
+      $index = preg_replace('/^info:fedora\//', '', $result->member_object);
+      $temp_result = (array) $result;
+      $temp_result['islandora_workflow_modified'] = $temp_result['timestamp'];
+      unset($temp_result['timestamp']);
+      $return_results[$index] = $temp_result;
+    }
+    return $return_results;
+  }
+  return array();
+
+  /*
   // Format query results for use (xml->array).
   $result_nodes = $query_return_dom->getElementsByTagName('result');
   $result_nodes_length = $result_nodes->length;
@@ -219,6 +238,8 @@ function islandora_workflow_get_all_members_of_collection($collection_id) {
     return $member_data;
   }
   return FALSE;
+   * 
+   */
 }
 
 /**
