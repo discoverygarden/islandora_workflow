@@ -67,6 +67,12 @@ function islandora_workflow_rules_email_recipients($object, $settings) {
       $recipients[] = $creator->uid;
     }
   }
+  if ($settings['notify_assignee']) {
+    $assignee_name = islandora_workflow_get_object_assignee($object->pid);
+    if (!empty($assignee_name)) {
+      $recipients[] = $assignee_name;
+    }
+  }
   return array_filter(array_unique($recipients));
 }
 
@@ -105,6 +111,7 @@ function islandora_workflow_rules_email_someone_form($settings, &$form) {
     'message' => '',
     'roles' => array('admin'),
     'notify_creator' => TRUE,
+    'notify_assignee' => FALSE,
   );
   $form['settings']['message'] = array(
     '#type' => 'textarea',
@@ -129,6 +136,11 @@ function islandora_workflow_rules_email_someone_form($settings, &$form) {
     '#type' => 'checkbox',
     '#title' => t("Notify the object's creator"),
     '#default_value' => $settings['notify_creator'],
+  );
+  $form['settings']['notify_assignee'] = array(
+    '#type' => 'checkbox',
+    '#title' => t("Notify the user assigned to the object"),
+    '#default_value' => $settings['notify_assignee'],
   );
 }
 
