@@ -390,7 +390,7 @@ function islandora_workflow_work_form_page_two(&$form_state, $tab) {
   $values = $form_state['values']['workflow']['elements'];
   $collections = array_keys($values);
 
-  if ($form_state['clicked_button'] == t('Delete...')) {
+  if ($form_state['clicked_button']['#value'] == t('Delete...')) {
     drupal_set_message(t('Deleting items removes them from workflow and from the active repository. This action is not reversible. Are you sure you want to continue?'), 'warning');
     $form['delete'] = array(
       '#type' => 'submit',
@@ -402,7 +402,7 @@ function islandora_workflow_work_form_page_two(&$form_state, $tab) {
     );
   }
 
-  if ($form_state['clicked_button'] == t('Reject...')) {
+  if ($form_state['clicked_button']['#value'] == t('Reject...')) {
     $possible_assignees = get_possible_assignees($collections);
 
     $form['assignees'] = array(
