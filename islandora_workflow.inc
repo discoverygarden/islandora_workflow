@@ -86,7 +86,7 @@ function islandora_workflow_get_users_collections($permission_level = 'islandora
     }
   }
   else {
-    return FALSE;
+    return array();
   }
   return $collection_list;
 }
