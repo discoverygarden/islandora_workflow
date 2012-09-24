@@ -405,7 +405,7 @@ function islandora_workflow_work_form_page_two(&$form_state, $tab) {
         $form['assignees'][$collection_pid][$object_pid]['Assign'] = array(
           '#type' => 'select',
           '#options' => array_combine($options, $options),
-          '#default_value' => '',
+          '#default_value' => $attributes['Assign'],
         );
       }
     }
@@ -1991,7 +1991,13 @@ function islandora_workflow_work_form_submit($form, &$form_state) {
   }
   elseif ($clicked_button == 'Assign') {
     foreach ($selected_object_ids as $object_id) {
-      islandora_workflow_assign_object($object_id, $assignees[$object_id]);
+      if (empty($assignees[$object_id])) {
+        islandora_workflow_assignment_remove($object_id);
+      }
+      else {
+        islandora_workflow_assign_object($object_id, $assignees[$object_id]);
+      }
+      
     }
   }
 }
@@ -2259,8 +2265,11 @@ function islandora_workflow_work_form_page_two_submit($form, &$form_state) {
     foreach ($form_state['values']['assignees'] as $collection_id => $object) {
       foreach ($object as $object_id => $assignees) {
         foreach ($assignees as $user_name) {
-          islandora_workflow_reject_object($object_id);        
-          if (!empty($user_name)) {
+          islandora_workflow_reject_object($object_id);
+          if (empty($user_name)) {
+            islandora_workflow_assignment_remove($object_id);
+          }
+          else {
             islandora_workflow_assign_object($object_id, $user_name);
           }
         }
