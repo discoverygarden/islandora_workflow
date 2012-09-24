@@ -2255,14 +2255,15 @@ function islandora_workflow_user_edit_batch($edit, $account, $category = NULL) {
  *   The existing form state
  */
 function islandora_workflow_work_form_page_two_submit($form, &$form_state) {
-  foreach ($form_state['values']['assignees'] as $collection_id => $object) {
-    foreach ($object as $object_id => $assignees) {
-      foreach ($assignees as $user_name) {
-        if (empty($user_name)) {
-          continue;
+  if ($form_state['clicked_button']['#value'] == t('Reject and Assign')) {
+    foreach ($form_state['values']['assignees'] as $collection_id => $object) {
+      foreach ($object as $object_id => $assignees) {
+        foreach ($assignees as $user_name) {
+          islandora_workflow_reject_object($object_id);        
+          if (!empty($user_name)) {
+            islandora_workflow_assign_object($object_id, $user_name);
+          }
         }
-        islandora_workflow_reject_object($object_id);
-        islandora_workflow_assign_object($object_id, $user_name);
       }
     }
   }
