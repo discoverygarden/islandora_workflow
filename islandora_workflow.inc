@@ -557,6 +557,13 @@ function islandora_workflow_submit_object($object_id) {
  */
 function islandora_workflow_claim_object($object_id) {
   global $user;
+  $present_assignee = islandora_workflow_get_object_assignee($object_id);
+  if ($present_assignee == $user->name) {
+    drupal_set_message(t('The object <em>%pid</em> is already assigned to you.',array(
+      '%pid' => $object_id,
+    )));
+    return FALSE;
+  }
   return (islandora_workflow_assign_object($object_id, $user->name));
 }
 
@@ -574,6 +581,15 @@ function islandora_workflow_claim_object($object_id) {
 function islandora_workflow_assign_object($object_id, $user_name) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+
+  $present_assignee = islandora_workflow_get_object_assignee($object_id);
+  if ($present_assignee == $user_name) {
+    drupal_set_message(t('The object <em>%pid</em> is already assigned to <em>%username</em>',array(
+      '%pid' => $object_id,
+      '%username' => $user_name
+    )));
+    return FALSE;
+  }
 
   // Permission check.
   if (!islandora_workflow_user_object_permission_check($object_id)) {

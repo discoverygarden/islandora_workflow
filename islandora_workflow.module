@@ -343,6 +343,7 @@ function islandora_workflow_work_form_page_one(&$form_state, $tab, $page) {
     '#type' => 'submit',
     '#weight' => '5',
     '#value' => t('Claim'),
+    '#access' => ($tab != 'assigned'),
   );
   $form['Assign'] = array(
     '#type' => 'submit',
