@@ -252,7 +252,6 @@ function islandora_workflow_work_form_page_one(&$form_state, $tab, $page) {
   // Get items.
   switch($tab) {
     case 'overview':
-      // @TODO make this function accept offsets and limits.
       $items = _islandora_workflow_get_created_items($user, $limit = $items_per_page, $offset);
       break;
     case 'assigned':
@@ -395,7 +394,6 @@ function islandora_workflow_work_form_page_two(&$form_state, $tab) {
     '#type' => 'submit',
     '#value' => t('Reject and Assign'),
   );
-  // @todo manipulate elements.
   foreach ($values as $collection_pid => $object) {
     if (!is_array($object)) {
       continue;
@@ -529,20 +527,6 @@ function islandora_workflow_work_form(&$form_state, $tab, $page = 1) {
       drupal_not_found();
       exit;
   }
-  /*
-  // Keeping track of objects to show.
-  if ($object_count > $object_lower_bound && $object_count <= $object_upper_bound) {
-    $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Selecter'] = array(
-      '#type' => 'checkbox',
-      '#title' => t(''),
-    );
-    $workflow_tabs_form['objects_form']['objects_form_elems'][$collection_id][$member]['Assign'] = array(
-      '#type' => 'select',
-      '#default_value' => isset($member_attributes['assignee']) ? $member_attributes['assignee'] : '',
-      '#options' => $possible_assignee_matrix[$collection_id][$member_attributes['state']],
-    );
-  }
-   */
 }
 
 /**
@@ -656,6 +640,7 @@ function islandora_workflow_menu() {
     'access callback' => 'islandora_workflow_check_permissions',
     'access arguments' => array(islandora_workflow_perm()),
     'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 1,
   );
   $menu_entries['islandora_workflow/assigned'] = array(
     'title' => 'Assigned To Me',
@@ -664,6 +649,7 @@ function islandora_workflow_menu() {
     'access callback' => 'islandora_workflow_check_permissions',
     'access arguments' => array(islandora_workflow_perm()),
     'type' => MENU_LOCAL_TASK,
+    'weight' => 2,
   );
   $menu_entries['islandora_workflow/overview'] = array(
     'title' => 'Overview',
@@ -672,6 +658,7 @@ function islandora_workflow_menu() {
     'access callback' => 'islandora_workflow_check_permissions',
     'access arguments' => array(islandora_workflow_perm()),
     'type' => MENU_LOCAL_TASK,
+    'weight' => 3,
   );
   // Main working page for islandora_workflow.
   $menu_entries['islandora_workflow_edit_note'] = array(
