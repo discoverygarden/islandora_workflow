@@ -172,10 +172,11 @@ function islandora_workflow_rules_defaults() {
       'iw_rules_email_item_submitted' => _islandora_workflow_base_rule($submitted_options),
       'iw_rules_email_item_assigned' => _islandora_workflow_base_rule($assigned_options),
       'iw_rules_message_item_approved' => _islandora_workflow_rules_message('Display a Drupal message when an object is approved', 'event_islandora_workflow_rules_approve_object', 'The object [object:fedora-object-pid] has been approved.'),
-      'iw_rules_message_item_rejected' => _islandora_workflow_rules_message('Display a Drupal message when an object is approved', 'event_islandora_workflow_rules_reject_object', 'The object [object:fedora-object-pid] has been rejected.'),
-      'iw_rules_message_item_submitted' => _islandora_workflow_rules_message('Display a Drupal message when an object is approved', 'event_islandora_workflow_rules_submit_object', 'The object [object:fedora-object-pid] has been submitted.'),
-      'iw_rules_message_item_assigned' => _islandora_workflow_rules_message('Display a Drupal message when an object is approved', 'event_islandora_workflow_rules_assign_object', 'The object [object:fedora-object-pid] has been assigned.'),
-      ),
+      'iw_rules_message_item_rejected' => _islandora_workflow_rules_message('Display a Drupal message when an object is rejected', 'event_islandora_workflow_rules_reject_object', 'The object [object:fedora-object-pid] has been rejected.'),
+      'iw_rules_message_item_submitted' => _islandora_workflow_rules_message('Display a Drupal message when an object is submitted', 'event_islandora_workflow_rules_submit_object', 'The object [object:fedora-object-pid] has been submitted.'),
+      'iw_rules_message_item_assigned' => _islandora_workflow_rules_message('Display a Drupal message when an object is assigned', 'event_islandora_workflow_rules_assign_object', 'The object [object:fedora-object-pid] has been assigned.'),
+      'iw_rules_message_item_deleted' => _islandora_workflow_rules_message('Display a Drupal message when an object is deleted', 'event_islandora_workflow_rules_delete_object', 'The object [object:fedora-object-pid] has been deleted.'),
+    ),
     'rule sets' => array(
       // No rule sets.
     ),

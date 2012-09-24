@@ -201,6 +201,11 @@ function islandora_workflow_rules_event_info() {
       'module' => 'Islandora Rules',
       'arguments' => $arguments,
     ),
+    'islandora_workflow_rules_delete_object' => array(
+      'label' => t('After deleting a Fedora object'),
+      'module' => 'Islandora Rules',
+      'arguments' => $arguments,
+    ),
   );
 }
 

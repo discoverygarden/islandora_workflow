@@ -352,7 +352,7 @@ function islandora_workflow_work_form_page_one(&$form_state, $tab, $page) {
   $form['Delete'] = array(
     '#type' => 'submit',
     '#weight' => '7',
-    '#value' => t('Delete'),
+    '#value' => t('Delete...'),
   );
 
   $form['#submit'][] = 'islandora_workflow_work_form_submit';
@@ -389,33 +389,48 @@ function islandora_workflow_work_form_page_two(&$form_state, $tab) {
   $form = array();
   $values = $form_state['values']['workflow']['elements'];
   $collections = array_keys($values);
-  $possible_assignees = get_possible_assignees($collections);
 
-  $form['assignees'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Assign Rejected Objects'),
-    '#description' => t('You may assign rejected objects to a user with suitable permissions.'),
-    '#theme' => 'workflow_table',
-    '#tree' => TRUE,
-  );
-  // $form['workflow'] = islandora_workflow_work_form_common($form_state, $tab);
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Reject and Assign'),
-  );
-  foreach ($values as $collection_pid => $object) {
-    if (!is_array($object)) {
-      continue;
-    }
-    $options = $possible_assignees[$collection_pid]['rejected'];
+  if ($form_state['clicked_button'] == t('Delete...')) {
+    drupal_set_message(t('Deleting items removes them from workflow and from the active repository. This action is not reversible. Are you sure you want to continue?'), 'warning');
+    $form['delete'] = array(
+      '#type' => 'submit',
+      '#value' => t('Delete Objects'),
+    );
+    $form['cancel'] = array(
+      '#type' => 'submit',
+      '#value' => t('Cancel'),
+    );
+  }
 
-    foreach ($object as $object_pid => $attributes) {
-      if (!empty($attributes['Selecter'])) {
-        $form['assignees'][$collection_pid][$object_pid]['Assign'] = array(
-          '#type' => 'select',
-          '#options' => array_combine($options, $options),
-          '#default_value' => $attributes['Assign'],
-        );
+  if ($form_state['clicked_button'] == t('Reject...')) {
+    $possible_assignees = get_possible_assignees($collections);
+
+    $form['assignees'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Assign Rejected Objects'),
+      '#description' => t('You may assign rejected objects to a user with suitable permissions.'),
+      '#theme' => 'workflow_table',
+      '#tree' => TRUE,
+    );
+    // $form['workflow'] = islandora_workflow_work_form_common($form_state, $tab);
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Reject and Assign'),
+    );
+    foreach ($values as $collection_pid => $object) {
+      if (!is_array($object)) {
+        continue;
+      }
+      $options = $possible_assignees[$collection_pid]['rejected'];
+
+      foreach ($object as $object_pid => $attributes) {
+        if (!empty($attributes['Selecter'])) {
+          $form['assignees'][$collection_pid][$object_pid]['Assign'] = array(
+            '#type' => 'select',
+            '#options' => array_combine($options, $options),
+            '#default_value' => $attributes['Assign'],
+          );
+        }
       }
     }
   }
@@ -1976,11 +1991,15 @@ function islandora_workflow_work_form_submit($form, &$form_state) {
       islandora_workflow_submit_object($object_id);
     }
   }
-  elseif ($clicked_button == 'Delete') {
+  elseif ($clicked_button == 'Delete...') {
+    $form_state['storage']['step'] += 1;
+    $form_state['rebuild'] = TRUE;
     // This sets fedora state to D.
+    /*
     foreach ($selected_object_ids as $object_id) {
       islandora_workflow_delete_object($object_id);
     }
+     */
   }
   elseif ($clicked_button == 'Reject...') {
     $form_state['storage']['step'] += 1;
@@ -2273,6 +2292,14 @@ function islandora_workflow_user_edit_batch($edit, $account, $category = NULL) {
  *   The existing form state
  */
 function islandora_workflow_work_form_page_two_submit($form, &$form_state) {
+  if ($form_state['clicked_button']['#value'] == t('Delete Objects')) {
+    $values = $form_state['values']['workflow']['elements'];
+    foreach ($values as $collection_pid => $object) {
+      foreach ($object as $object_pid => $attributes) {
+        islandora_workflow_delete_object($object_id);
+      }
+    }
+  }
   if ($form_state['clicked_button']['#value'] == t('Reject and Assign')) {
     foreach ($form_state['values']['assignees'] as $collection_id => $object) {
       foreach ($object as $object_id => $assignees) {

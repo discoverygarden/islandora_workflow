@@ -789,6 +789,7 @@ function islandora_workflow_delete_object($object_id) {
 
   module_load_include('object.inc', 'islandora_fedora_api');
   $object = new FedoraObject($object_id);
+  rules_invoke_event('islandora_workflow_rules_delete_object', $object);
   return ($object->__set('state', 'D'));
 }
 
