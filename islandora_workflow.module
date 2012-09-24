@@ -1924,6 +1924,7 @@ function islandora_workflow_batch_finished($success, $results, $operations) {
 function islandora_workflow_work_form_validate($form, &$form_state) {
   $clicked_button = $form_state['clicked_button']['#value'];
   switch ($clicked_button) {
+    case 'Submit':
     case 'Approve':
     case 'Assign':
     case 'Publish':
