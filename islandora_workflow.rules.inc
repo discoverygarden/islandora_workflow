@@ -67,7 +67,7 @@ function islandora_workflow_rules_email_recipients($object, $settings) {
       $recipients[] = $creator->uid;
     }
   }
-  return $recipients;
+  return array_filter(array_unique($recipients));
 }
 
 /**
