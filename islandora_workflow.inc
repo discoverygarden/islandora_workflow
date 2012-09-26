@@ -348,22 +348,23 @@ function islandora_workflow_itql_to_array($query_results) {
  *   $result the return mesage from fedora
  */
 function islandora_workflow_init_workflow($object_id) {
-  module_load_include('object.inc', 'islandora_fedora_api');
-  $object = new FedoraObject($object_id);
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+
+  $item - new Fedora_Item($object_id);
+  if (!$item->exists()) {
+    return FALSE;
+  }
 
   // Attach default workflow.
   $default_xml_file_name = drupal_get_path('module', 'islandora_workflow') . '/start_workflow.xml';
-  $workflow_parser = new DOMDocument();
-  $workflow_parser->load($default_xml_file_name);
-  $object->addDatastream('islandora_workflow',
-    NULL,
-    $workflow_parser->saveXML(),
-    array(
-      'dsLabel' => 'workflow',
-      'mimeType' => 'text/xml',
-      'controlGroup' => 'X',
-      'logMessage' => 'Adding islandora_workflow datastream(editorial workflow tracking).',
-    )
+
+  $item->add_datastream_from_file(
+      $default_xml_file_name,
+      $dsid = 'islandora_workflow',
+      $ds_label = NULL,
+      $mimetype = 'text/xml',
+      $control_group = 'X',
+      $log_message = 'Adding islandora_workflow datastream(editorial workflow tracking).'
   );
 
   // Set state.
@@ -483,6 +484,8 @@ function islandora_workflow_approve_object($object_id) {
  *   FALSE if the publication was not attempted
  */
 function islandora_workflow_publish_object($object_id) {
+  
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
 
   // Permission check.
@@ -494,9 +497,9 @@ function islandora_workflow_publish_object($object_id) {
   if (islandora_workflow_get_object_workflow_state($object_id) != 'published') {
     islandora_workflow_set_object_workflow_state($object_id, 'published');
     // Make the object viewable.
-    module_load_include('object.inc', 'islandora_fedora_api');
-    $object = new FedoraObject($object_id);
-    return ($object->__set('state', 'A'));
+    $label = islandora_workflow_get_object_label($object_id);
+    $item = new Fedora_Item($object_id);
+    $item->modify_object($label, 'A');
   }
   else {
     drupal_set_message(t('The object %pid could not be published, it was not in an appropriate workflow state.', array('%pid' => $object_id)));
@@ -620,18 +623,21 @@ function islandora_workflow_assign_object($object_id, $user_name) {
  *   $result the return mesage from Fedora
  */
 function islandora_workflow_set_object_workflow_state($object_id, $state) {
-  module_load_include('object.inc', 'islandora_fedora_api');
-  // For getting an object.
-  module_load_include('inc', 'islandora_fedora_api', 'islandora_fedora_api.exception');
 
-  $object = new FedoraObject($object_id);
-  $workflow_parser = new DOMDocument();
-  global $user;
-  $object_datastreams = $object->get_datastreams();
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+
+  GLOBAL $user;
+
+  $item = new Fedora_Item($object_id);
+  if (!$item->exists()) {
+    return FALSE;
+  }
 
   // Get the collection of this object.
   $collection = islandora_workflow_get_object_parent($object_id);
 
+  $workflow_parser = new DOMDocument();
+  
   // Make sure there is an appropriate XACML datastream if there should be.
   if (variable_get('islandora_workflow_enforce_security', 0) && module_exists('islandora_xacml_api') && $state != 'published') {
     module_load_include('inc', 'islandora_xacml_api', 'Xacml');
@@ -650,33 +656,47 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
     $xacml->managementRule->addUser($perms['users']);
     $xacml->viewingRule->addUser($perms['users']);
 
-    if (isset($object_datastreams['POLICY'])) {
-      $object_datastreams['POLICY']->content = $xacml->getXmlString();
+    if (isset($item->datastreams['POLICY'])) {
+      $item->modify_datastream(
+          $xacml->getXmlString(),
+          $ds_id = 'POLICY',
+          $ds_label = NULL,
+          $mimetype = 'text/xml'
+      );
     }
     else {
-      $object->addDatastream('POLICY', NULL, $xacml->getXmlString(), array('mimeType' => 'text/xml', 'controlGroup' => 'X'));
+      $item->add_datastream_from_string(
+          $xacml->getXmlString(),
+          $ds_id = 'POLICY',
+          $ds_label = NULL,
+          $mimetype = 'text/xml',
+          $control_group = 'X'
+      );
     }
   }
   else {
     try {
       /* XACML is disabled. delete the xacml datastream if
        * it exists before it starts causing problems.*/
-      if (isset($object_datastreams['POLICY'])) {
-        $object_datastreams['POLICY']->purge();
+      if (isset($item->datastreams['POLICY'])) {
+        $item->purge_datastream('POLICY');
       }
-      $collection_object = new FedoraObject($collection);
-      $collection_datastreams = $collection_object->get_datastreams();
+      $collection_item = new Fedora_Item($collection);
+      $collection_datastreams = $collection_item->datastreams;
 
-      if (isset($collection_datastreams['CHILD_SECURITY'])) {
-        $object->addDatastream('POLICY', NULL, $collection_datastreams['CHILD_SECURITY']->content, array(
-          'dsLabel' => 'security policy',
-          'mimeType' => 'text/xml',
-          'controlGroup' => 'X',
-          'logMessage' => 'Adding policy datastream.',
-        ));
+      if (isset($collection_item->datastreams['CHILD_SECURITY'])) {
+        $child_security = $collection_item->get_datastream_dissemination('CHILD_SECURITY');
+        $item->add_datastream_from_string(
+            $child_security,
+            $ds_id = 'POLICY',
+            $ds_label = 'security policy',
+            $mimetype = 'text/xml',
+            $control_group = 'X',
+            $log_message = 'Adding policy datastream.'
+        );
       }
     }
-    catch (FedoraAPIRestException $e) {
+    catch (Exception $e) {
       if ($e->http->code == 401) {
         // It has a policy but we can't delete it.
         drupal_set_message(t('This object has a policy datastream preventing it from being modified.'), 'error');
@@ -689,10 +709,9 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
   }
 
   // Update last modified user/time.
-  if (isset($object_datastreams['islandora_workflow'])) {
+  if (isset($item->datastreams['islandora_workflow'])) {
     // Build xml from DS.
-    $workflow_datastream = $object_datastreams['islandora_workflow'];
-    $workflow_string = $workflow_datastream->__get('content');
+    $workflow_string = $item->get_datastream_dissemination('islandora_workflow');
     $workflow_parser->loadXML($workflow_string);
     // Get elements to populate dynamicaly.
     $last_modified_by_array = $workflow_parser->getElementsByTagName('last_modified_by');
@@ -712,12 +731,16 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
       // Insert text node.
       $when_last_modified_element->parentNode->replaceChild($when_last_modified, $when_last_modified_element);
     }
-    $workflow_datastream->__set('content', $workflow_parser->saveXML());
+    $item->modify_datastream(
+        $workflow_parser->saveXML(),
+        $ds_id = 'islandora_workflow',
+        $ds_label = NULL,
+        $mimetype = 'text/xml'
+    );
   }
   else {
     // Build xml from default if there is no DS present.
     $default_xml_file_name = drupal_get_path('module', 'islandora_workflow') . '/start_workflow.xml';
-    $workflow_parser = new DOMDocument();
     $workflow_parser->load($default_xml_file_name);
     // Get elements to populate dynamicaly.
     $last_modified_by_array = $workflow_parser->getElementsByTagName('last_modified_by');
@@ -737,12 +760,14 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
       // Insert text node.
       $when_last_modified_element->appendChild($when_last_modified);
     }
-    $object->addDatastream('islandora_workflow', NULL, $workflow_parser->saveXML(), array(
-      'dsLabel' => 'workflow',
-      'mimeType' => 'text/xml',
-      'controlGroup' => 'X',
-      'logMessage' => 'Adding islandora_workflow datastream (workflow tracking).',
-    ));
+    $item->add_datastream_from_string(
+        $workflow_parser->saveXML(),
+        $ds_id = 'islandora_workflow',
+        $ds_label = 'workflow',
+        $mimetype = 'text/xml',
+        $control_group = 'X',
+        $log_message = 'Adding islandora_workflow stream (workflow tracking).'
+    );
   }
 
   // Change the rels-int.
@@ -751,7 +776,8 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
   /* Make sure that the object's fedora
    * state is going to be set to I if the object is still in workflow.*/
   if ($state != 'published' && islandora_workflow_get_object_fedora_state($object_id) != 'I') {
-    $object->__set('state', 'I');
+    $label = islandora_workflow_get_object_label($object_id);
+    $item->modify_object($label, 'I');
   }
   module_invoke_all('workflow_state_change', $object_id, $state);
   return (islandora_workflow_set_object_relationship($object_id, 'state', $state));
@@ -770,15 +796,15 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
  *   FALSE if there is an exception in geting the label
  */
 function islandora_workflow_get_object_label($object_id) {
-  try {
-    module_load_include('object.inc', 'islandora_fedora_api');
-    $object = new FedoraObject($object_id);
-    $label = $object->__get('label');
-  }
-  catch (FedoraAPIRestException $e) {
+  module_load_include();
+  $item = new Fedora_Item($object_id);
+  if (!$item->exists()) {
     return FALSE;
   }
-  return $label;
+  if (!isset($item->objectProfile->objLabel)) {
+    return '';
+  }
+  return $item->objectProfile->objLabel;
 }
 
 /**
@@ -796,6 +822,7 @@ function islandora_workflow_get_object_label($object_id) {
  */
 function islandora_workflow_delete_object($object_id) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
 
   // Permission check.
   if (!islandora_workflow_user_object_permission_check($object_id)) {
@@ -803,10 +830,16 @@ function islandora_workflow_delete_object($object_id) {
     return FALSE;
   }
 
-  module_load_include('object.inc', 'islandora_fedora_api');
-  $object = new FedoraObject($object_id);
-  rules_invoke_event('islandora_workflow_rules_delete_object', $object);
-  return ($object->__set('state', 'D'));
+  $label = islandora_workflow_get_object_label($object_id);
+  $item = new Fedora_Item($object_id);
+  $response = $item->modify_object($label, 'D');
+  if ($response) {
+    rules_invoke_event('islandora_workflow_rules_delete_object', $object);
+    return $response;
+  }
+  else {
+    return FALSE;
+  }
 }
 
 /**
@@ -825,15 +858,12 @@ function islandora_workflow_delete_object($object_id) {
  */
 function islandora_workflow_get_object_creator($object_id) {
 
-  module_load_include('object.inc', 'islandora_fedora_api');
-  try {
-    $object = new FedoraObject($object_id);
-    $creator = $object->__get('ownerId');
-  }
-  catch (FedoraAPIRestException $e) {
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+  $item = new Fedora_Item($object_id);
+  if (!$item->exists()) {
     return FALSE;
   }
-  return $creator;
+  return $item->objectProfile->objOwnerId;
 }
 
 /**
@@ -850,16 +880,19 @@ function islandora_workflow_get_object_creator($object_id) {
  *   FALSE if the state of the object could not be retrieved.
  */
 function islandora_workflow_get_object_fedora_state($object_id) {
-  module_load_include('object.inc', 'islandora_fedora_api');
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
 
-  try {
-    $object = new FedoraObject($object_id);
-    $state = $object->__get('state');
-  }
-  catch (FedoraAPIRestException $e) {
+  $params = array(
+    'query' => 'pid=' . $object_id,
+    'resultFields' => array('pid', 'state'),
+    'maxResults' => 1,
+  );
+  $response = Fedora_Item::soap_call('findObjects', $params);
+
+  if (!$response) {
     return FALSE;
   }
-  return $state;
+  return $response->result->resultList->objectFields[0]->state;
 }
 
 /**
@@ -877,29 +910,20 @@ function islandora_workflow_get_object_fedora_state($object_id) {
  */
 function islandora_workflow_get_object_workflow_state($object_id) {
 
-  module_load_include('raw.inc', 'islandora_fedora_api');
-  // For getting an object.
-  $apim_object = new FedoraAPIM();
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
 
-  try {
-    $relationships = $apim_object->getRelationships($object_id, 'info:islandora/islandora-system:def/islandora_workflow#state');
-  }
-  catch (FedoraAPIRestException $e) {
+  $islandora_workflow_namespace = 'info:islandora/islandora-system:def/islandora_workflow#';
+
+  $item = new Fedora_Item($object_id);
+  if (!$item->exists()) {
     return FALSE;
   }
-
-  $relationships_parser = new DOMDocument();
-  $relationships_parser->loadXML($relationships->data);
-
-  $state_elements = $relationships_parser->getElementsByTagNameNS('info:islandora/islandora-system:def/islandora_workflow#', 'state');
-
-  $state = $state_elements->item(0)->firstChild;
-  if ($state) {
-    $state = $state->nodeValue;
-    return $state;
+  $workflow_relationships = $item->get_rdf_relationships($islandora_workflow_namespace);
+  if (!empty($workflow_relationships)) {
+    return $workflow_relationships['state'][0];
   }
-
   return FALSE;
+
 }
 
 /**
@@ -915,28 +939,22 @@ function islandora_workflow_get_object_workflow_state($object_id) {
  *   user's name, or false if none was set
  */
 function islandora_workflow_get_object_assignee($object_id) {
-  module_load_include('raw.inc', 'islandora_fedora_api');
-  // For getting an object.
-  $apim_object = new FedoraAPIM();
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
 
-  try {
-    $relationships = $apim_object->getRelationships($object_id, 'info:islandora/islandora-system:def/islandora_workflow#assignee');
-  }
-  catch (FedoraAPIRestException $e) {
+  $item = new Fedora_Item($object_id);
+  if (!$item->exists()) {
     return FALSE;
   }
+  $namespace = 'info:islandora/islandora-system:def/islandora_workflow#';
+  $workflow_relationships = $item->get_rdf_relationships($namespace);
 
-  $relationships_parser = new DOMDocument();
-  $relationships_parser->loadXML($relationships->data);
-
-  $assignee_elements = $relationships_parser->getElementsByTagNameNS('info:islandora/islandora-system:def/islandora_workflow#', 'assignee');
-
-  $assignee = $assignee_elements->item(0)->firstChild;
-  if ($assignee) {
-    $assignee = $assignee->nodeValue;
-    return $assignee;
+  if (!empty($workflow_relationships['assignee'])) {
+    foreach($workflow_relationships['assignee'] as $assignee) {
+      if (!empty($assignee)) {
+        return $assignee;
+      }
+    }
   }
-
   return FALSE;
 }
 
@@ -947,11 +965,11 @@ function islandora_workflow_get_object_assignee($object_id) {
  * The function currently only does literals.
  *
  * @param string $object_id
- *   the Fedora PID of the object whos rels-ext will be modified
- * @param string $relationship_in
+ *   the Fedora PID of the object whos RELS-EXT or RELS-INT will be modified
+ * @param string $relationship
  *   the relationship to set
  * @param string $target
- *   a litteral or Fedora PID string (object of the relationship)
+ *   a literal or Fedora PID string (object of the relationship)
  * @param string $subject
  *   This defaults to the object's pid in the REST
  *   interface, only specify if a datastream
@@ -959,29 +977,27 @@ function islandora_workflow_get_object_assignee($object_id) {
  * @return object
  *   the response from fedora for adding/modifying the relationship
  */
-function islandora_workflow_set_object_relationship($object_id, $relationship_in, $target, $subject = NULL) {
-  $islandora_workflow_namespace = 'info:islandora/islandora-system:def/islandora_workflow#';
-  module_load_include('raw.inc', 'islandora_fedora_api');
-  $apim_object = new FedoraAPIM();
+function islandora_workflow_set_object_relationship($object_id, $relationship, $target, $subject = NULL) {
 
-  // Get existing relationshp.
-  $relationships = $apim_object->getRelationships($object_id, $islandora_workflow_namespace . $relationship_in, $subject);
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
 
-  $relationships_parser = new DOMDocument();
-  $relationships_parser->loadXML($relationships->data);
-  $relationship_elements = $relationships_parser->getElementsByTagNameNS($islandora_workflow_namespace, $relationship_in);
-  $current_relationship = NULL;
-  $relationship = $relationship_elements->item(0);
-
-  if (!empty($relationship)) {
-    foreach ($relationship->childNodes as $relationship_text_node) {
-      $current_relationship = $relationship_text_node->nodeValue;
-      // Clear current relationship.
-      $purge_response = $apim_object->purgeRelationship($object_id, $islandora_workflow_namespace . $relationship_in, $current_relationship, array('isLiteral' => 'true', 'subject' => $subject));
-    }
+  $namespace = 'info:islandora/islandora-system:def/islandora_workflow#';
+  
+  $item = new Fedora_Item($object_id);
+  if (!$item->exists()) {
+    return FALSE;
   }
-  // Set new relationship.
-  return $apim_object->addRelationship($object_id, $islandora_workflow_namespace . $relationship_in, $target, array('isLiteral' => 'true', 'subject' => $subject));
+  
+  if ($subject) {
+    // Subject is an internal one - use RELS-INT.
+    $item->purge_dsid_relationships($subject, $relationship, $target, $namespace);
+    return $item->add_dsid_relationship($subject, $relationship, $target, $namespace);
+  }
+  else {
+    // External relationship - use RELS-EXT.
+    $item->purge_relationships($relationship, $target, $namespace, RELS_TYPE_PLAIN_LITERAL);
+    return $item->add_relationships($relationship, $target, $namespace, RELS_TYPE_PLAIN_LITERAL);
+  }
 }
 
 /**
@@ -1002,49 +1018,18 @@ function islandora_workflow_set_object_relationship($object_id, $relationship_in
  *   FALSE if no parent found
  */
 function islandora_workflow_get_object_parent($object_id) {
-  $parent_relationship = 'isMemberOf';
-  $parent_relationship_namespace = 'info:fedora/fedora-system:def/relations-external#';
-  module_load_include('raw.inc', 'islandora_fedora_api');
-  $apim_object = new FedoraAPIM();
-  $relationships_parser = new DOMDocument();
-  $parent = FALSE;
 
-  // Get relation ship data.
-  try {
-    $relationships = $apim_object->getRelationships($object_id, $parent_relationship_namespace . $parent_relationship);
-    // Grab realtionship.
-    $relationships_parser->loadXML($relationships->data);
-    $relationship_elements = $relationships_parser->getElementsByTagNameNS($parent_relationship_namespace, $parent_relationship);
-    $relationship = $relationship_elements->item(0);
-  }
-  catch (FedoraAPIRestException $e) {
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+
+  $item = new Fedora_Item($object_id);
+  if (!$item->exists()) {
     return FALSE;
   }
-
-  // Handle second collecion memberships string if the first wasn't found.
-  if (empty($relationship)) {
-    $parent_relationship = 'isMemberOfCollection';
-    try {
-      $relationships = $apim_object->getRelationships($object_id, $parent_relationship_namespace . $parent_relationship);
-      // Grab relationship.
-      $relationships_parser->loadXML($relationships->data);
-      $relationship_elements = $relationships_parser->getElementsByTagNameNS($parent_relationship_namespace, $parent_relationship);
-      $relationship = $relationship_elements->item(0);
-    }
-    catch (FedoraAPIRestException $e) {
-      return FALSE;
-    }
+  $parents = $item->get_relationships('isMemberOf');
+  if (!empty($parents)) {
+    return $parents[0]['object'];
   }
-
-  // Handle relationship data.
-  if (!empty($relationship)) {
-    $parent = $relationship->getAttributeNS('http://www.w3.org/1999/02/22-rdf-syntax-ns#', 'resource');
-    // Cut out 'info:fedora/'.
-    if (substr($parent, 0, 12) == 'info:fedora/') {
-      $parent = substr($parent, 12, strlen($parent));
-    }
-  }
-  return $parent;
+  return FALSE;
 }
 
 /**
@@ -1065,18 +1050,19 @@ function islandora_workflow_get_object_parent($object_id) {
  */
 function islandora_workflow_set_object_note($object_id, $subject, $body) {
 
-  module_load_include('object.inc', 'islandora_fedora_api');
-  // For getting an object.
-  $object = new FedoraObject($object_id);
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+  
+  GLOBAL $user;
+
+  $item = new Fedora_Item($object_id);
   $workflow_parser = new DOMDocument();
-  global $user;
+
   $object_datastreams = $object->get_datastreams();
-  if (!isset($object_datastreams['islandora_workflow'])) {
+  if (!isset($item->datastreams['islandora_workflow'])) {
     return FALSE;
   }
   // Get the DS xml in dom object.
-  $workflow_datastream = $object_datastreams['islandora_workflow'];
-  $workflow_string = $workflow_datastream->__get('content');
+  $workflow_string = $item->get_datastream_dissemination('islandora_workflow');
   $workflow_parser->loadXML($workflow_string);
 
   // Modify DS xml.
@@ -1157,7 +1143,12 @@ function islandora_workflow_set_object_note($object_id, $subject, $body) {
   islandora_workflow_set_object_relationship($object_id, 'has_note_subject', $subject, 'info:fedora/' . $object_id . '/islandora_workflow');
 
   // Set the new DS content.
-  return ($workflow_datastream->__set('content', $workflow_parser->saveXML()));
+  return $item->modify_datastream(
+      $workflow_parser->saveXML(),
+      $ds_id = 'islandora_workflow',
+      $ds_label = 'workflow',
+      $mimetype = 'text/xml'
+  );
 }
 
 /**
@@ -1172,31 +1163,20 @@ function islandora_workflow_set_object_note($object_id, $subject, $body) {
  */
 function islandora_workflow_get_object_note_subject($object_id) {
 
-  module_load_include('object.inc', 'islandora_fedora_api');
-  try {
-    $object = new FedoraObject($object_id);
-    $workflow_parser = new DOMDocument();
-    global $user;
-    $object_datastreams = $object->get_datastreams();
-    if (!isset($object_datastreams['islandora_workflow'])) {
-      return FALSE;
-    }
-    // Get the DS xml in dom object.
-    $workflow_datastream = $object_datastreams['islandora_workflow'];
-    $workflow_string = $workflow_datastream->__get('content');
-    $workflow_parser->loadXML($workflow_string);
-  }
-  catch (FedoraAPIRestException $e) {
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+
+  $object_id = 'islandora:156';
+  $item = new Fedora_Item($object_id);
+  if (!$item->exists()) {
     return FALSE;
   }
-  $subject = '';
-
-  $subject_node_list = $workflow_parser->getElementsByTagName('subject');
-  foreach ($subject_node_list as $subject_element) {
-    // Get the text.
-    $subject = $subject_element->nodeValue;
+  $iw = $item->get_datastream_dissemination('islandora_workflow');
+  if (!$iw) {
+    return FALSE;
   }
-  return $subject;
+  $dom = new DOMDocument();
+  $dom->loadXML($iw);
+  return $dom->getElementsByTagName('subject')->item(0)->nodeValue;
 }
 
 /**
@@ -1211,36 +1191,21 @@ function islandora_workflow_get_object_note_subject($object_id) {
  */
 function islandora_workflow_get_object_note_body($object_id) {
 
-  module_load_include('object.inc', 'islandora_fedora_api');
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
 
-  try {
-    $object = new FedoraObject($object_id);
-    $workflow_parser = new DOMDocument();
-    global $user;
-    $object_datastreams = $object->get_datastreams();
-    if (!isset($object_datastreams['islandora_workflow'])) {
-      return FALSE;
-    }
-    // Get the DS xml in dom object.
-    $workflow_datastream = $object_datastreams['islandora_workflow'];
-    $workflow_string = $workflow_datastream->__get('content');
-  }
-  catch (FedoraAPIRestException $e) {
+  $object_id = 'islandora:156';
+  $item = new Fedora_Item($object_id);
+  if (!$item->exists()) {
     return FALSE;
   }
-
-  $workflow_parser->loadXML($workflow_string);
-
-  $body = '';
-
-  $body_node_list = $workflow_parser->getElementsByTagName('body');
-
-  foreach ($body_node_list as $body_element) {
-    // Get the text.
-    $body = $body_element->nodeValue;
+  $iw = $item->get_datastream_dissemination('islandora_workflow');
+  if (!$iw) {
+    return FALSE;
   }
-
-  return $body;
+  $dom = new DOMDocument();
+  $dom->loadXML($iw);
+  return $dom->getElementsByTagName('body')->item(0)->nodeValue;
+  
 }
 
 /**
@@ -1317,28 +1282,23 @@ function format_email_array_to_string($emails_array) {
  */
 function islandora_workflow_get_object_state_time_stamp($object_id) {
 
-  $times = array();
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
 
-  module_load_include('object.inc', 'islandora_fedora_api');
-  $object = new FedoraObject($object_id);
-
-  $object_datastreams = $object->get_datastreams();
-
-  if (isset($object_datastreams['islandora_workflow'])) {
-    // Build xml from DS.
-    $workflow_parser = new DOMDocument();
-    $workflow_datastream = $object_datastreams['islandora_workflow'];
-    $workflow_string = $workflow_datastream->__get('content');
-    $workflow_parser->loadXML($workflow_string);
-    $when_last_modified_array = $workflow_parser->getElementsByTagName('when_last_modified');
-
-    foreach ($when_last_modified_array as $when_last_modified_element) {
-      // Get timestamp.
-      $times['islandora_workflow_modified'] = strtotime($when_last_modified_element->nodeValue);
-      $times['islandora_workflow_modified'] = format_date($times['islandora_workflow_modified'], $type = 'small');
-    }
+  $item = new Fedora_Item($object_id);
+  if (!$item->exists()) {
+    return FALSE;
   }
-
+  $iw = $item->get_datastream_dissemination('islandora_workflow');
+  if (!$iw) {
+    return FALSE;
+  }
+  $times = array();
+  $dom = new DOMDocument();
+  $dom->loadXML($iw);
+  $modified_times =  $dom->getElementsByTagName('when_last_modified');
+  foreach ($modified_times as $modified_time) {
+    $times['islandora_workflow_modified'] = format_date(strtotime($modified_time->nodeValue), 'small');
+  }
   return $times;
 }
 

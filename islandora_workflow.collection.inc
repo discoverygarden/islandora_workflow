@@ -106,28 +106,23 @@ function islandora_workflow_stop_tracking_collection_in_workflow($object_pid) {
  *
  * @return boolean
  *   TRUE if the collection is tracked in workflow, FALSE otherwise.
- *  @todo: look at creating api func for checking if rel exists
  */
 function islandora_workflow_is_collection_workflow_tracked($object_pid) {
 
-  module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
-  $relationship_in = 'is_tracked_by_workflow';
-  $islandora_workflow_namespace = 'info:islandora/islandora-system:def/islandora_workflow#';
-  module_load_include('raw.inc', 'islandora_fedora_api');
-  $apim_object = new FedoraAPIM();
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
 
-  // Get existing relationshp.
-  $relationships = $apim_object->getRelationships($object_pid, $islandora_workflow_namespace . $relationship_in);
+  $workflow_namespace = 'info:islandora/islandora-system:def/islandora_workflow#';
 
-  $relationships_parser = new DOMDocument();
-  $relationships_parser->loadXML($relationships->data);
-  $relationship_elements = $relationships_parser->getElementsByTagNameNS($islandora_workflow_namespace, $relationship_in);
-  $current_relationship = NULL;
-  $relationship = $relationship_elements->item(0);
-  if (!empty($relationship)) {
-    return TRUE;
+  $item = new Fedora_Item($object_id);
+  if (!$item->exists()) {
+    return FALSE;
+  }
+  $workflow_relationships = $item->get_rdf_relationships($workflow_namespace);
+  if (!empty($workflow_relationships)) {
+    return ('TRUE' == $workflow_relationships['is_tracked_by_workflow']);
   }
   return FALSE;
+  
 }
 
 /**

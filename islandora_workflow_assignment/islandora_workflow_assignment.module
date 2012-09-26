@@ -297,32 +297,23 @@ function islandora_workflow_assignment_workflow_state_change($object_pid, $state
  * @param string $assignee
  *   The Drupal username of the assignee.
  *
- * @return HTTPResponse
- *   A HTTP response from Fedora
+ * @return boolean
+ *   TRUE if any relationships were purged, FALSE otherwise.
  */
 function islandora_workflow_assignment_remove($object_pid, $assignee = NULL) {
 
-  module_load_include('inc', 'islandora_fedora_api', 'islandora_fedora_api.raw');
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
 
-  static $apim;
-  if (!isset($apim)) {
-    $apim = new FedoraAPIM();
-  }
+  $islandora_workflow_namespace = 'info:islandora/islandora-system:def/islandora_workflow#';
+  $predicate = 'assignee';
 
-  $predicate = 'info:islandora/islandora-system:def/islandora_workflow#assignee';
-  if (!$assignee) {
-    $response = $apim->getRelationships($object_pid, $predicate);
-    $pattern = '/<assignee.+?>([^<]+?)<\/assignee>/';
-    if (preg_match($pattern, $response->data, $matches)) {
-      $assignee = $matches[1][0];
-    }
-    else {
-      // @TODO return error message?
-      return FALSE;
-    }
+  $item = new Fedora_Item($object_id);
+  if (!$item->exists()) {
+    return FALSE;
   }
-  $optional_args = array('isLiteral' => TRUE);
-  return $apim->purgeRelationship($object_pid, $predicate, $assignee, $optional_args);
+  $workflow_relationships = $item->get_rdf_relationships($islandora_workflow_namespace);
+
+  $item->purge_relationships($predicate, $assignee, $islandora_workflow_namespace, RELS_TYPE_PLAIN_LITERAL);
   // @TODO drupal_set_message here -- OK for batch jobs?
 }
 

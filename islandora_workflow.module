@@ -1801,10 +1801,10 @@ function islandora_workflow_user_permissions_form_submit($collection_user_permis
  *   This is defined by drupal_batch.
  */
 function islandora_workflow_batch_function($collection_pid, $members, $delete, &$context) {
+
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   module_load_include('inc', 'islandora_xacml_api', 'Xacml');
   module_load_include('permissions.inc', 'islandora_workflow');
-  module_load_include('object.inc', 'islandora_fedora_api');
-  module_load_include('exception.inc', 'islandora_fedora_api');
   module_load_include('inc', 'islandora_workflow');
 
   if (empty($context['sandbox'])) {
@@ -1826,8 +1826,7 @@ function islandora_workflow_batch_function($collection_pid, $members, $delete, &
   $context['sandbox']['progress']++;
 
   try {
-    $object = new FedoraObject($pid);
-    $datastreams = $object->get_datastreams();
+    $item = new Fedora_Item($pid);
 
     if (!$delete) {
       $xacml = new Xacml();
@@ -1841,32 +1840,43 @@ function islandora_workflow_batch_function($collection_pid, $members, $delete, &
       $xacml->managementRule->addUser($perms['users']);
       $xacml->viewingRule->addUser($perms['users']);
 
-      if (isset($datastreams['POLICY'])) {
-        $datastreams['POLICY']->content = $xacml->getXmlString();
+      if (isset($item->datastreams['POLICY'])) {
+        $policy_content = $xacml->getXmlString();
+        $item->modify_datastream(
+            $xacml->getXmlString(),
+            $ds_id = 'POLICY',
+            $ds_label = 'Policy datastream',
+            $mimetype = 'text/xml'
+        );
       }
       else {
-        $object->addDatastream('POLICY', NULL, $xacml->getXmlString(), array(
-          'mimeType' => 'text/xml',
-          'controlGroup' => 'X',
-        ));
+        $item->add_datastream_from_string(
+          $xacml->getXmlString(),
+          $ds_id = 'POLICY',
+          $ds_label = NULL,
+          $mimetype = 'text/xml',
+          $control_group = 'X',
+          $log_message = 'Adding policy datastream.'
+        );
       }
     }
     else {
       /* XACML is disabled. delete the xacml datastream if it
        * exists before it starts causing problems.*/
-      if (isset($datastreams['POLICY'])) {
-        $datastreams['POLICY']->purge();
+      if (isset($item->datastreams['POLICY'])) {
+        $item->purge_datastream('POLICY');
       }
-      $collection_object = new FedoraObject($collection_pid);
-      $collection_ds = $collection_object->get_datastreams();
-
-      if (isset($collection_ds['CHILD_SECURITY'])) {
-        $object->addDatastream('POLICY', NULL, $collection_ds['CHILD_SECURITY']->content, array(
-          'dsLabel' => 'security policy',
-          'mimeType' => 'text/xml',
-          'controlGroup' => 'X',
-          'logMessage' => 'Adding policy datastream.',
-        ));
+      $collection_item = new Fedora_Item($collection_pid);
+      
+      if (isset($collection_item->datastreams['CHILD_SECURITY'])) {
+        $item->add_datastream_from_string(
+          $collection_item->get_datastream_dissemination('CHILD_SECURITY'),
+          $ds_id = 'POLICY',
+          $ds_label = NULL,
+          $mimetype = 'text/xml',
+          $control_group = 'X',
+          $log_message = 'Adding policy datastream.'
+        );
       }
     }
     $context['results']['success'][] = $pid;
