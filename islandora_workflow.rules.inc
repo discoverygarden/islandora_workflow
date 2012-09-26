@@ -215,9 +215,9 @@ function islandora_workflow_rules_event_info() {
 function islandora_workflow_token_values($type, $object = NULL, $options = array()) {
   $values = array();
   if ('fedora_object' == $type) {
-    $values['fedora-object-pid'] = $object->__get('pid');
-    $values['fedora-object-title'] = $object->__get('label');
-    $values['fedora-object-creator'] = $object->__get('ownerId');
+    $values['fedora-object-pid'] = $object->objectProfile->pid;
+    $values['fedora-object-title'] = $object->objectProfile->objLabel;
+    $values['fedora-object-creator'] = $object->objectProfile->objOwnerId;
   }
   return $values;
 }
@@ -259,12 +259,12 @@ class FedoraObjectRulesDataType extends rules_data_type {
    * @param string $pid
    *   The Fedora PID of the object.
    *
-   * @return FedoraObject
+   * @return Fedora_Item
    *   A Fedora object.
    */
   function load($pid) {
-    module_load_include('inc', 'islandora_fedora_api', 'islandora_fedora_api.object');
-    $object = new FedoraObject($pid);
+    module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+    $object = new Fedora_Item($pid);
     return $object;
   }
 
@@ -277,7 +277,7 @@ class FedoraObjectRulesDataType extends rules_data_type {
   function get_identifier() {
     $fedora_object = $this->get();
     if ($fedora_object) {
-      return $fedora_object->__get('pid');
+      return $fedora_object->pid;
     }
   }
 
