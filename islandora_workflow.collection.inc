@@ -15,7 +15,7 @@
  *   $collection_list an associated array of collection pids and names
  */
 function islandora_workflow_get_collections() {
-  module_load_include('inc', 'islandora_fedora_api', 'islandora_fedora_api.risearch');
+  module_load_include('inc', 'fedora_repository', 'ObjectHelper');
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
 
   $query_file_name = drupal_get_path('module', 'islandora_workflow') . '/collection_workflow_states_query.txt';
@@ -23,51 +23,21 @@ function islandora_workflow_get_collections() {
   $query_string = fread($query_file_handle, filesize($query_file_name));
   fclose($query_file_handle);
 
-  $query_return_string = query_resource_index($query_string);
-
-  if ($query_return_string) {
-    $query_return_dom = DOMDocument::loadXML($query_return_string);
-  }
-
-  // Format query results for use (xml->array).
-  $collection_data = array();
-  $result_nodes = $query_return_dom->getElementsByTagName('result');
-  $result_nodes_length = $result_nodes->length;
-  if ($result_nodes_length > 0) {
-    for ($i = 0; $i < $result_nodes_length; $i++) {
-      $result_node = $result_nodes->item($i);
-
-      $label_element = $result_node->getElementsByTagName('label')->item(0);
-      $collection_pid_element = $result_node->getElementsByTagName('collection_object')->item(0);
-      $workflow_tracking_element = $result_node->getElementsByTagName('workflow_tracking')->item(0);
-
-      $collection_object_uri = $collection_pid_element->getAttribute('uri');
-      // Removing: info:fedora/ is 12 chars.
-      $collection_object_pid = substr($collection_object_uri, 12, strlen($collection_object_uri));
-      // Need to extract the pid.
-      $collection_data[$collection_object_pid] = array();
-
-      if ($label_element) {
-        $label = $label_element->nodeValue;
-        if ($label) {
-          // The label may not be pupulated.
-          $collection_data[$collection_object_pid]['label'] = $label;
-        }
-      }
-      if ($workflow_tracking_element) {
-        $workflow_tracking = $workflow_tracking_element->nodeValue;
-        if ($workflow_tracking && $workflow_tracking == 'TRUE') {
-          $collection_data[$collection_object_pid]['workflow_tracking'] = TRUE;
-        }
-        else {
-          $collection_data[$collection_object_pid]['workflow_tracking'] = FALSE;
-        }
-      }
+  $query_results = ObjectHelper::performRiQuery($query_string, 'sparql');
+  $collections = array();
+  foreach ($query_results as $result) {
+    $collection_pid = substr($result['collection_object'], 12);
+    if (empty($collection_pid)) {
+      continue;
     }
+    $collections[$collection_pid] = array(
+      'label' => $result['label'],
+      'workflow_tracking' => 'TRUE' == $result['workflow_tracking'],
+    );
   }
   // Strip out non-applicable collections via namespace.
-  $collection_data = islandora_workflow_limit_collections_by_namespace($collection_data);
-  return $collection_data;
+  $collections = islandora_workflow_limit_collections_by_namespace($collections);
+  return $collections;
 }
 
 /**

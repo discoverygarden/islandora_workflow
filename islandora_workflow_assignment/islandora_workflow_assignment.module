@@ -15,7 +15,7 @@
  */
 function islandora_workflow_assignment_by_user($account, $limit = -1, $offset = 0) {
 
-  module_load_include('inc', 'islandora_fedora_api', 'islandora_fedora_api.risearch');
+  module_load_include('inc', 'fedora_repository', 'ObjectHelper');
 
   GLOBAL $user;
 
@@ -33,22 +33,16 @@ function islandora_workflow_assignment_by_user($account, $limit = -1, $offset = 
   $replacement = '\1' . $account->name . '\3';
 
   $query = preg_replace($pattern, $replacement, $query_string);
-  $query_return_json = query_resource_index($query, $limit, $offset, $format = 'json');
+  $query_results = ObjectHelper::performRiQuery($query, 'sparql', $limit, $offset);
 
-  if ($query_return_json) {
-    $query_return = json_decode($query_return_json);
-    $results = $query_return->results;
-    $return_results = array();
-    foreach ($results as $result) {
-      $index = preg_replace('/^info:fedora\//', '', $result->member_object);
-      $temp_result = (array) $result;
-      $temp_result['islandora_workflow_modified'] = $temp_result['timestamp'];
-      unset($temp_result['timestamp']);
-      $return_results[$index] = $temp_result;
-    }
-    return $return_results;
+  $objects = array();
+  foreach ($query_results as $result) {
+    $index = preg_replace('/^info:fedora\//', '', $result['member_object']);
+    $result['islandora_workflow_modified'] = $temp_result['timestamp'];
+    unset($result['timestamp']);
+    $objects[$index] = $result;
   }
-  return array();
+  return $objects;
 
 }
 
@@ -63,7 +57,7 @@ function islandora_workflow_assignment_by_user($account, $limit = -1, $offset = 
  */
 function islandora_workflow_assignment_by_collection($collection_pid) {
 
-  module_load_include('inc', 'islandora_fedora_api', 'islandora_fedora_api.risearch');
+  module_load_include('inc', 'fedora_repository', 'ObjectHelper');
 
   // Get the stored query.
   $query_file_name = drupal_get_path('module', 'islandora_workflow_assignment') . '/assignee_query.sparql';
@@ -73,13 +67,9 @@ function islandora_workflow_assignment_by_collection($collection_pid) {
 
   $query = preg_replace('/\?collection/', '"' . $collection_pid . '"', $query);
   $limit = -1;
-  $query_return_json = query_resource_index($query, $limit, $offset = 0, $format = 'json');
+  $query_results = ObjectHelper::performRiQuery($query, 'sparql', $limit, $offset = 0);
 
-  if ($query_return_json) {
-    $query_return = json_decode($query_return_json);
-    return $query_return->results;
-  }
-  return array();
+  return $query_results;
 
 }
 

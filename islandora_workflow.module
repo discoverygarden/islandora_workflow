@@ -443,8 +443,8 @@ function islandora_workflow_work_form_page_two(&$form_state, $tab) {
 
 function _islandora_workflow_get_created_items($account = NULL, $limit = -1, $offset = 0) {
 
-  module_load_include('inc', 'islandora_fedora_api', 'islandora_fedora_api.risearch');
-
+  module_load_include('inc', 'fedora_rpeository', 'ObjectHelper');
+  
   GLOBAL $user;
 
   if (empty($account)) {
@@ -461,22 +461,16 @@ function _islandora_workflow_get_created_items($account = NULL, $limit = -1, $of
   $replacement = '\1' . $account->name . '\3';
 
   $query = preg_replace($pattern, $replacement, $query);
-  $query_return_json = query_resource_index($query, $limit, $offset, $format = 'json');
 
-  if ($query_return_json) {
-    $query_return = json_decode($query_return_json);
-    $results = $query_return->results;
-    $return_results = array();
-    foreach ($results as $result) {
-      $index = preg_replace('/^info:fedora\//', '', $result->member_object);
-      $temp_result = (array) $result;
-      $temp_result['islandora_workflow_modified'] = $temp_result['timestamp'];
-      unset($temp_result['timestamp']);
-      $return_results[$index] = $temp_result;
-    }
-    return $return_results;
+  $query_results = ObjectHelper::performRiQuery($query, 'sparql', $limit, $offset);
+  $processed_results = array();
+  foreach($query_results as $result) {
+    $index = preg_replace('/^info:fedora\//', '', $result['member_object']);
+    $result['islandora_workflow_modified'] = $result['timestamp'];
+    unset($result['timestamp']);
+    $processed_results[$index] = $result;
   }
-  return array();
+  return $processed_results;
 
 }
 
@@ -2437,7 +2431,7 @@ function islandora_workflow_islandora_tabs_alter(&$tabs, $params) {
 function islandora_workflow_get_subcollections($collection_id = NULL) {
 
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
-  module_load_include('inc', 'islandora_fedora_api', 'islandora_fedora_api.risearch');
+  module_load_include('inc', 'fedora_repository', 'ObjectHelper');
 
   $query_file_name = drupal_get_path('module', 'islandora_workflow') . '/subcollection_query.sparql';
   $query_file_handle = fopen($query_file_name, "r");
@@ -2452,26 +2446,13 @@ function islandora_workflow_get_subcollections($collection_id = NULL) {
     $query_string = preg_replace('/\?collection/', "<{$collection_id}>", $query_string);
   }
 
-  $query_return_string = query_resource_index($query_string);
-
-  if ($query_return_string) {
-    $query_return_dom = DOMDocument::loadXML($query_return_string);
-  }
-
+  $query_results = ObjectHelper::performRiQuery($query_string, 'sparql');
   $subcollections = array();
-
-  $result_nodes = $query_return_dom->getElementsByTagName('result');
-  $result_nodes_length = $result_nodes->length;
-  if ($result_nodes_length > 0) {
-    for ($i = 0; $i < $result_nodes_length; $i++) {
-      $result_node = $result_nodes->item($i);
-      $subcollection_uri = $result_node->getElementsByTagName('subcollection')->item(0)->getAttribute('uri');
-      // Match the URI after "info:fedora/".
-      preg_match('/info:fedora\/(.*)$/', $subcollection_uri, $matches);
-      $subcollection_pid = $matches[1];
-      // Add to the array as a key => value pair for convenience.
-      $subcollections[$subcollection_pid] = $subcollection_pid;
-    }
+  foreach($query_results as $result) {
+    preg_match('/info:fedora\/(.*)$/', $result['subcollection'], $matches);
+    $subcollection_pid = $matches[1];
+    // Add to the array as a key => value pair for convenience.
+    $subcollections[$subcollection_pid] = $subcollection_pid;
   }
   // Strip out non-applicable collections via namespace.
   $subcollections = islandora_workflow_limit_collections_by_namespace($subcollections);
