@@ -137,6 +137,8 @@ function islandora_workflow_get_all_collections() {
  */
 function islandora_workflow_get_all_members_of_collection($collection_id) {
 
+  module_load_include('inc', 'fedora_repository', 'ObjectHelper');
+
   // Get info for query.
   $query_file_name = drupal_get_path('module', 'islandora_workflow') . '/member_query.txt';
   $query_file_handle = fopen($query_file_name, "r");
@@ -153,94 +155,17 @@ function islandora_workflow_get_all_members_of_collection($collection_id) {
 
   $query = preg_replace($pattern, $replacement, $query);
 
-  // Run query.
-  /*
-  $query_url .= "?type=tuples&flush=TRUE&format=Sparql". (($limit > 0)? "&limit=$limit" : "") ."&offset=$offset&lang=$type&query=". urlencode($query);
-  $query_return_string = do_curl($query_url);
-  if ($query_return_string) {
-    $query_return_dom = DOMDocument::loadXML($query_return_string);
+  $query_results = ObjectHelper::performRiQuery($query, 'sparql', $limit, $offset);
+
+  $processed_results = array();
+  foreach($query_results as $result) {
+    $index = preg_replace('/^info:fedora\//', '', $result['member_object']);
+    $result['islandora_workflow_modified'] = $temp_result['timestamp'];
+    unset($result['timestamp']);
+    $processed_results[$index] = $result;
   }
-   */
 
-  $query_return_json = query_resource_index($query, $limit, $offset, $format = 'json');
-
-  if ($query_return_json) {
-    $query_return = json_decode($query_return_json);
-    $results = $query_return->results;
-    $return_results = array();
-    foreach ($results as $result) {
-      $index = preg_replace('/^info:fedora\//', '', $result->member_object);
-      $temp_result = (array) $result;
-      $temp_result['islandora_workflow_modified'] = $temp_result['timestamp'];
-      unset($temp_result['timestamp']);
-      $return_results[$index] = $temp_result;
-    }
-    return $return_results;
-  }
-  return array();
-
-  /*
-  // Format query results for use (xml->array).
-  $result_nodes = $query_return_dom->getElementsByTagName('result');
-  $result_nodes_length = $result_nodes->length;
-  if ($result_nodes_length > 0) {
-    for ($i = 0; $i < $result_nodes_length; $i++) {
-      $result_node = $result_nodes->item($i);
-      $label_element = $result_node->getElementsByTagName('label')->item(0);
-      $assignee_element = $result_node->getElementsByTagName('assignee')->item(0);
-      $state_element = $result_node->getElementsByTagName('state')->item(0);
-      $member_object_element = $result_node->getElementsByTagName('member_object')->item(0);
-      $created_date_element = $result_node->getElementsByTagName('created_date')->item(0);
-      $owner_element = $result_node->getElementsByTagName('owner')->item(0);
-      $subject_element = $result_node->getElementsByTagName('subject')->item(0);
-      $timestamp_element = $result_node->getElementsByTagName('timestamp')->item(0);
-
-      $member_object = $member_object_element->getAttribute('uri');
-      // Need to extract the PID: info:fedora/ is 12 chars.
-      $member_object = substr($member_object, 12, strlen($member_object));
-
-      $member_data[$member_object] = array();
-
-      if ($label_element) {
-        $label = $label_element->nodeValue;
-        // The label may not be pupulated.
-        if ($label) {
-          $member_data[$member_object]['label'] = $label;
-        }
-      }
-      if ($assignee_element) {
-        $assignee = $assignee_element->nodeValue;
-        // The assignee may not be populated.
-        if ($assignee) {
-          $member_data[$member_object]['assignee'] = $assignee;
-        }
-      }
-      if ($state_element) {
-        $state = $state_element->nodeValue;
-        $member_data[$member_object]['state'] = $state;
-      }
-      if ($created_date_element) {
-        $created_date = $created_date_element->nodeValue;
-        $member_data[$member_object]['created_date'] = $created_date;
-      }
-      if ($owner_element) {
-        $owner = $owner_element->nodeValue;
-        $member_data[$member_object]['owner'] = $owner;
-      }
-      if ($timestamp_element) {
-        $timestamp = $timestamp_element->nodeValue;
-        $member_data[$member_object]['islandora_workflow_modified'] = $timestamp;
-      }
-      if ($subject_element) {
-        $subject = $subject_element->nodeValue;
-        $member_data[$member_object]['subject'] = $subject;
-      }
-    }
-    return $member_data;
-  }
-  return FALSE;
-   * 
-   */
+  return $processed_results;
 }
 
 /**
