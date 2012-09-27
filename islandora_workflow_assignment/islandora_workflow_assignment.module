@@ -38,7 +38,7 @@ function islandora_workflow_assignment_by_user($account, $limit = -1, $offset = 
   $objects = array();
   foreach ($query_results as $result) {
     $index = preg_replace('/^info:fedora\//', '', $result['member_object']);
-    $result['islandora_workflow_modified'] = $temp_result['timestamp'];
+    $result['islandora_workflow_modified'] = $result['timestamp'];
     unset($result['timestamp']);
     $objects[$index] = $result;
   }
@@ -112,7 +112,13 @@ function islandora_workflow_assignment_valid_assignee_permissions($state) {
  * @return array
  *   An array of batch operations.
  */
-function islandora_workflow_assignment_user_delete_batch($edit, $account) {
+function islandora_workflow_assignment_user_delete_batch($edit, $account = NULL) {
+
+  GLOBAL $user;
+
+  if (empty($account)) {
+    $account = drupal_clone($user);
+  }
 
   $assigned_objects = islandora_workflow_assignment_by_user($account);
   // @TODO make the following into a batch job.
