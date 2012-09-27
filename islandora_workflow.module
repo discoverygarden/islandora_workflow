@@ -918,7 +918,7 @@ function islandora_workflow_collections(&$form_state) {
   $form = array();
 
   // Make the form.
-  $form['#theme'] = 'workflow_collections';
+  // $form['#theme'] = 'workflow_collections';
 
   foreach ($collection_data as $collection_pid => $collection_info) {
     $form[$collection_pid] = array(
