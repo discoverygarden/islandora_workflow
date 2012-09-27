@@ -915,25 +915,25 @@ function islandora_workflow_collections(&$form_state) {
 
   $collection_data = islandora_workflow_get_collections();
 
-  $workflow_collection_form = array();
+  $form = array();
 
   // Make the form.
-  $workflow_collection_form['#theme'] = 'workflow_collections';
+  $form['#theme'] = 'workflow_collections';
 
   foreach ($collection_data as $collection_pid => $collection_info) {
-    $workflow_collection_form[$collection_pid] = array(
+    $form[$collection_pid] = array(
       '#type' => 'checkbox',
       '#title' => ($collection_info['label']) ? $collection_info['label'] : $collection_pid,
       '#default_value' => ($collection_info['workflow_tracking']) ? 1 : 0,
     );
   }
 
-  $workflow_collection_form['submit'] = array(
+  $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save collection configuration'),
   );
-
-  return $workflow_collection_form;
+  $form['#submit'] = array('islandora_workflow_collections_submit');
+  return $form;
 }
 
 /**
