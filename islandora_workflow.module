@@ -1317,6 +1317,7 @@ function islandora_workflow_role_permissions_form() {
     $collection_id = $_SESSION['workflow_permissions_page']['active_collection'];
     /* Change the default permission
      * string to be inline with the user friendly strings.*/
+    $default_value = '';
     if (array_key_exists($role_id, $current_collection_permissions)) {
       if (array_key_exists($collection_id, $current_collection_permissions[$role_id])) {
         if ($current_collection_permissions[$role_id][$collection_id] == 'islandora_workflow_Manager') {
@@ -1330,9 +1331,6 @@ function islandora_workflow_role_permissions_form() {
         }
         $default_value = array_search($current_collection_permissions[$role_id][$collection_id], $current_module_permissions[$role_id][key($role_name)]);
       }
-    }
-    else {
-      $default_value = '';
     }
     // Drupal made me do it...
     $form['islandora_workflow_collection_permissions_table']['permissions_table'][$role_id][$collection_id] = array(
@@ -1592,6 +1590,7 @@ function islandora_workflow_user_permissions_form(&$form_state) {
     $collection_id = $_SESSION['workflow_permissions_page']['active_collection'];
     /* Change the default permission string to be
      * inline with the user friendly strings.*/
+    $default_value = '';
     if(array_key_exists($user_id, $current_collection_permissions)) {
       if (array_key_exists($collection_id, $current_collection_permissions[$user_id])) {
         if ($current_collection_permissions[$user_id][$collection_id] == 'islandora_workflow_Manager') {
@@ -1605,9 +1604,6 @@ function islandora_workflow_user_permissions_form(&$form_state) {
         }
         $default_value = array_search($current_collection_permissions[$user_id][$collection_id], $current_module_permissions[$user_id][key($user_name)]);
       }
-    }
-    else {
-      $default_value = '';
     }
     // Drupal made me do it...
     $form['islandora_workflow_collection_permissions_table']['permissions_table'][$user_id][$collection_id] = array(
