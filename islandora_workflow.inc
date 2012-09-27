@@ -160,7 +160,7 @@ function islandora_workflow_get_all_members_of_collection($collection_id) {
   $processed_results = array();
   foreach($query_results as $result) {
     $index = preg_replace('/^info:fedora\//', '', $result['member_object']);
-    $result['islandora_workflow_modified'] = $temp_result['timestamp'];
+    $result['islandora_workflow_modified'] = $result['timestamp'];
     unset($result['timestamp']);
     $processed_results[$index] = $result;
   }
