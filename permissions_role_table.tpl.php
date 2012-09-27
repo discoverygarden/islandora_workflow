@@ -13,9 +13,12 @@
       <TH>
       		Role
       </TH>
+      <th>
+        <?php print $list['active_collection_label'] . ' [' . $list['active_collection_pid'] . ']'; ?>
+      </th>
       <!-- Display a header for each collection -->
       <?php
-      print('<TH>' . $_SESSION['workflow_permissions_page']['active_collection'] . '</TH>');
+      //print('<TH>' . $_SESSION['workflow_permissions_page']['active_collection'] . '</TH>');
       ?>
     </TR>
 	</THEAD>
