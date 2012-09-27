@@ -990,12 +990,12 @@ function islandora_workflow_set_object_relationship($object_id, $relationship, $
   
   if ($subject) {
     // Subject is an internal one - use RELS-INT.
-    $item->purge_dsid_relationships($subject, $relationship, $target, $namespace);
+    $item->purge_dsid_relationships($subject, $relationship, NULL, $namespace);
     return $item->add_dsid_relationship($subject, $relationship, $target, $namespace);
   }
   else {
     // External relationship - use RELS-EXT.
-    $item->purge_relationships($relationship, $target, $namespace, RELS_TYPE_PLAIN_LITERAL);
+    $item->purge_relationships($relationship, NULL, $namespace, RELS_TYPE_PLAIN_LITERAL);
     return $item->add_relationship($relationship, $target, $namespace, RELS_TYPE_PLAIN_LITERAL);
   }
 }
