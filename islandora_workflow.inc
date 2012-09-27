@@ -996,7 +996,7 @@ function islandora_workflow_set_object_relationship($object_id, $relationship, $
   else {
     // External relationship - use RELS-EXT.
     $item->purge_relationships($relationship, $target, $namespace, RELS_TYPE_PLAIN_LITERAL);
-    return $item->add_relationships($relationship, $target, $namespace, RELS_TYPE_PLAIN_LITERAL);
+    return $item->add_relationship($relationship, $target, $namespace, RELS_TYPE_PLAIN_LITERAL);
   }
 }
 
