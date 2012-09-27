@@ -768,7 +768,9 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
  *   FALSE if there is an exception in geting the label
  */
 function islandora_workflow_get_object_label($object_id) {
-  module_load_include();
+
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+  
   $item = new Fedora_Item($object_id);
   if (!$item->exists()) {
     return FALSE;
