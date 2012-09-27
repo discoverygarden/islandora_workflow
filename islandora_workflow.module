@@ -1299,7 +1299,7 @@ function islandora_workflow_role_permissions_form() {
   // Populate the form, Roles.
   foreach ($current_module_permissions as $role_id => $role_name) {
     // Add none to the possible options.
-    $current_module_permissions[$role_id][key($role_name)][] = '';
+    array_unshift($current_module_permissions[$role_id][key($role_name)], '');
     // Remove the islandora_workflow_Administrator permission.
     if (in_array('islandora_workflow_Administrator', $current_module_permissions[$role_id][key($role_name)])) {
       unset($current_module_permissions[$role_id][key($role_name)][array_search('islandora_workflow_Administrator', $current_module_permissions[$role_id][key($role_name)])]);
@@ -1574,7 +1574,7 @@ function islandora_workflow_user_permissions_form(&$form_state) {
   // Users.
   foreach ($current_module_permissions as $user_id => $user_name) {
     // Add none to the possible options.
-    $current_module_permissions[$user_id][key($user_name)][] = '';
+    array_unshift($current_module_permissions[$user_id][key($user_name)], '');
     // Rmove the islandora_workflow_Administrator permission.
     if (in_array('islandora_workflow_Administrator', $current_module_permissions[$user_id][key($user_name)])) {
       unset($current_module_permissions[$user_id][key($user_name)][array_search('islandora_workflow_Administrator', $current_module_permissions[$user_id][key($user_name)])]);
