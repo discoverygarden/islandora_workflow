@@ -1105,6 +1105,10 @@ function islandora_workflow_preprocess_permissions_user_table(&$vars) {
   $vars['users'] = islandora_workflow_get_users_with_module_permissions();
   $vars['list']['collection_selector'] = drupal_render($vars['list']['collection_selector']);
   $vars['list']['collection_submit'] = drupal_render($vars['list']['collection_submit']);
+  $active_collection_pid = $_SESSION['workflow_permissions_page']['active_collection'];
+  $vars['list']['active_collection_pid'] = $active_collection_pid;
+  $vars['list']['active_collection_label'] = islandora_workflow_get_object_label($active_collection_pid);
+
   // Render each form element.
   foreach ($vars['users'] as $user_id => $user_name) {
     $vars['list'][$user_id][$_SESSION['workflow_permissions_page']['active_collection']] = drupal_render($vars['list'][$user_id][$_SESSION['workflow_permissions_page']['active_collection']]);
@@ -1130,6 +1134,10 @@ function islandora_workflow_preprocess_permissions_role_table(&$vars) {
   $vars['list']['collection_selector'] = drupal_render($vars['list']['collection_selector']);
   $vars['list']['collection_submit'] = drupal_render($vars['list']['collection_submit']);
   // Render each form element.
+  $active_collection_pid = $_SESSION['workflow_permissions_page']['active_collection'];
+  $vars['list']['active_collection_pid'] = $active_collection_pid;
+  $vars['list']['active_collection_label'] = islandora_workflow_get_object_label($active_collection_pid);
+  
   foreach ($vars['roles'] as $role_id => $role_name) {
     $vars['list'][$role_id][$_SESSION['workflow_permissions_page']['active_collection']] = drupal_render($vars['list'][$role_id][$_SESSION['workflow_permissions_page']['active_collection']]);
   }
