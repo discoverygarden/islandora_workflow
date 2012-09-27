@@ -26,7 +26,8 @@ function islandora_workflow_get_collections() {
   $query_results = ObjectHelper::performRiQuery($query_string, 'sparql');
   $collections = array();
   foreach ($query_results as $result) {
-    $collection_pid = substr($result['collection_object'], 12);
+    $collection_pid = $result['collection_object'];
+    $collection_pid = preg_replace('/^info:fedora\//', '', $collection_pid);
     if (empty($collection_pid)) {
       continue;
     }
