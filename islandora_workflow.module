@@ -959,14 +959,20 @@ function islandora_workflow_collections_submit($form, &$form_state) {
     if ($form_state['values'][$collection_pid] != $form[$collection_pid]['#default_value']) {
       if ($form_state['values'][$collection_pid]) {
         islandora_workflow_track_collection_in_workflow($collection_pid);
-        drupal_set_message(t('Collection %pid is now tracked in workflow.',
-            array('%pid' => $collection_pid)
+        drupal_set_message(t('Collection <em>%label</em> (%pid) is now tracked in workflow.',
+            array(
+              '%label' => $collection_data['label'],
+              '%pid' => $collection_pid,
+            )
         ));
       }
       else {
         islandora_workflow_stop_tracking_collection_in_workflow($collection_pid);
-        drupal_set_message(t('Collection %pid is no longer tracked in workflow.',
-            array('%pid' => $collection_pid)
+        drupal_set_message(t('Collection <em>%label</em> (%pid) is no longer tracked in workflow.',
+            array(
+              '%label' => $collection_data['label'],
+              '%pid' => $collection_pid,
+            )
         ));
       }
     }
