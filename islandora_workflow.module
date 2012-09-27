@@ -1074,11 +1074,13 @@ function islandora_workflow_preprocess_workflow_collections(&$vars) {
   module_load_include('inc', 'islandora_workflow');
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow.collection');
 
-
   $collections = islandora_workflow_get_collections();
 
   $vars['collections'] = $collections;
   $vars['list']['submit'] = drupal_render($vars['list']['submit']);
+  $active_collection_pid = $_SESSION['workflow_permissions_page']['active_collection'];
+  $vars['list']['active_collection_pid'] = $active_collection_pid;
+  $vars['list']['active_collection_label'] = islandora_workflow_get_object_label($active_collection_pid);
   // Tender each form element.
   foreach ($collections as $collection_pid => $collection_information) {
     $vars['list']['collection_checkboxes'][$collection_pid] = drupal_render($vars['list'][$collection_pid]);
