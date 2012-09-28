@@ -42,6 +42,8 @@ function islandora_workflow_rules_action_info() {
 function islandora_workflow_rules_email_recipients($object, $settings) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
+
   $recipients = array();
   // Get everyone who has the given workflow roles for the parent collection.
   $collections = array();
@@ -61,7 +63,7 @@ function islandora_workflow_rules_email_recipients($object, $settings) {
   }
 
   if ($settings['notify_creator']) {
-    $creator_name = $object->objectProfile->objOwnerId;
+    $creator_name = islandora_workflow_get_object_creator($object->pid);
     $creator = user_load(array('name' => $creator_name));
     if ($creator) {
       $recipients[] = $creator->uid;
@@ -217,7 +219,7 @@ function islandora_workflow_token_values($type, $object = NULL, $options = array
   if ('fedora_object' == $type) {
     $values['fedora-object-pid'] = $object->objectProfile->pid;
     $values['fedora-object-title'] = $object->objectProfile->objLabel;
-    $values['fedora-object-creator'] = $object->objectProfile->objOwnerId;
+    $values['fedora-object-creator'] = islandora_workflow_get_object_creator($object->pid);
   }
   return $values;
 }
