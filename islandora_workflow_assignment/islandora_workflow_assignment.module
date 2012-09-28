@@ -121,14 +121,14 @@ function islandora_workflow_assignment_user_delete_batch($edit, $account = NULL)
   }
 
   $assigned_objects = islandora_workflow_assignment_by_user($account);
-  // @TODO make the following into a batch job.
-  $pattern = '/^info:fedora\/(.+)$/';
+  $pattern = '/^info:fedora\//';
+  $operations = array();
   foreach ($assigned_objects as $object) {
-    preg_match($pattern, $object->pid, $matches);
+    $truncated_pid = preg_replace($pattern, '', $object->pid);
     // Remove the assignment from each object.
     $operations[] = array(
       'islandora_workflow_assignment_remove',
-      array($matches[1], $account->name),
+      array($truncated_pid, $account->name),
     );
   }
   return $operations;
