@@ -84,7 +84,7 @@ function islandora_workflow_is_collection_workflow_tracked($object_pid) {
 
   $workflow_namespace = 'info:islandora/islandora-system:def/islandora_workflow#';
 
-  $item = new Fedora_Item($object_id);
+  $item = new Fedora_Item($object_pid);
   if (!$item->exists()) {
     return FALSE;
   }
