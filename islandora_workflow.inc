@@ -870,7 +870,7 @@ function islandora_workflow_get_object_fedora_state($object_id) {
   if (!$response) {
     return FALSE;
   }
-  return $response->result->resultList->objectFields[0]->state;
+  return $response->result->resultList->objectFields->state;
 }
 
 /**
