@@ -2199,6 +2199,7 @@ function islandora_workflow_delete_role($form, &$form_state) {
  */
 function islandora_workflow_role_delete_batch($form, $form_state) {
 
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
 
   $operations = array();
