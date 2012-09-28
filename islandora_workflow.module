@@ -409,7 +409,11 @@ function islandora_workflow_work_form_page_two(&$form_state, $tab) {
     $form['assignees'] = array(
       '#type' => 'fieldset',
       '#title' => t('Assign Rejected Objects'),
-      '#description' => t('You may assign rejected objects to a user with suitable permissions.'),
+      '#description' => t('You may assign rejected objects to a user with 
+        suitable permissions. If you do not assign the rejected object to
+        a particular user, the rejected object will still appear under
+        "Unpublished Objects" for all editors and managers
+        in this collection.'),
       '#theme' => 'workflow_table',
       '#tree' => TRUE,
     );
@@ -2388,6 +2392,7 @@ function islandora_workflow_islandora_tabs_alter(&$tabs, $params) {
 
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
+  module_load_include('inc', 'fedora_repository', 'CollectionClass');
 
   $pid = $params['pid'];
   $content_models = $params['content_models'];
@@ -2415,8 +2420,28 @@ function islandora_workflow_islandora_tabs_alter(&$tabs, $params) {
 
   // Restrict the 'Add' tab on collection pages to Submitters and above.
   $create_access = !empty($permission);
-  if (!$create_access) {
-    unset($tabs['add_tab']);
+  if ($create_access) {
+    if ($is_collection) {
+      $collection = new CollectionClass($pid);
+      if (!isset($tabs['add_tab'])) {
+        $members = $collection->getRelatedItems($pid, $collection->getCollectionQuery($pid));
+        $members_view = $collection->renderCollection($members, $pid, NULL, NULL, $page_number = 1);
+        $current_form_id = isset($_POST['form_id'])? $_POST['form_id']: '';
+        $is_ingest_form = ('fedora_repository_ingest_form' == $current_form_id);
+        $tabs['add_tab'] = array(
+          '#type' => 'tabpage',
+          '#title' => t('Add'),
+          '#selected' => $is_ingest_form || !$members_view,
+          '#content' => drupal_get_form('fedora_repository_ingest_form', $pid),
+          '#tab_name' => 'add-tab',
+        );
+      }
+    }
+  }
+  else {
+    if (isset($tabs['add_tab'])) {
+      unset($tabs['add_tab']);
+    }
   }
 
   // Restrict object details/edit to appropriate permissions.
