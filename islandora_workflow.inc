@@ -812,7 +812,7 @@ function islandora_workflow_delete_object($object_id) {
   $item = new Fedora_Item($object_id);
   $response = $item->modify_object($label, 'D');
   if ($response) {
-    rules_invoke_event('islandora_workflow_rules_delete_object', $object);
+    rules_invoke_event('islandora_workflow_rules_delete_object', $item);
     return $response;
   }
   else {
