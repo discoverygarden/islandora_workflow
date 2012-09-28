@@ -144,10 +144,6 @@ function islandora_workflow_get_all_members_of_collection($collection_id) {
   $query_file_handle = fopen($query_file_name, "r");
   $query = fread($query_file_handle, filesize($query_file_name));
   fclose($query_file_handle);
-  $limit = -1;
-  $offset = 0;
-  $type = 'sparql';
-  $query_url = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
 
   // Inject collection value into the query.
   $pattern = '/(REGEX.+collection_object.+?\')(\.)(\')/';
@@ -155,7 +151,7 @@ function islandora_workflow_get_all_members_of_collection($collection_id) {
 
   $query = preg_replace($pattern, $replacement, $query);
 
-  $query_results = ObjectHelper::performRiQuery($query, 'sparql', $limit, $offset);
+  $query_results = ObjectHelper::performRiQuery($query, 'sparql', $limit = -1, $offset = 0);
 
   $processed_results = array();
   foreach($query_results as $result) {
@@ -837,11 +833,18 @@ function islandora_workflow_delete_object($object_id) {
 function islandora_workflow_get_object_creator($object_id) {
 
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
-  $item = new Fedora_Item($object_id);
-  if (!$item->exists()) {
+
+  $params = array(
+    'query' => 'pid=' . $object_id,
+    'resultFields' => array('pid', 'ownerId'),
+    'maxResults' => 1,
+  );
+  $response = Fedora_Item::soap_call('findObjects', $params);
+
+  if (!$response) {
     return FALSE;
   }
-  return $item->objectProfile->objOwnerId;
+  return $response->result->resultList->objectFields->ownerId;
 }
 
 /**
