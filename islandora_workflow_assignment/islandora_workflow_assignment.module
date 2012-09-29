@@ -303,7 +303,7 @@ function islandora_workflow_assignment_remove($object_pid, $assignee = NULL) {
   $islandora_workflow_namespace = 'info:islandora/islandora-system:def/islandora_workflow#';
   $predicate = 'assignee';
 
-  $item = new Fedora_Item($object_id);
+  $item = new Fedora_Item($object_pid);
   if (!$item->exists()) {
     return FALSE;
   }
