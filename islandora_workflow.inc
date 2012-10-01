@@ -543,20 +543,33 @@ function islandora_workflow_assign_object($object_id, $user_name) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
 
-  GLOBAL $user;
+  global $user;
 
   $item = new Fedora_Item($object_id);
   $label = $item->objectProfile->objLabel;
 
+  $relationships = $item->get_rdf_relationships();
+  if (isset($relationships['hasModel'])) {
+    if (in_array('islandora:collectionCModel', $relationships['hasModel'])) {
+      drupal_set_message(t('The object <em>%label</em> (%pid) is a collection and cannot be assigned.', array(
+        '%label' => $label,
+        '%pid' => $object_id,
+      )));
+      return FALSE;
+    }
+  }
+
   $present_assignee = islandora_workflow_get_object_assignee($object_id);
   if ($present_assignee == $user_name) {
     if ($user_name == $user->name) {
-      drupal_set_message(t('The object <em>%label</em> (%pid) is already assigned to you.' , array(
+      drupal_set_message(t('The object <em>%label</em> (%pid) is already assigned to you.', array(
+        '%label' => $label,
         '%pid' => $object_id,
       )));
     }
     else {
       drupal_set_message(t('The object <em>%label</em> (%pid) is already assigned to <em>%username</em>.', array(
+        '%label' => $label,
         '%pid' => $object_id,
         '%username' => $user_name,
       )));
@@ -567,8 +580,8 @@ function islandora_workflow_assign_object($object_id, $user_name) {
   // Permission check.
   if (!islandora_workflow_user_object_permission_check($object_id)) {
     drupal_set_message(t('The object <em>%label</em> (%pid) could not be assigned, you do not have the necessary permissions.', array(
+      '%label' => $label,
       '%pid' => $object_id,
-      '%label'
     )));
     return FALSE;
   }
