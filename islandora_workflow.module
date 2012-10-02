@@ -2511,6 +2511,7 @@ function islandora_workflow_get_subcollections($collection_id = NULL) {
  */
 function islandora_workflow_can_ingest($collection_pid) {
 
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
   return (islandora_workflow_user_collection_permission_check($collection_pid) !== FALSE);
 
 }
