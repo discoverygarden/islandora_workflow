@@ -1857,7 +1857,6 @@ function islandora_workflow_batch_function($collection_pid, $members, $delete, &
       $xacml->viewingRule->addUser($perms['users']);
 
       if (isset($item->datastreams['POLICY'])) {
-        $policy_content = $xacml->getXmlString();
         $item->modify_datastream(
             $xacml->getXmlString(),
             $ds_id = 'POLICY',
@@ -2500,4 +2499,18 @@ function islandora_workflow_get_subcollections($collection_id = NULL) {
   // Strip out non-applicable collections via namespace.
   $subcollections = islandora_workflow_limit_collections_by_namespace($subcollections);
   return $subcollections;
+}
+
+/**
+ * Override ingest permissions.
+ *
+ * @param string $collection_pid
+ *   The PID of the collection
+ * @return boolean
+ *   TRUE if the user can ingest into the specified collection, FALSE otherwise.
+ */
+function islandora_workflow_can_ingest($collection_pid) {
+
+  return (islandora_workflow_user_collection_permission_check($collection_pid) !== FALSE);
+
 }
