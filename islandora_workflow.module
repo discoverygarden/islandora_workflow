@@ -227,7 +227,7 @@ function islandora_workflow_tracked_collection_members($collection_id) {
  * @return array
  *   A form definition.
  */
-function islandora_workflow_work_form_page_one(&$form_state, $tab, $page) {
+function islandora_workflow_work_form_page_one(&$form_state, $tab, $page = 1) {
 
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
 
