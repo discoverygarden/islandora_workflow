@@ -31,7 +31,7 @@ function islandora_workflow_assignment_by_user($account, $limit = -1, $offset = 
 
   // We don't want results where ?assignee is not bound.
   $query = str_replace('!BOUND(?assignee) || ', '', $query_string);
-  $query = str_replace("REGEX(STR(?assignee),'.?'", "STR(?assignee) = '" . $account->name . "'", $query);
+  $query = str_replace("REGEX(STR(?assignee),'.?')", "STR(?assignee) = '" . $account->name . "'", $query);
   $query_results = ObjectHelper::performRiQuery($query, 'sparql', $limit, $offset);
 
   $objects = array();
