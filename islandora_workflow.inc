@@ -271,7 +271,7 @@ function islandora_workflow_itql_to_array($query_results) {
 function islandora_workflow_init_workflow($object_id) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
 
-  $item - new Fedora_Item($object_id);
+  $item = new Fedora_Item($object_id);
   if (!$item->exists()) {
     return FALSE;
   }
