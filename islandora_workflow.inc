@@ -387,7 +387,7 @@ function islandora_workflow_approve_object($object_id) {
   if ($tmp != 'islandora_workflow_Editor' && $tmp != 'islandora_workflow_Manager') {
     drupal_set_message(t('The object <em>%label</em> (%pid) could not be approved, you do not have the necessary permissions.', array(
       '%label' => $label,
-      '%pid' => $object_pid,
+      '%pid' => $object_id,
     )));
     return FALSE;
   }
