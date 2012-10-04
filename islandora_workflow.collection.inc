@@ -90,7 +90,7 @@ function islandora_workflow_is_collection_workflow_tracked($object_pid) {
   }
   $workflow_relationships = $item->get_rdf_relationships($workflow_namespace);
   if (!empty($workflow_relationships)) {
-    return ('TRUE' == $workflow_relationships['is_tracked_by_workflow']);
+    return (in_array('TRUE', $workflow_relationships['is_tracked_by_workflow']));
   }
   return FALSE;
   
