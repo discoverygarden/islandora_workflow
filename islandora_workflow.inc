@@ -1154,7 +1154,6 @@ function islandora_workflow_get_object_note_subject($object_id) {
 
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
 
-  $object_id = 'islandora:156';
   $item = new Fedora_Item($object_id);
   if (!$item->exists()) {
     return FALSE;
@@ -1182,7 +1181,6 @@ function islandora_workflow_get_object_note_body($object_id) {
 
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
 
-  $object_id = 'islandora:156';
   $item = new Fedora_Item($object_id);
   if (!$item->exists()) {
     return FALSE;
