@@ -341,11 +341,7 @@ function islandora_workflow_reject_object($object_id) {
     // Send out email to creator.
     $user_name = islandora_workflow_get_object_creator($object_id);
     if ($user_name) {
-      // Some objects may not have been created by a drupal user.
       $object = new Fedora_Item($object_id);
-      // Optional parameters for mail hook.
-      $recipient = user_load(array('name' => $user_name));
-      $address = $recipient->mail;
       rules_invoke_event('islandora_workflow_rules_reject_object', $object);
     }
     else {
@@ -1051,7 +1047,6 @@ function islandora_workflow_set_object_note($object_id, $subject, $body) {
   $item = new Fedora_Item($object_id);
   $workflow_parser = new DOMDocument();
 
-  $object_datastreams = $object->get_datastreams();
   if (!isset($item->datastreams['islandora_workflow'])) {
     return FALSE;
   }
