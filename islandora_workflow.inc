@@ -1129,8 +1129,8 @@ function islandora_workflow_set_object_note($object_id, $subject, $body) {
     $note_node_list->item(0)->appendChild($body_new_element);
   }
 
-  islandora_workflow_set_object_relationship($object_id, 'has_note_subject', $subject, 'info:fedora/' . $object_id . '/islandora_workflow');
-
+  islandora_workflow_set_object_relationship($object_id, 'has_note_subject', $subject);
+  
   // Set the new DS content.
   return $item->modify_datastream(
       $workflow_parser->saveXML(),
