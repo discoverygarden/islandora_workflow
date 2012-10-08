@@ -967,7 +967,7 @@ function islandora_workflow_get_object_assignee($object_id) {
  * @return object
  *   the response from fedora for adding/modifying the relationship
  */
-function islandora_workflow_set_object_relationship($object_id, $relationship, $target, $subject = NULL) {
+function islandora_workflow_set_object_relationship($object_id, $relationship, $target, $subject = NULL, $value_type = RELS_TYPE_PLAIN_LITERAL) {
 
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
 
@@ -980,13 +980,13 @@ function islandora_workflow_set_object_relationship($object_id, $relationship, $
   
   if ($subject) {
     // Subject is an internal one - use RELS-INT.
-    $item->purge_dsid_relationships('islandora_workflow', $relationship, NULL, $namespace);
-    return $item->add_dsid_relationship('islandora_workflow', $relationship, $target, $namespace);
+    $item->purge_dsid_relationships($subject, $relationship, NULL, $namespace, $value_type);
+    return $item->add_dsid_relationship($subject, $relationship, $target, $namespace, $value_type);
   }
   else {
     // External relationship - use RELS-EXT.
-    $item->purge_relationships($relationship, NULL, $namespace, RELS_TYPE_PLAIN_LITERAL);
-    return $item->add_relationship($relationship, $target, $namespace, RELS_TYPE_PLAIN_LITERAL);
+    $item->purge_relationships($relationship, NULL, $namespace, $value_type);
+    return $item->add_relationship($relationship, $target, $namespace, $value_type);
   }
 }
 
@@ -1129,7 +1129,7 @@ function islandora_workflow_set_object_note($object_id, $subject, $body) {
     $note_node_list->item(0)->appendChild($body_new_element);
   }
 
-  islandora_workflow_set_object_relationship($object_id, 'has_note_subject', $subject);
+  islandora_workflow_set_object_relationship($object_id, 'has_note_subject', $subject, 'islandora_workflow');
   
   // Set the new DS content.
   return $item->modify_datastream(
