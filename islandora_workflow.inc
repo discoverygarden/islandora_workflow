@@ -1189,30 +1189,6 @@ function islandora_workflow_get_object_note_body($object_id) {
 }
 
 /**
- * Get the registered email addresses for a set of named users.
- *
- * @author
- *   William Panting
- *
- * @param array $users_names
- *   an array containing all the users names to find emails for
- *
- * @return array
- *   $users_emails An associative array of user_name=>user_email
- */
-function get_users_email_by_name($users_names) {
-  $users_emails = array();
-  if (is_array($users_names)) {
-    foreach ($users_names as $user_name) {
-      $user_object = user_load(array('name' => $user_name));
-      $email = $user_object->mail;
-      $users_emails[$user_name] = $email;
-    }
-  }
-  return $users_emails;
-}
-
-/**
  * Get the workflow associated times for an object.
  *
  * @param string $object_id
