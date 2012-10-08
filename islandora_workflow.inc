@@ -391,12 +391,6 @@ function islandora_workflow_approve_object($object_id) {
   $workflow_state = islandora_workflow_get_object_workflow_state($object_id);
   if ($workflow_state != 'published' && $workflow_state != 'approved') {
 
-    // Send email to all managers.
-    $collection = islandora_workflow_get_object_parent($object_id);
-    $manager_list = islandora_workflow_get_all_users_with_collection_permissions(
-      array($collection), $permission_level = 'islandora_workflow_Manager');
-    $emails = get_users_email_by_name($manager_list[$collection]);
-    $emails = format_email_array_to_string($emails);
     $object = new Fedora_Item($object_id);
     // drupal_mail('islandora_workflow', 'approve', $emails, language_default(), $params);
     rules_invoke_event('islandora_workflow_rules_approve_object', $object);
@@ -484,11 +478,6 @@ function islandora_workflow_submit_object($object_id) {
   if ($workflow_state == 'created' || $workflow_state == 'rejected') {
 
     // Send email to all editors.
-    $collection = islandora_workflow_get_object_parent($object_id);
-    $editor_list = islandora_workflow_get_all_users_with_collection_permissions(
-      array($collection), $permission_level = 'islandora_workflow_Editor');
-    $emails = get_users_email_by_name($editor_list[$collection]);
-    $emails = format_email_array_to_string($emails);
     $object = new Fedora_Item($object_id);
     rules_invoke_event('islandora_workflow_rules_submit_object', $object);
     return (islandora_workflow_set_object_workflow_state($object_id, 'submitted'));
@@ -1221,44 +1210,6 @@ function get_users_email_by_name($users_names) {
     }
   }
   return $users_emails;
-}
-
-/**
- * Transform an associative array of email addresses to a delimited string.
- *
- * Given an array with username/email key/value pairs,
- * return a semicolon-delimited string suitable for using in drupal_mail().
- *
- * @see drupal_mail
- *
- * @author
- *   William Panting
- *
- * @param array $emails_array
- *   The array of email strings to concatenate
- *
- * @return string
- *   $emails_string The formatted string containing all of the emails
- */
-function format_email_array_to_string($emails_array) {
-  $emails_string = '';
-  if (is_array($emails_array)) {
-    // For telling if this is the first iteration of the loop.
-    $is_first = TRUE;
-
-    foreach ($emails_array as $key => $email) {
-      if ($is_first == TRUE) {
-        // First email in list.
-        $emails_string = $email;
-        $is_first = FALSE;
-      }
-      else {
-        // Emails get a comma delimiter.
-        $emails_string = $emails_string . ', ' . $email;
-      }
-    }
-  }
-  return $emails_string;
 }
 
 /**
