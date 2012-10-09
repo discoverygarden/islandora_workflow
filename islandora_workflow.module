@@ -2530,16 +2530,14 @@ function islandora_workflow_file_download($path) {
   // Check that the user has workflow permissions for the parent collection.
   $parents = $item->get_relationships('isMemberOf');
   if (sizeof($parents) > 0) {
-    foreach($parents as $parent) {
+    $users_collections = islandora_workflow_get_users_collections('all', $user);
+    foreach ($parents as $parent) {
       $collection_pid = $parents['object'];
+      if (in_array($collection_pid, $users_collections)) {
+        return TRUE;
+      }
     }
   }
-  $users_collections = islandora_workflow_get_users_collections('all', $user);
-  if (in_array($collection_pid, $users_collections)) {
-    return TRUE;
-  }
-  else {
-    return -1;
-  }
-
+  return -1;
+  
 }
