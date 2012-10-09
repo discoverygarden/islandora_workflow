@@ -733,6 +733,7 @@ function islandora_workflow_delete_object($object_id) {
   $item = new Fedora_Item($object_id);
   $owner = islandora_workflow_get_object_creator($object_id);
 
+  islandora_workflow_set_object_workflow_state($object_id, 'deleted');
   $response = $item->modify_object($label, 'D', $owner);
   if ($response) {
     rules_invoke_event('islandora_workflow_rules_delete_object', $item);
