@@ -2017,6 +2017,7 @@ function islandora_workflow_work_form_submit($form, &$form_state) {
   }
   elseif ($clicked_button == 'Delete...') {
     $form_state['storage']['step'] += 1;
+    $form_state['storage']['selected_objects'] = $selected_object_ids;
     $form_state['rebuild'] = TRUE;
     // This sets fedora state to D.
     /*
@@ -2317,8 +2318,8 @@ function islandora_workflow_user_edit_batch($edit, $account, $category = NULL) {
  */
 function islandora_workflow_work_form_page_two_submit($form, &$form_state) {
   if ($form_state['clicked_button']['#value'] == t('Delete Objects')) {
-    $values = $form_state['values']['workflow']['elements'];
-    foreach ($values as $collection_pid => $object) {
+    $selected_objects = $form_state['storage']['selected_objects'];
+    foreach ($selected_objects as $collection_pid => $object) {
       foreach ($object as $object_pid => $attributes) {
         islandora_workflow_delete_object($object_id);
       }
@@ -2513,6 +2514,7 @@ function islandora_workflow_can_ingest($collection_pid) {
 
 }
 
+/*
 function islandora_workflow_file_download($path) {
 
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
@@ -2520,10 +2522,14 @@ function islandora_workflow_file_download($path) {
 
   global $user;
 
-  if (arg(0) != 'fedora' || arg(1) != 'repository') {
+  $path_parts = explode('/', $path);
+  if ($path_parts[1] != 'fedora' || $path_parts[2] != 'repository') {
     return TRUE;
   }
-  $pid = arg(2);
+  if (empty($path_parts[3])) {
+    return TRUE;
+  }
+  $pid = $path_parts[3];
   if (!XMLDatastream::valid_pid($pid)) {
     return TRUE;
   }
@@ -2545,3 +2551,4 @@ function islandora_workflow_file_download($path) {
   return -1;
   
 }
+ */
