@@ -2516,6 +2516,7 @@ function islandora_workflow_can_ingest($collection_pid) {
 function islandora_workflow_file_download($path) {
 
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
+  module_load_include('inc', 'fedora_repository', 'XMLDatastream');
 
   global $user;
 
@@ -2523,6 +2524,9 @@ function islandora_workflow_file_download($path) {
     return TRUE;
   }
   $pid = arg(2);
+  if (!XMLDatastream::valid_pid($pid)) {
+    return TRUE;
+  }
   $item = new Fedora_Item($pid);
   if ($item->exists()) {
     return TRUE;
