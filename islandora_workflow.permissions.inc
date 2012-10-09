@@ -635,7 +635,7 @@ function islandora_workflow_user_object_permission_check($object_id, $account = 
 
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
 
-  GLOBAL $user;
+  global $user;
 
   if (empty($account)) {
     $account = drupal_clone($user);
@@ -660,7 +660,7 @@ function islandora_workflow_user_object_permission_check($object_id, $account = 
   // Even more init.
   $submitter_permissions = islandora_workflow_get_users_collections('islandora_workflow_Submitter', $account);
   $creator = islandora_workflow_get_object_creator($object_id);
-  
+
   // Submitter level.
   if (isset($submitter_permissions[$parent]) && ($workflow_state == 'created' || $workflow_state == 'rejected') && $account->name == $creator) {
     return 'islandora_workflow_Submitter';
@@ -675,6 +675,7 @@ function islandora_workflow_user_object_permission_check($object_id, $account = 
  *
  * @param string $collection_pid
  *   The PID of the collection.
+ *
  * @return mixed
  *   The level of permission if one exists, otherwise FALSE.
  */

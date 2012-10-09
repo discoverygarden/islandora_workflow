@@ -21,7 +21,7 @@ function _islandora_workflow_rules_message($rule_label, $event, $message) {
               'label' => 'Show a configurable message on the site',
               'module' => 'System',
               'eval input' => array(
-                 0 => 'message',
+                0 => 'message',
               ),
             ),
             '#name' => 'rules_action_drupal_message',
@@ -51,6 +51,7 @@ function _islandora_workflow_rules_message($rule_label, $event, $message) {
  *
  * @param array $options
  *   A set of options.
+ *
  * @return array
  */
 function _islandora_workflow_base_rule($options) {
@@ -159,7 +160,7 @@ function islandora_workflow_rules_defaults() {
     ),
   );
 
-  $message_footer = ' Please visit ' . l('The Islandora Workflow pages', 'islandora_workflow') . ' to take action.';
+  $message_footer = ' Please visit ' . l(t('The Islandora Workflow pages'), 'islandora_workflow') . ' to take action.';
   $approved_options['settings']['message'] .= $message_footer;
   $rejected_options['settings']['message'] .= $message_footer;
   $submitted_options['settings']['message'] .= $message_footer;

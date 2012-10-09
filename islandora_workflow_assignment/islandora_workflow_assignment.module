@@ -17,7 +17,7 @@ function islandora_workflow_assignment_by_user($account, $limit = -1, $offset = 
 
   module_load_include('inc', 'fedora_repository', 'ObjectHelper');
 
-  GLOBAL $user;
+  global $user;
 
   if (empty($account)) {
     $account = drupal_clone($user);
@@ -113,7 +113,7 @@ function islandora_workflow_assignment_valid_assignee_permissions($state) {
  */
 function islandora_workflow_assignment_user_delete_batch($edit, $account = NULL) {
 
-  GLOBAL $user;
+  global $user;
 
   if (empty($account)) {
     $account = drupal_clone($user);

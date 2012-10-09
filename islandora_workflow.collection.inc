@@ -7,7 +7,6 @@
 
 /**
  * Get a list of all of the Islandora collections in a Fedora repository.
- * @TODO:  use this function to replace islandora_workflow_get_all_collections()
  * @author
  *   William Panting
  *
@@ -93,7 +92,7 @@ function islandora_workflow_is_collection_workflow_tracked($object_pid) {
     return (in_array('TRUE', $workflow_relationships['is_tracked_by_workflow']));
   }
   return FALSE;
-  
+
 }
 
 /**

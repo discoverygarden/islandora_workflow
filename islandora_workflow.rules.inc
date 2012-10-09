@@ -169,7 +169,7 @@ function islandora_workflow_rules_email_someone_validate($form, &$form_state) {
 }
 
 /**
- * Implement hook_rules_event_info().
+ * Implements hook_rules_event_info().
  *
  * @return array
  *   An array of event information.
@@ -238,7 +238,7 @@ function islandora_workflow_token_list($type = 'all') {
 }
 
 /**
- * Implementation of hook_rules_data_type_info().
+ * Implements hook_rules_data_type_info().
  */
 function islandora_workflow_rules_data_type_info() {
   $data_types = array();
