@@ -2519,11 +2519,14 @@ function islandora_workflow_file_download($path) {
 
   global $user;
 
-  if (!preg_match('/fedora\/repository\/([^/]+)', $path, $matches)) {
+  if (arg(0) != 'fedora' || arg(1) != 'repository') {
     return TRUE;
   }
-  $pid = $matches[1];
+  $pid = arg(2);
   $item = new Fedora_Item($pid);
+  if ($item->exists()) {
+    return TRUE;
+  }
   // Check that the user has workflow permissions for the parent collection.
   $parents = $item->get_relationships('isMemberOf');
   if (sizeof($parents) > 0) {
