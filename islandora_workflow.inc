@@ -280,7 +280,7 @@ function islandora_workflow_reject_object($object_id) {
   else {
     drupal_set_message(t('The object <em>%label</em> (%pid) could not be rejected, it was not in an appropriate workflow state.', array(
       '%label' => $label,
-      '%pid' => $object_pid,
+      '%pid' => $object_id,
     )));
     return FALSE;
   }
