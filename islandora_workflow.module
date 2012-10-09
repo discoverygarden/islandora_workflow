@@ -7,10 +7,6 @@
  *   William Panting
  *
  * @todo
- *   Look at refactoring out collection_query.txt or
- *   collection_workflow_states_query.txt
- *
- * @todo
  *   Alow for the sorting of columns: requires signifigent
  *   refactoring. Likely dump all data to JS? scaleable?
  *
@@ -211,7 +207,6 @@ function islandora_workflow_tracked_collection_members($collection_id) {
   foreach ($members as $object_pid => $attributes) {
     if (isset($attributes['state'])) {
       $tracked_members[$object_pid] = $members[$object_pid];
-      // $tracked_members[$object_pid]['collection_pid'] = $collection_id;
     }
   }
   return $tracked_members;
@@ -487,7 +482,9 @@ function _islandora_workflow_actionable_by_editor($item) {
 }
 
 function _islandora_workflow_actionable_by_submitter($item) {
-  if ($item->creator != $user->name) {
+ 
+  global $user;
+  if ($item['owner'] != $user->name) {
     return FALSE;
   }
   return 'created' == $item['state'];
@@ -2513,5 +2510,33 @@ function islandora_workflow_can_ingest($collection_pid) {
 
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
   return (islandora_workflow_user_collection_permission_check($collection_pid) !== FALSE);
+
+}
+
+function islandora_workflow_file_download($path) {
+
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
+
+  global $user;
+
+  if (!preg_match('/fedora\/repository\/([^/]+)', $path, $matches)) {
+    return TRUE;
+  }
+  $pid = $matches[1];
+  $item = new Fedora_Item($pid);
+  // Check that the user has workflow permissions for the parent collection.
+  $parents = $item->get_relationships('isMemberOf');
+  if (sizeof($parents) > 0) {
+    foreach($parents as $parent) {
+      $collection_pid = $parents['object'];
+    }
+  }
+  $users_collections = islandora_workflow_get_users_collections('all', $user);
+  if (in_array($collection_pid, $users_collections)) {
+    return TRUE;
+  }
+  else {
+    return -1;
+  }
 
 }
