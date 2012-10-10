@@ -406,7 +406,7 @@ function islandora_workflow_work_form_page_two(&$form_state, $tab) {
     $form['assignees'] = array(
       '#type' => 'fieldset',
       '#title' => t('Assign Rejected Objects'),
-      '#description' => t('You may assign rejected objects to a user with 
+      '#description' => t('You may assign rejected objects to a user with
         suitable permissions. If you do not assign the rejected object to
         a particular user, the rejected object will still appear under
         "Unpublished Objects" for all editors and managers
@@ -2502,7 +2502,7 @@ function islandora_workflow_get_subcollections($collection_id = NULL) {
  * @return boolean
  *   TRUE if the user can ingest into the specified collection, FALSE otherwise.
  */
-function islandora_workflow_can_ingest($collection_pid) {
+function islandora_workflow_fedora_repository_can_ingest($collection_pid) {
 
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
   return (islandora_workflow_user_collection_permission_check($collection_pid) !== FALSE);
