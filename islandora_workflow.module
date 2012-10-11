@@ -444,7 +444,7 @@ function islandora_workflow_work_form_page_two(&$form_state, $tab) {
 
 function _islandora_workflow_get_created_items($account = NULL, $limit = -1, $offset = 0) {
 
-  module_load_include('inc', 'fedora_rpeository', 'ObjectHelper');
+  module_load_include('inc', 'fedora_repository', 'ObjectHelper');
 
   global $user;
 
