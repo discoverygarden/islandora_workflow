@@ -1,0 +1,11 @@
+This updater requires the DGI fork of fcrepo and the islandoraPYUtils module.
+Both are vailable on github.
+
+From Bash:
+#This bash script was used for dev/testing.
+#The command should be of the form:
+#python path_to_update_workflow_objects.py path_to_config_file
+#All other info should be in the config file.  The dev cfg is present as an example.
+
+From Parent readme:
+On Dec 2nd 2011 the workflow schema underwent a change.  An update utility is packaged with the module.

@@ -1,0 +1,8 @@
+SELECT ?subcollection
+WHERE {
+ {?subcollection <fedora-rels-ext:isMemberOf> ?collection}
+ UNION
+ {?subcollection <fedora-rels-ext:isMemberOfCollection> ?collection}
+ ?subcollection <fedora-model:hasModel> ?model
+ FILTER REGEX(STR(?model), 'islandora:collectionCModel')
+}

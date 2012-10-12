@@ -1,0 +1,23 @@
+PREFIX fedora_relations: <info:fedora/fedora-system:def/relations-external#>
+PREFIX fedora_model: <info:fedora/fedora-system:def/model#>
+PREFIX workflow: <info:islandora/islandora-system:def/islandora_workflow#>
+SELECT $label $collection_object $workflow_tracking
+FROM <#ri>
+WHERE {
+{
+$collection_object fedora_model:hasModel $collection_content_model .
+$collection_content_model fedora_model:hasModel <info:fedora/islandora:collectionCModel>
+}
+UNION
+{
+$collection_object fedora_model:hasModel <info:fedora/islandora:collectionCModel>
+}
+OPTIONAL
+{
+$collection_object fedora_model:label $label
+}
+OPTIONAL
+{
+$collection_object workflow:is_tracked_by_workflow $workflow_tracking
+}
+}

@@ -1,0 +1,8 @@
+PREFIX fedora_model: <info:fedora/fedora-system:def/model#>
+PREFIX workflow: <info:islandora/islandora-system:def/islandora_workflow#>
+
+SELECT ?pid ?state WHERE {
+ ?pid fedora_model:ownerId ?username .
+ ?pid workflow:state ?state
+}
+ORDER BY ?pid

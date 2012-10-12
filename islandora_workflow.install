@@ -7,102 +7,108 @@
  */
 
 /**
- * This function handles setting up the islandora_workflow module's database schema
- * @return $workflow_schema
- *   the associative array containing the database table(s) for islandora_workflow
+ * Set up the islandora_workflow module's database schema.
+ *
+ * @return array
+ *   $workflow_schema an array of database table(s) for islandora_workflow.
  */
 function islandora_workflow_schema() {
-  $workflow_schema=array();
-  $workflow_schema['islandora_workflow_role_permissions']=array(
-  
-    'description' => 'The collection level role based permissions for workflow users.', 
+  $workflow_schema = array();
+  $workflow_schema['islandora_workflow_role_permissions'] = array(
+
+    'description' => 'The collection level role based permissions for workflow users.',
     'fields' => array(
-        'uid' => array(
-        'description' => 'The primary identifier for an instance of a permision.', 
-        'type' => 'serial', 
-        'unsigned' => TRUE, 
+      'uid' => array(
+        'description' => 'The primary identifier for an instance of a permision.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
         'not null' => TRUE,
-        ), 
-        'role' => array(
-          'description' => 'The drupal user role associated with the permission instance.', 
-          'type' => 'varchar', 
-          'length' => 100,
-          'not null' => TRUE, 
-          'default' => '',
-        ), 
-        'permission' => array(
-          'description' => 'The drupal permission type associated with the permission instance.', 
-          'type' => 'varchar', 
-          'length' => 50, 
-          'not null' => TRUE, 
-          'default' => '',
-        ), 
-        'collection' => array(
-          'description' => 'The Fedora collection associated with the permission instance.', 
-          'type' => 'varchar', 
-          'length' => 255, 
-          'not null' => TRUE, 
-          'default' => ''
-        )
+      ),
+      'role' => array(
+        'description' => 'The drupal user role associated with the permission instance.',
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'permission' => array(
+        'description' => 'The drupal permission type associated with the permission instance.',
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'collection' => array(
+        'description' => 'The Fedora collection associated with the permission instance.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
     ),
-  'primary key' => array('uid')
+    'primary key' => array('uid'),
   );
-  
-  $workflow_schema['islandora_workflow_user_permissions']=array(
-  
-    'description' => 'The collection level user based permissions for workflow users.', 
+
+  $workflow_schema['islandora_workflow_user_permissions'] = array(
+
+    'description' => 'The collection level user based permissions for workflow users.',
     'fields' => array(
-        'uid' => array(
-        'description' => 'The primary identifier for an instance of a permision.', 
-        'type' => 'serial', 
-        'unsigned' => TRUE, 
+      'uid' => array(
+        'description' => 'The primary identifier for an instance of a permision.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
         'not null' => TRUE,
-        ), 
-        'user' => array(
-          'description' => 'The drupal user associated with the permission instance.', 
-          'type' => 'varchar', 
-          'length' => 100,
-          'not null' => TRUE, 
-          'default' => '',
-        ), 
-        'permission' => array(
-          'description' => 'The drupal permission type associated with the permission instance.', 
-          'type' => 'varchar', 
-          'length' => 50, 
-          'not null' => TRUE, 
-          'default' => '',
-        ), 
-        'collection' => array(
-          'description' => 'The Fedora collection associated with the permission instance.', 
-          'type' => 'varchar', 
-          'length' => 255, 
-          'not null' => TRUE, 
-          'default' => ''
-        )
+      ),
+      'user' => array(
+        'description' => 'The drupal user associated with the permission instance.',
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'permission' => array(
+        'description' => 'The drupal permission type associated with the permission instance.',
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'collection' => array(
+        'description' => 'The Fedora collection associated with the permission instance.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
     ),
-  'primary key' => array('uid')
+    'primary key' => array('uid'),
   );
+
   return $workflow_schema;
 }
 
 /**
-* This function handles the installation of islandora_workflow
-* [just adds the schema and variables]
+ * Implements hook_install().
+ *
+ * This function handles the installation of islandora_workflow
+ * [just adds the schema and variables]
  */
 function islandora_workflow_install() {
-   drupal_install_schema('islandora_workflow');
-   
-   variable_set('islandora_workflow_enforce_security', 0);
+  drupal_install_schema('islandora_workflow');
+
+  variable_set('islandora_workflow_enforce_security', 0);
 }
 
 /**
- * This function handles removing the islandora_workflow module's 
+ * Implements hook_uninstall().
+ *
+ * This function handles removing the islandora_workflow module's
  * database schema and variables
  */
 function islandora_workflow_uninstall() {
   drupal_uninstall_schema('islandora_workflow');
 
-  //remove all variables prefixed with the module's name
+  // Remove all variables prefixed with the module's name.
   global $conf;
   foreach (array_keys($conf) as $var_name) {
     if (strpos($var_name, 'islandora_workflow_') === 0) {
@@ -110,4 +116,3 @@ function islandora_workflow_uninstall() {
     }
   }
 }
-

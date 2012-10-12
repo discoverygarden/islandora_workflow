@@ -1,0 +1,157 @@
+<?php
+/**
+ * @file
+ * Test Islandora Workflow functionality.
+ */
+
+class IslandoraWorkflowAbstractTestCase extends DrupalWebTestCase {
+
+  function setUp() {
+  
+    date_default_timezone_set('America/Halifax');
+
+    // Enable required modules.
+    parent::setUp(
+      'dblog',
+      // 'imageapi',
+      'tabs',
+      /*
+      'php_lib',
+      'objective_forms',
+      'xml_schema_api',
+      'xml_form_api',
+      'xml_form_builder',
+      'jquery_update',
+      'jquery_ui',
+      'xml_form_elements',
+      'xml_forms',
+      'islandora_content_model_forms',
+      */
+      'fedora_repository',
+      'islandora_workflow',
+      'islandora_collection_manager',
+      'islandora_workflow_assignment',
+      // 'islandora_pdf_sp',
+      'rules',
+      'islandora_xacml_api'
+    );
+
+    // Create permissions.
+    $admin_permission = 'islandora_workflow_Administrator';
+    $manager_permission = 'islandora_workflow_Manager';
+    $editor_permission = 'islandora_workflow_Editor';
+    $submitter_permission = 'islandora_workflow_Submitter';
+    $fedora_viewer_permission = 'view fedora collection';
+    $collection_manager_permission = 'manage collections';
+    $ingest_permission = 'ingest new fedora objects';
+    $permission_permission = 'administer permissions';
+
+    // Create users.
+    $this->adminUser = $this->drupalCreateUser(array(
+      $admin_permission,
+      $fedora_viewer_permission,
+      $collection_manager_permission,
+      $ingest_permission,
+      $permission_permission,
+    ));
+    $this->managerUser = $this->drupalCreateUser(array(
+      $manager_permission,
+      $fedora_viewer_permission,
+      $collection_manager_permission,
+      $ingest_permission,
+    ));
+    $this->editorUser = $this->drupalCreateUser(array(
+      $editor_permission,
+      $fedora_viewer_permission,
+      $collection_manager_permission,
+      $ingest_permission,
+    ));
+
+    // Set the Fedora base URL.
+    variable_set('fedora_base_url', 'http://localhost:8080/fedora');
+    // Disable namespace restrictions; otherwise "islandora:" will be ignored.
+    variable_set('fedora_namespace_restriction_enforced', FALSE);
+    // Workaround for negotiating the Drupal filter.
+    // @see ConnectionHelper::getSoapClient()
+    variable_set('simpletest_username', 'admin');
+    $simpletest_password = 'abe062e8c05a1be512c3a6ca1fccc432';
+    variable_set('simpletest_password', $simpletest_password);
+    // Set Collection Management tabs to appear.
+    variable_set('islandora_add_collection_tabs', TRUE);
+    variable_set('fedora_drupal_filter', FALSE);
+    variable_set('fedora_user', 'admin');
+    variable_set('fedora_password', $simpletest_password);
+  }
+
+}
+
+class IslandoraWorkflowWebTestCase extends IslandoraWorkflowAbstractTestCase {
+
+  /**
+   * Get information aboout this module's tests.
+   * @return array
+   *   Information about the tests.
+   */
+  public function getInfo() {
+    return array(
+      'name' => 'Islandora Workflow',
+      'description' => 'Check that Islandora Workflow regulates permissions correctly',
+      'group' => 'Islandora Workflow',
+    );
+  }
+
+  
+  /**
+   * Test that an editor can add to a collection he has editor permissions for.
+   *
+   * Step 1: Log in as an IW Admin
+   * Step 2: Track a collection for workflow
+   * Step 3: Grant the Editor editor permissions to the collection.
+   * Step 4: Log in as the Editor
+   * Step 5: Navigate to the collection
+   * Assert: The 'Add' tab can be seen
+   */
+  public function testCollectionTabsDisplay() {
+    define('COLLECTION', 'islandora:sp_pdf_collection');
+    define('EDITOR_PERMISSION', 'islandora_workflow_Editor');
+
+    // Step 1.
+    $this->drupalLogin($this->adminUser);
+
+    // Step 2.
+    // Track the PDF collection (from the Solution Pack) via workflow.
+    $path = 'admin/settings/islandora_workflow_collections';
+    $edit = array(
+      COLLECTION => TRUE,
+    );
+    $submit_value = t('Save collection configuration');
+    $this->drupalPost($path, $edit, $submit_value);
+
+    // Step 3.
+    // Give the Editor editor permissions for the collection.
+    // First, select the collection.
+    $path = 'admin/settings/islandora_workflow_perms';
+    $edit = array(
+      'islandora_workflow_collection_permissions_table[permissions_table][collection_selector]' => COLLECTION,
+    );
+    $submit_value = t('Select Collection');
+    $this->drupalPost($path, $edit, $submit_value);
+    // Next, alter the user permissions.
+    $edit = array(
+      'islandora_workflow_collection_permissions_table[permissions_table][' . $this->editorUser->uid . '][' . COLLECTION . ']' => EDITOR_PERMISSION,
+    );
+    $submit_value = t('Update');
+    $this->drupalPost($path, $edit, $submit_value);
+
+    // Step 4.
+    // Log in as the editor user.
+    $this->drupalLogin($this->editorUser);
+
+    // Step 5.
+    // Navigate to the collection.
+    $this->drupalGet('fedora/repository/' . COLLECTION . '/-/collection');
+
+    // Assert that the 'add' tab can be seen when we view the collection.
+    $this->assertText('Add');
+  }
+}
