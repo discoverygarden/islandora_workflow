@@ -5,5 +5,6 @@ dependencies[] = fedora_repository
 dependencies[] = tabs
 dependencies[] = rules
 dependencies[] = token
+dependencies[] = islandora_workflow_assignment
 version = 6.1dev
 core = 6.x
