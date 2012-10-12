@@ -89,8 +89,10 @@ function islandora_workflow_rules_email_recipients($object, $settings) {
 function islandora_workflow_rules_email_someone($object, $settings) {
   $recipients = islandora_workflow_rules_email_recipients($object, $settings);
   foreach ($recipients as $recipient) {
-    // Use drupal_mail()?
     $account = user_load($recipient);
+    //TODO:  Find some way to make the language actually send the message in
+    //  the preferred language of the user.
+    drupal_mail('rules', NULL, $account->mail, user_preferred_language($account), $settings);
     watchdog('iw_rules', 'Sending message about %object to %address', array(
       '%object' => $object->pid,
       '%address' => $account->mail,
