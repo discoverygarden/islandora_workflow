@@ -663,7 +663,7 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
   }
 
   // Change the rels-int.
-  islandora_workflow_set_object_relationship($object_id, 'has_workflow_timestamp', date('c'), 'info:fedora/' . $object_id . '/islandora_workflow');
+  islandora_workflow_set_object_relationship($object_id, 'has_workflow_timestamp', date('c'), 'islandora_workflow');
 
   /* Make sure that the object's fedora
    * state is going to be set to I if the object is still in workflow.*/
