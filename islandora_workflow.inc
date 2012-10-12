@@ -763,7 +763,7 @@ function islandora_workflow_get_object_creator($object_id) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
 
   $params = array(
-    'query' => 'pid=' . $object_id,
+    'query' => array(array('property' =>'pid', 'operator' => 'eq', 'value' => $object_id)),
     'resultFields' => array('pid', 'ownerId'),
     'maxResults' => 1,
   );
@@ -792,7 +792,7 @@ function islandora_workflow_get_object_fedora_state($object_id) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
 
   $params = array(
-    'query' => 'pid=' . $object_id,
+    'query' => array(array('property' =>'pid', 'operator' => 'eq', 'value' => $object_id)),
     'resultFields' => array('pid', 'state'),
     'maxResults' => 1,
   );
