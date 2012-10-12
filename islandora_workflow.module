@@ -1318,6 +1318,12 @@ function islandora_workflow_role_permissions_form() {
 
   // Populate the form, Roles.
   foreach ($current_module_permissions as $role_id => $role_name) {
+    if (sizeof($current_module_permissions[$role_id][key($role_name)]) == 1) {
+      if (in_array('islandora_workflow_Administrator', $current_module_permissions[$role_id][key($role_name)])) {
+        // This role has Admin permissions only.
+        continue;
+      }
+    }
     // Add none to the possible options.
     array_unshift($current_module_permissions[$role_id][key($role_name)], '');
     // Remove the islandora_workflow_Administrator permission.
