@@ -515,7 +515,6 @@ function islandora_workflow_assign_object($object_id, $user_name) {
  *   $result the return mesage from Fedora
  */
 function islandora_workflow_set_object_workflow_state($object_id, $state) {
-
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
 
   global $user;

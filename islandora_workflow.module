@@ -2091,47 +2091,16 @@ function islandora_workflow_edit_note_form_submit($edit_note_form, &$edit_note_f
  * @param array $message
  *   The message to augment with the template
  * @param array $params
- *   containst 'object_id' which is the object for which this email regards.
+ *   Associative array of parameters.
  */
 function islandora_workflow_mail($key, &$message, $params) {
-  switch ($key) {
-    case 'assign':
-      $body = islandora_workflow_get_object_note_body($params['object_id']);
-      $subject = islandora_workflow_get_object_note_subject($params['object_id']);
-      // Setup email.
-      $message['subject'] = $params['object_id'] . ' Assigned: ' . $subject;
-      $message['body'][] = 'Object ' . $params['object_id'] . ' has been assigned to you.';
-      $message['body'][] = $body;
-      break;
-
-    case 'reject':
-      $body = islandora_workflow_get_object_note_body($params['object_id']);
-      $subject = islandora_workflow_get_object_note_subject($params['object_id']);
-      // Setup email.
-      $message['subject'] = $params['object_id'] . ' Rejected: ' . $subject;
-      $message['body'][] = 'Object ' . $params['object_id'] . ' has been rejected to you.';
-      $message['body'][] = $body;
-      break;
-
-    case 'submit':
-      $body = islandora_workflow_get_object_note_body($params['object_id']);
-      $subject = islandora_workflow_get_object_note_subject($params['object_id']);
-      // Setup email.
-      $message['subject'] = $params['object_id'] . ' Submited: ' . $subject;
-      $message['body'][] = 'Object ' . $params['object_id'] . ' has been submited for appoval.';
-      $message['body'][] = $body;
-      break;
-
-    case 'approve':
-      $body = islandora_workflow_get_object_note_body($params['object_id']);
-      $subject = islandora_workflow_get_object_note_subject($params['object_id']);
-      // Setup email.
-      $message['subject'] = $params['object_id'] . ' Aproved: ' . $subject;
-      $message['body'][] = 'Object ' . $params['object_id'] . ' has been aproved and is awaiting publication.';
-      $message['body'][] = $body;
-      break;
-
+  if ($params['html_message']) {
+    //Set headers for HTML.
+    $message['headers']['Content-Type'] = 'text/html; charset=UTF-8; format=flowed';
   }
+
+  $message['subject'] .= str_replace(array("\r", "\n"), '', $params['subject']);
+  $message['body'][] = $params['message'];
 }
 
 /**
