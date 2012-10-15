@@ -1,52 +1,5 @@
 <?php
 
-function _islandora_workflow_rules_message($rule_label, $event, $message) {
-  $rule = array(
-    'rules' => array(
-      'rules_1' => array(
-        '#type' => 'rule',
-        '#set' => $event,
-        '#label' => $rule_label,
-        '#active' => 1,
-        '#weight' => '0',
-        '#categories' => array(
-          0 => 'workflow',
-        ),
-        '#status' => 'default',
-        '#conditions' => array(),
-        '#actions' => array(
-          0 => array(
-            '#weight' => 0,
-            '#info' => array(
-              'label' => 'Show a configurable message on the site',
-              'module' => 'System',
-              'eval input' => array(
-                0 => 'message',
-              ),
-            ),
-            '#name' => 'rules_action_drupal_message',
-            '#settings' => array(
-              'message' => $message,
-              'error' => 0,
-              '#eval input' => array(
-                'token_rules_input_evaluator' => array(
-                  'message' => array(
-                    0 => 'object',
-                    1 => ':global',
-                  ),
-                ),
-              ),
-            ),
-            '#type' => 'action',
-          ),
-        ),
-      ),
-    ),
-    '#version' => 6003,
-  );
-  return $rule;
-}
-
 /**
  *
  * @param array $options
@@ -77,12 +30,14 @@ function _islandora_workflow_base_rule($options) {
             ),
           ),
           'eval input' => array(
-            0 => 'message',
+            'message', 'subject'
           ),
         ),
         '#name' => 'islandora_workflow_rules_email_someone',
         '#settings' => array(
+          'subject' => $options['settings']['subject'],
           'message' => $options['settings']['message'],
+          'html_message' => $options['settings']['html_message'],
           // An array with key/value pairs of the permission name.
           'roles' => $options['settings']['roles'],
           'notify_creator' => $options['settings']['notify_creator'],
@@ -93,7 +48,30 @@ function _islandora_workflow_base_rule($options) {
           '#eval input' => array(
             'token_rules_input_evaluator' => array(
               'message' => array(
-                0 => ':global',
+                'object', ':global',
+              ),
+            ),
+          ),
+        ),
+        '#type' => 'action',
+      ),
+      1 => array(
+        '#weight' => 0,
+        '#info' => array(
+          'label' => t('Show a configurable message on the site'),
+          'module' => 'System',
+          'eval input' => array(
+            'message',
+          ),
+        ),
+        '#name' => 'rules_action_drupal_message',
+        '#settings' => array(
+          'message' => $options['show_message'],
+          'error' => 0,
+          '#eval input' => array(
+            'token_rules_input_evaluator' => array(
+              'message' => array(
+                'object', ':global',
               ),
             ),
           ),
@@ -110,77 +88,80 @@ function _islandora_workflow_base_rule($options) {
  * Implements hook_rules_defaults().
  */
 function islandora_workflow_rules_defaults() {
-
-  $approved_options = array(
+  $options = array(
+   'approved' => array(
     'set' => 'event_islandora_workflow_rules_approve_object',
     'label' => 'A Fedora object is approved',
     'action_label' => 'Send email notifications',
     'object_label' => 'The object that has been approved',
     'settings' => array(
+      'subject' => 'An object has been approved',
       'message' => 'Object [object:fedora-object-pid] has been approved and is awaiting publication.',
       'roles' => array('islandora_workflow_Editor'),
       'notify_creator' => 1,
       'notify_assignee' => 0,
     ),
-  );
-  $rejected_options = array(
+    'show_message' => 'The object [object:fedora-object-pid] has been approved.',
+  ),
+  'rejected' => array(
     'set' => 'event_islandora_workflow_rules_reject_object',
     'label' => 'A Fedora object is rejected',
     'action_label' => 'Send email notifications',
     'object_label' => 'The object that has been rejected',
     'settings' => array(
+      'subject' => 'An object has been rejected',
       'message' => 'Object [object:fedora-object-pid] has been rejected.',
       'roles' => array('islandora_workflow_Editor'),
       'notify_creator' => 1,
       'notify_assignee' => 0,
     ),
-  );
-  $submitted_options = array(
+    'show_message' => 'The object [object:fedora-object-pid] has been rejected.',
+  ),
+  'submitted' => array(
     'set' => 'event_islandora_workflow_rules_submit_object',
     'label' => 'A Fedora object is submitted',
     'action_label' => 'Send email notifications',
     'object_label' => 'The object that has been submitted',
     'settings' => array(
+      'subject' => 'An object has been submitted',
       'message' => 'Object [object:fedora-object-pid] has been submitted for approval.',
       'roles' => array('islandora_workflow_Editor'),
       'notify_creator' => 0,
       'notify_assignee' => 0,
     ),
-  );
-  $assigned_options = array(
+    'show_message' => 'The object [object:fedora-object-pid] has been submitted.',
+  ),
+  'assigned' => array(
     'set' => 'event_islandora_workflow_rules_assign_object',
     'label' => 'A Fedora object is assigned',
     'action_label' => 'Send email notifications',
     'object_label' => 'The object that has been assigned',
     'settings' => array(
-      'message' => 'Object [object:fedora-object-pid] has been assigned to you.',
+      'subject' => 'An object has been assigned',
+      'message' => 'Object [object:fedora-object-pid] has been assigned.',
       'roles' => array(),
       'notify_creator' => 0,
       'notify_assignee' => 1,
     ),
+    'show_message' => 'The object [object:fedora-object-pid] has been assigned.',
+  ),
   );
 
-  $message_footer = ' Please visit ' . l(t('The Islandora Workflow pages'), 'islandora_workflow') . ' to take action.';
-  $approved_options['settings']['message'] .= $message_footer;
-  $rejected_options['settings']['message'] .= $message_footer;
-  $submitted_options['settings']['message'] .= $message_footer;
-  $assigned_options['settings']['message'] .= $message_footer;
+  $message_footer = ' Please visit ' . l(t('The Islandora Workflow pages'), 'islandora_workflow', array('absolute' => TRUE)) . ' to take action.';
 
   $config = array(
-    'rules' => array(
-      'iw_rules_email_item_approved' => _islandora_workflow_base_rule($approved_options),
-      'iw_rules_email_item_rejected' => _islandora_workflow_base_rule($rejected_options),
-      'iw_rules_email_item_submitted' => _islandora_workflow_base_rule($submitted_options),
-      'iw_rules_email_item_assigned' => _islandora_workflow_base_rule($assigned_options),
-      'iw_rules_message_item_approved' => _islandora_workflow_rules_message('Display a Drupal message when an object is approved', 'event_islandora_workflow_rules_approve_object', 'The object [object:fedora-object-pid] has been approved.'),
-      'iw_rules_message_item_rejected' => _islandora_workflow_rules_message('Display a Drupal message when an object is rejected', 'event_islandora_workflow_rules_reject_object', 'The object [object:fedora-object-pid] has been rejected.'),
-      'iw_rules_message_item_submitted' => _islandora_workflow_rules_message('Display a Drupal message when an object is submitted', 'event_islandora_workflow_rules_submit_object', 'The object [object:fedora-object-pid] has been submitted.'),
-      'iw_rules_message_item_assigned' => _islandora_workflow_rules_message('Display a Drupal message when an object is assigned', 'event_islandora_workflow_rules_assign_object', 'The object [object:fedora-object-pid] has been assigned.'),
-      'iw_rules_message_item_deleted' => _islandora_workflow_rules_message('Display a Drupal message when an object is deleted', 'event_islandora_workflow_rules_delete_object', 'The object [object:fedora-object-pid] has been deleted.'),
-    ),
+    'rules' => array(),
     'rule sets' => array(
       // No rule sets.
     ),
   );
+
+  foreach ($options as $type => $info) {
+    $key = 'iw_rules_email_item_' . $type;
+    $info['settings']['message'] .= $message_footer;
+    $info['settings']['html_message'] = TRUE;
+    $config['rules'][$key] = _islandora_workflow_base_rule($info);
+  }
+
   return $config;
 }
