@@ -216,8 +216,11 @@ function islandora_workflow_tracked_collection_members($collection_id) {
  * Form definition.
  *
  * @param array $form_state
+ *   The current state of the form.
  * @param string $tab
+ *   The active tab on the workflow page.
  * @param int $page
+ *   The page of results that the workflow page is on.
  *
  * @return array
  *   A form definition.
@@ -475,14 +478,26 @@ function _islandora_workflow_get_created_items($account = NULL, $limit = -1, $of
 
 }
 
+/**
+ *
+ * @param unknown_type $item
+ */
 function _islandora_workflow_actionable_by_manager($item) {
   return 'published' != $item['state'];
 }
 
+/**
+ *
+ * @param unknown_type $item
+ */
 function _islandora_workflow_actionable_by_editor($item) {
   return 'submitted' == $item['state'];
 }
 
+/**
+ *
+ * @param unknown_type $item
+ */
 function _islandora_workflow_actionable_by_submitter($item) {
 
   global $user;
@@ -492,6 +507,10 @@ function _islandora_workflow_actionable_by_submitter($item) {
   return 'created' == $item['state'];
 }
 
+/**
+ *
+ * @param unknown_type $form_state
+ */
 function islandora_workflow_overview_items(&$form_state) {
   $manager_collections = islandora_workflow_get_users_collections('islandora_workflow_Manager');
   $editor_collections = islandora_workflow_get_users_collections('islandora_workflow_Editor');
@@ -1113,9 +1132,10 @@ function islandora_workflow_preprocess_permissions_user_table(&$vars) {
   $vars['list']['active_collection_pid'] = $active_collection_pid;
   $vars['list']['active_collection_label'] = islandora_workflow_get_object_label($active_collection_pid);
 
+
   // Render each form element.
   foreach ($vars['users'] as $user_id => $user_name) {
-    $vars['list'][$user_id][$_SESSION['workflow_permissions_page']['active_collection']] = drupal_render($vars['list'][$user_id][$_SESSION['workflow_permissions_page']['active_collection']]);
+    $vars['list'][$user_id][$active_collection_pid] = drupal_render($vars['list'][$user_id][$active_collection_pid]);
   }
 }
 
@@ -1137,13 +1157,14 @@ function islandora_workflow_preprocess_permissions_role_table(&$vars) {
   $vars['roles'] = islandora_workflow_get_roles_with_module_permissions();
   $vars['list']['collection_selector'] = drupal_render($vars['list']['collection_selector']);
   $vars['list']['collection_submit'] = drupal_render($vars['list']['collection_submit']);
-  // Render each form element.
+
   $active_collection_pid = $_SESSION['workflow_permissions_page']['active_collection'];
   $vars['list']['active_collection_pid'] = $active_collection_pid;
   $vars['list']['active_collection_label'] = islandora_workflow_get_object_label($active_collection_pid);
 
+  // Render each form element.
   foreach ($vars['roles'] as $role_id => $role_name) {
-    $vars['list'][$role_id][$_SESSION['workflow_permissions_page']['active_collection']] = drupal_render($vars['list'][$role_id][$_SESSION['workflow_permissions_page']['active_collection']]);
+    $vars['list'][$role_id][$active_collection_pid] = drupal_render($vars['list'][$role_id][$active_collection_pid]);
   }
 }
 
@@ -1289,6 +1310,7 @@ function islandora_workflow_role_permissions_form() {
 
   // Collection selector and submit button.
   $my_collections_ids = array();
+
   foreach ($my_collections as $collection_id => $collection_info) {
     if (!isset($_SESSION['workflow_permissions_page']['active_collection'])) {
       $_SESSION['workflow_permissions_page']['active_collection'] = $collection_id;
@@ -1341,6 +1363,7 @@ function islandora_workflow_role_permissions_form() {
       $current_module_permissions[$role_id][key($role_name)][array_search('islandora_workflow_Submitter', $current_module_permissions[$role_id][key($role_name)])] = 'Submitter';
     }
     $collection_id = $_SESSION['workflow_permissions_page']['active_collection'];
+
     /* Change the default permission
      * string to be inline with the user friendly strings.*/
     $default_value = '';
@@ -1522,7 +1545,7 @@ function islandora_workflow_role_permissions_form_submit($form, &$form_state) {
   }
   // Collection to display.
   elseif ($clicked_button == 'Select Collection') {
-    $_SESSION['workflow_permissions_page']['active_collection'] = $form['islandora_workflow_collection_permissions_table']['permissions_table']['collection_selector']['#options'][$form_state['values']['islandora_workflow_collection_permissions_table']['permissions_table']['collection_selector']];
+    $_SESSION['workflow_permissions_page']['active_collection'] = $form_state['values']['islandora_workflow_collection_permissions_table']['permissions_table']['collection_selector'];
   }
 }
 
@@ -1794,8 +1817,7 @@ function islandora_workflow_user_permissions_form_submit($form, &$form_state) {
   }
   // Collection to display.
   elseif ($clicked_button == 'Select Collection') {
-    $active_collection = $form_state['values']['islandora_workflow_collection_permissions_table']['permissions_table']['collection_selector'];
-    $_SESSION['workflow_permissions_page']['active_collection'] = $active_collection;
+    $_SESSION['workflow_permissions_page']['active_collection'] = $form_state['values']['islandora_workflow_collection_permissions_table']['permissions_table']['collection_selector'];
   }
 }
 
