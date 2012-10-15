@@ -112,6 +112,8 @@ function islandora_workflow_rules_email_someone($object, $settings) {
  */
 function islandora_workflow_rules_email_someone_form($settings, &$form) {
   $settings += array(
+    'subject' => '',
+    'html_message' => TRUE,
     'message' => '',
     'roles' => array('admin'),
     'notify_creator' => TRUE,

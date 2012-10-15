@@ -37,6 +37,7 @@ function _islandora_workflow_base_rule($options) {
         '#settings' => array(
           'subject' => $options['settings']['subject'],
           'message' => $options['settings']['message'],
+          'html_message' => $options['settings']['html_message'],
           // An array with key/value pairs of the permission name.
           'roles' => $options['settings']['roles'],
           'notify_creator' => $options['settings']['notify_creator'],
@@ -70,10 +71,9 @@ function _islandora_workflow_base_rule($options) {
           '#eval input' => array(
             'token_rules_input_evaluator' => array(
               'message' => array(
-                0 => 'object',
-                1 => ':global',
-               ),
-             ),
+                'object', ':global',
+              ),
+            ),
           ),
         ),
         '#type' => 'action',
@@ -158,9 +158,9 @@ function islandora_workflow_rules_defaults() {
 
   foreach ($options as $type => $info) {
     $key = 'iw_rules_email_item_' . $type;
+    $info['settings']['message'] .= $message_footer;
+    $info['settings']['html_message'] = TRUE;
     $config['rules'][$key] = _islandora_workflow_base_rule($info);
-    $config['rules'][$key]['settings']['message'] .= $message_footer;
-    $config['rules'][$key]['settings']['html_message'] = TRUE;
   }
 
   return $config;
