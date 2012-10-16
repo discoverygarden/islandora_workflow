@@ -49,7 +49,12 @@
  */
 
 /**
- * Check the Fedora server is available, displaying an error message if not.
+ * Defer a drupal_get_form() call.
+ *
+ * If the Fedora server is unavailable, display an error message; otherwise,
+ * works exactly like drupal_get_form().
+ *
+ * @see drupal_get_form()
  */
 function _islandora_workflow_get_form($form_id) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
@@ -58,19 +63,9 @@ function _islandora_workflow_get_form($form_id) {
     drupal_set_message(t('The Fedora server is not available'), 'error');
     return drupal_not_found();
   }
-  // if we get a form request with no parameters then $args = {function name}
-  // parameters appear in the array after that, in this case we handle the case
-  // of 1 param and 2
+ 
   $args = func_get_args();
-  $num = func_num_args();
-  switch ($num) {
-    case 1:
-      return drupal_get_form($form_id);
-    case 2:
-      return drupal_get_form($form_id, $args[1]);
-    case 3:
-      return drupal_get_form($form_id, $args[1], $args[2]);
-  }
+  return call_user_func_array('drupal_get_form', $args);
 }
 
 /**
