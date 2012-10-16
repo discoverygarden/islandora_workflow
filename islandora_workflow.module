@@ -1861,7 +1861,7 @@ function islandora_workflow_user_permissions_form_submit($form, &$form_state) {
 function islandora_workflow_batch_function($collection_pid, $members, $delete, &$context) {
 
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
-  module_load_include('inc', 'islandora_xacml_api', 'Xacml');
+  module_load_include('inc', 'islandora_xacml_api', 'IslandoraXacml');
   module_load_include('permissions.inc', 'islandora_workflow');
   module_load_include('inc', 'islandora_workflow');
 
@@ -1887,35 +1887,21 @@ function islandora_workflow_batch_function($collection_pid, $members, $delete, &
     $item = new Fedora_Item($pid);
 
     if (!$delete) {
-      $xacml = new Xacml();
+      $xacml = new IslandoraXacml($pid);
       // Get users and roles.
       $creator = islandora_workflow_get_object_creator($pid);
       $perms = islandora_workflow_get_permission_state($collection_pid, $data['state']);
       $perms['users'][] = $creator;
+
+      $xacml->managementRule->clear();
+      $xacml->viewingRule->clear();
 
       $xacml->managementRule->addRole($perms['roles']);
       $xacml->viewingRule->addRole($perms['roles']);
       $xacml->managementRule->addUser($perms['users']);
       $xacml->viewingRule->addUser($perms['users']);
 
-      if (isset($item->datastreams['POLICY'])) {
-        $item->modify_datastream(
-            $xacml->getXmlString(),
-            $ds_id = 'POLICY',
-            $ds_label = 'Policy datastream',
-            $mimetype = 'text/xml'
-        );
-      }
-      else {
-        $item->add_datastream_from_string(
-          $xacml->getXmlString(),
-          $ds_id = 'POLICY',
-          $ds_label = NULL,
-          $mimetype = 'text/xml',
-          $control_group = 'X',
-          $log_message = 'Adding policy datastream.'
-        );
-      }
+      $xacml->writeBackToFedora();
     }
     else {
       /* XACML is disabled. delete the xacml datastream if it
