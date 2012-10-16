@@ -480,7 +480,7 @@ function _islandora_workflow_get_created_items($account = NULL, $limit = -1, $of
 
 /**
  *
- * @param unknown_type $item
+ * @param boolean $item
  */
 function _islandora_workflow_actionable_by_manager($item) {
   return 'published' != $item['state'];
@@ -488,7 +488,7 @@ function _islandora_workflow_actionable_by_manager($item) {
 
 /**
  *
- * @param unknown_type $item
+ * @param boolean $item
  */
 function _islandora_workflow_actionable_by_editor($item) {
   return 'submitted' == $item['state'];
@@ -496,7 +496,7 @@ function _islandora_workflow_actionable_by_editor($item) {
 
 /**
  *
- * @param unknown_type $item
+ * @param boolean $item
  */
 function _islandora_workflow_actionable_by_submitter($item) {
 
@@ -509,7 +509,7 @@ function _islandora_workflow_actionable_by_submitter($item) {
 
 /**
  *
- * @param unknown_type $form_state
+ * @param boolean $form_state
  */
 function islandora_workflow_overview_items(&$form_state) {
   $manager_collections = islandora_workflow_get_users_collections('islandora_workflow_Manager');
@@ -1320,7 +1320,7 @@ function islandora_workflow_role_permissions_form() {
   $form['islandora_workflow_collection_permissions_table']['permissions_table']['collection_selector'] = array(
     '#type' => 'select',
     '#options' => $my_collections_ids,
-    '#default_value' => array_search($_SESSION['workflow_permissions_page']['active_collection'], $my_collections_ids),
+    '#default_value' => $_SESSION['workflow_permissions_page']['active_collection'],
   );
   $form['islandora_workflow_collection_permissions_table']['permissions_table']['collection_submit'] = array(
     '#type' => 'submit',
@@ -1600,7 +1600,7 @@ function islandora_workflow_user_permissions_form(&$form_state) {
   $form['islandora_workflow_collection_permissions_table']['permissions_table']['collection_selector'] = array(
     '#type' => 'select',
     '#options' => $my_collections_ids,
-    '#default_value' => array_search($_SESSION['workflow_permissions_page']['active_collection'], $my_collections_ids),
+    '#default_value' => $_SESSION['workflow_permissions_page']['active_collection'],
   );
   $form['islandora_workflow_collection_permissions_table']['permissions_table']['collection_submit'] = array(
     '#type' => 'submit',
