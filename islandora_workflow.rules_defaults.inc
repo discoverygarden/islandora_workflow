@@ -89,62 +89,62 @@ function _islandora_workflow_base_rule($options) {
  */
 function islandora_workflow_rules_defaults() {
   $options = array(
-   'approved' => array(
-    'set' => 'event_islandora_workflow_rules_approve_object',
-    'label' => 'A Fedora object is approved',
-    'action_label' => 'Send email notifications',
-    'object_label' => 'The object that has been approved',
-    'settings' => array(
-      'subject' => 'An object has been approved',
-      'message' => 'Object [object:fedora-object-pid] has been approved and is awaiting publication.',
-      'roles' => array('islandora_workflow_Editor'),
-      'notify_creator' => 1,
-      'notify_assignee' => 0,
+    'approved' => array(
+      'set' => 'event_islandora_workflow_rules_approve_object',
+      'label' => t('A Fedora object is approved'),
+      'action_label' => t('Send email notifications'),
+      'object_label' => t('The object that has been approved'),
+      'settings' => array(
+        'subject' => 'An object has been approved',
+        'message' => 'Object [object:fedora-object-pid] has been approved and is awaiting publication.',
+        'roles' => array('islandora_workflow_Editor'),
+        'notify_creator' => 1,
+        'notify_assignee' => 0,
+      ),
+      'show_message' => 'The object [object:fedora-object-pid] has been approved.',
     ),
-    'show_message' => 'The object [object:fedora-object-pid] has been approved.',
-  ),
-  'rejected' => array(
-    'set' => 'event_islandora_workflow_rules_reject_object',
-    'label' => 'A Fedora object is rejected',
-    'action_label' => 'Send email notifications',
-    'object_label' => 'The object that has been rejected',
-    'settings' => array(
-      'subject' => 'An object has been rejected',
-      'message' => 'Object [object:fedora-object-pid] has been rejected.',
-      'roles' => array('islandora_workflow_Editor'),
-      'notify_creator' => 1,
-      'notify_assignee' => 0,
+    'rejected' => array(
+      'set' => 'event_islandora_workflow_rules_reject_object',
+      'label' => t('A Fedora object is rejected'),
+      'action_label' => t('Send email notifications'),
+      'object_label' => t('The object that has been rejected'),
+      'settings' => array(
+        'subject' => 'An object has been rejected',
+        'message' => 'Object [object:fedora-object-pid] has been rejected.',
+        'roles' => array('islandora_workflow_Editor'),
+        'notify_creator' => 1,
+        'notify_assignee' => 0,
+      ),
+      'show_message' => 'The object [object:fedora-object-pid] has been rejected.',
     ),
-    'show_message' => 'The object [object:fedora-object-pid] has been rejected.',
-  ),
-  'submitted' => array(
-    'set' => 'event_islandora_workflow_rules_submit_object',
-    'label' => 'A Fedora object is submitted',
-    'action_label' => 'Send email notifications',
-    'object_label' => 'The object that has been submitted',
-    'settings' => array(
-      'subject' => 'An object has been submitted',
-      'message' => 'Object [object:fedora-object-pid] has been submitted for approval.',
-      'roles' => array('islandora_workflow_Editor'),
-      'notify_creator' => 0,
-      'notify_assignee' => 0,
+    'submitted' => array(
+      'set' => 'event_islandora_workflow_rules_submit_object',
+      'label' => t('A Fedora object is submitted'),
+      'action_label' => t('Send email notifications'),
+      'object_label' => t('The object that has been submitted'),
+      'settings' => array(
+        'subject' => 'An object has been submitted',
+        'message' => 'Object [object:fedora-object-pid] has been submitted for approval.',
+        'roles' => array('islandora_workflow_Editor'),
+        'notify_creator' => 0,
+        'notify_assignee' => 0,
+      ),
+      'show_message' => 'The object [object:fedora-object-pid] has been submitted.',
     ),
-    'show_message' => 'The object [object:fedora-object-pid] has been submitted.',
-  ),
-  'assigned' => array(
-    'set' => 'event_islandora_workflow_rules_assign_object',
-    'label' => 'A Fedora object is assigned',
-    'action_label' => 'Send email notifications',
-    'object_label' => 'The object that has been assigned',
-    'settings' => array(
-      'subject' => 'An object has been assigned',
-      'message' => 'Object [object:fedora-object-pid] has been assigned.',
-      'roles' => array(),
-      'notify_creator' => 0,
-      'notify_assignee' => 1,
+    'assigned' => array(
+      'set' => 'event_islandora_workflow_rules_assign_object',
+      'label' => t('A Fedora object is assigned'),
+      'action_label' => t('Send email notifications'),
+      'object_label' => t('The object that has been assigned'),
+      'settings' => array(
+        'subject' => 'An object has been assigned',
+        'message' => 'Object [object:fedora-object-pid] has been assigned.',
+        'roles' => array(),
+        'notify_creator' => 0,
+        'notify_assignee' => 1,
+      ),
+      'show_message' => 'The object [object:fedora-object-pid] has been assigned.',
     ),
-    'show_message' => 'The object [object:fedora-object-pid] has been assigned.',
-  ),
   );
 
   $message_footer = ' Please visit ' . l(t('The Islandora Workflow pages'), 'islandora_workflow', array('absolute' => TRUE)) . ' to take action.';
