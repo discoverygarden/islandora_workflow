@@ -89,8 +89,10 @@ function islandora_workflow_rules_email_recipients($object, $settings) {
 function islandora_workflow_rules_email_someone($object, $settings) {
   $recipients = islandora_workflow_rules_email_recipients($object, $settings);
   foreach ($recipients as $recipient) {
-    // Use drupal_mail()?
     $account = user_load($recipient);
+    //TODO:  Find some way to make the language actually send the message in
+    //  the preferred language of the user.
+    drupal_mail('islandora_workflow', NULL, $account->mail, user_preferred_language($account), $settings);
     watchdog('iw_rules', 'Sending message about %object to %address', array(
       '%object' => $object->pid,
       '%address' => $account->mail,
@@ -110,16 +112,30 @@ function islandora_workflow_rules_email_someone($object, $settings) {
  */
 function islandora_workflow_rules_email_someone_form($settings, &$form) {
   $settings += array(
+    'subject' => '',
+    'html_message' => TRUE,
     'message' => '',
     'roles' => array('admin'),
     'notify_creator' => TRUE,
     'notify_assignee' => FALSE,
+  );
+  $form['settings']['subject'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Message subject'),
+    '#default_value' => $settings['subject'],
+    '#description' => t('The subject to set on the sent message.'),
   );
   $form['settings']['message'] = array(
     '#type' => 'textarea',
     '#title' => t('Message'),
     '#default_value' => $settings['message'],
     '#description' => t('The message to be sent.'),
+  );
+  $form['settings']['html_message'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Send as HTML message'),
+    '#default_value' => $settings['html_message'],
+    '#description' => t('Adjusts the e-mail headers so HTML tags should be properly used.'),
   );
   $role_options = array(
     ISLANDORA_RULES_ADMINISTRATOR => t('Workflow Administrator'),
@@ -217,7 +233,7 @@ function islandora_workflow_rules_event_info() {
 function islandora_workflow_token_values($type, $object = NULL, $options = array()) {
   $values = array();
   if ('fedora_object' == $type) {
-    $values['fedora-object-pid'] = $object->objectProfile->pid;
+    $values['fedora-object-pid'] = $object->pid;
     $values['fedora-object-title'] = $object->objectProfile->objLabel;
     $values['fedora-object-creator'] = islandora_workflow_get_object_creator($object->pid);
   }
