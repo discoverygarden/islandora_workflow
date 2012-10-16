@@ -44,26 +44,32 @@ function islandora_workflow_rules_email_recipients($object, $settings) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
 
+  //Variable in which to accumulate the array of recipients. (user ids)
   $recipients = array();
+
   // Get everyone who has the given workflow roles for the parent collection.
-  $collections = array();
-  $parents = $object->get_relationships('fedora:isMemberOf');
-  foreach ($parents as $parent) {
-    $collections[] = $parent['object'];
-  }
-  $parents = $object->get_relationships('fedora:isMemberOfCollection');
-  foreach ($parents as $parent) {
-    $collections[] = $parent['object'];
-  }
-  $options = array(
-    'collection' => $collections,
-    'permissions' => $settings['roles'],
-  );
-  $user_permissions = islandora_workflow_get_user_permissions($options);
-  // Return an array with the keys [user,collection,permission].
-  foreach ($user_permissions as $user_permission) {
-    $uid = $user_permission['user'];
-    $recipients[] = $uid;
+  if ($settings['roles']) {
+    $collections = array();
+    $parents = $object->get_relationships('fedora:isMemberOf');
+    foreach ($parents as $parent) {
+      $collections[] = $parent['object'];
+    }
+    $parents = $object->get_relationships('fedora:isMemberOfCollection');
+    foreach ($parents as $parent) {
+      $collections[] = $parent['object'];
+    }
+    $options = array(
+      'collection' => $collections,
+      'permissions' => $settings['roles'],
+    );
+
+    $user_permissions = islandora_workflow_get_user_permissions($options);
+
+    // Return an array with the keys [user,collection,permission].
+    foreach ($user_permissions as $user_permission) {
+      $uid = $user_permission['user'];
+      $recipients[] = $uid;
+    }
   }
 
   if ($settings['notify_creator']) {
@@ -75,8 +81,9 @@ function islandora_workflow_rules_email_recipients($object, $settings) {
   }
   if ($settings['notify_assignee']) {
     $assignee_name = islandora_workflow_get_object_assignee($object->pid);
-    if (!empty($assignee_name)) {
-      $recipients[] = $assignee_name;
+    $assignee = user_load(array('name' => $assignee_name));
+    if ($assignee) {
+      $recipients[] = $assignee->uid;
     }
   }
   return array_filter(array_unique($recipients));
