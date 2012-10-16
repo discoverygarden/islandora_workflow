@@ -1,7 +1,3 @@
-DO NOT DOWNLOAD AND USE THIS MODULE, UNTIL THIS NOTICE DISAPEARS. 
-IT MAY CORRUPT FEDORA RELATIONSHIPS WITH NAMESPACES THAT DO NOT END IN THE FRAGMENT IDENTIFIER BY USING THE FEDORA REST API.
-
-
 This is a drupal module to implement a generic workflow around Fedora objects.
 
 It uses an inline xml datastream and rdf to record the state of the workflow and notes associated with the workflow in workflow managed objects.
@@ -9,12 +5,6 @@ Acceptable state values: created, in_process(for machine workflow), submitted, a
 
 Wheather or not to treat collections as being workflow tracked during ingest is handled in a RESL-EXT relationship:
 @todo put relationship here... FALSE and not set will initialy(at least) be functionaly equivalent.
-
-The module currently assumes that the 'islandora:collectionCModel' object acts as a parent for collection content models or directly as a content model.
-This can be changed via modifying 'collection_query.txt', and collection_workflow_states_query.txt.
-
-Machine level workflow will be handled via fedora microservices.
-Human level workflow will be handled through this drupal module.
 
 Workflow can be enforced through the use of XACML. There is a settings toggle for this.
 This toggle starts a large process, we highly recommend only changing it at install time.
