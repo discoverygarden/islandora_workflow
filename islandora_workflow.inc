@@ -253,8 +253,8 @@ function islandora_workflow_reject_object($object_id) {
     // Reject due to XACML.
     global $user;
     if ($workflow_state == 'published' && module_exists('islandora_xacml_api') && $user->uid != 1) {
-      module_load_include('inc', 'islandora_xacml_api', 'Xacml');
-      $xacml = Xacml::constructFromPid($object_id);
+      module_load_include('inc', 'islandora_xacml_api', 'IslandoraXacml');
+      $xacml = new IslandoraXacml($object_id);
       if (!$xacml->managementRule->hasPermission($user->name, $user->roles)) {
         drupal_set_message(t('The object <em>%label</em> (%pid) could not be rejected, you do not have XACML access to the object.', array(
           '%label' => $label,
@@ -530,10 +530,10 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
 
   // Make sure there is an appropriate XACML datastream if there should be.
   if (variable_get('islandora_workflow_enforce_security', 0) && module_exists('islandora_xacml_api') && $state != 'published') {
-    module_load_include('inc', 'islandora_xacml_api', 'Xacml');
+    module_load_include('inc', 'islandora_xacml_api', 'IslandoraXacml');
     module_load_include('permissions.inc', 'islandora_workflow');
 
-    $xacml = new Xacml();
+    $xacml = new IslandoraXacml($object_id);
 
     // Get users and roles.
     $creator = islandora_workflow_get_object_creator($object_id);
@@ -541,28 +541,17 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
     $perms = islandora_workflow_get_permission_state($collection, $state);
     $perms['users'][] = $creator;
 
+    // We're going to add new settings...
+    $xacml->managementRule->clear();
+    $xacml->viewingRule->clear();
+
+    // Add the new settings.
     $xacml->managementRule->addRole($perms['roles']);
     $xacml->viewingRule->addRole($perms['roles']);
     $xacml->managementRule->addUser($perms['users']);
     $xacml->viewingRule->addUser($perms['users']);
 
-    if (isset($item->datastreams['POLICY'])) {
-      $item->modify_datastream(
-          $xacml->getXmlString(),
-          $ds_id = 'POLICY',
-          $ds_label = NULL,
-          $mimetype = 'text/xml'
-      );
-    }
-    else {
-      $item->add_datastream_from_string(
-          $xacml->getXmlString(),
-          $ds_id = 'POLICY',
-          $ds_label = NULL,
-          $mimetype = 'text/xml',
-          $control_group = 'X'
-      );
-    }
+    $xacml->writeBackToFedora();
   }
   else {
     try {
