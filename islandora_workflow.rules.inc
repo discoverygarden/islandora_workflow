@@ -47,6 +47,10 @@ function islandora_workflow_rules_email_recipients($object, $settings) {
   $recipients = array();
   // Get everyone who has the given workflow roles for the parent collection.
   $collections = array();
+  $parents = $object->get_relationships('fedora:isMemberOf');
+  foreach ($parents as $parent) {
+    $collections[] = $parent['object'];
+  }
   $parents = $object->get_relationships('fedora:isMemberOfCollection');
   foreach ($parents as $parent) {
     $collections[] = $parent['object'];
