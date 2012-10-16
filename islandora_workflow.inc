@@ -361,9 +361,8 @@ function islandora_workflow_publish_object($object_id) {
     islandora_workflow_set_object_workflow_state($object_id, 'published');
     // Make the object viewable.
     $label = islandora_workflow_get_object_label($object_id);
-    $owner = islandora_workflow_get_object_creator($object_id);
     $item = new Fedora_Item($object_id);
-    $item->modify_object($label, 'A', $owner);
+    $item->modify_object($label, 'A');
   }
   else {
     drupal_set_message(t('The object <em>%label</em> (%pid) could not be published, it was not in an appropriate workflow state.', array(
@@ -668,8 +667,7 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
    * state is going to be set to I if the object is still in workflow.*/
   if ($state != 'published' && islandora_workflow_get_object_fedora_state($object_id) != 'I') {
     $label = islandora_workflow_get_object_label($object_id);
-    $owner = islandora_workflow_get_object_creator($object_id);
-    $item->modify_object($label, 'I', $owner);
+    $item->modify_object($label, 'I');
   }
   module_invoke_all('workflow_state_change', $object_id, $state);
   return (islandora_workflow_set_object_relationship($object_id, 'state', $state));
@@ -730,10 +728,9 @@ function islandora_workflow_delete_object($object_id) {
   }
 
   $item = new Fedora_Item($object_id);
-  $owner = islandora_workflow_get_object_creator($object_id);
 
   islandora_workflow_set_object_workflow_state($object_id, 'deleted');
-  $response = $item->modify_object($label, 'D', $owner);
+  $response = $item->modify_object($label, 'D');
   if ($response) {
     rules_invoke_event('islandora_workflow_rules_delete_object', $item);
     return $response;
