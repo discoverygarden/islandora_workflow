@@ -952,6 +952,10 @@ function islandora_workflow_get_object_parent($object_id) {
   if (!empty($parents)) {
     return $parents[0]['object'];
   }
+  $parents = $item->get_relationships('isMemberOfCollection');
+  if (!empty($parents)) {
+    return $parents[0]['object'];
+  }
   return FALSE;
 }
 

@@ -51,12 +51,25 @@
 /**
  * Check the Fedora server is available, displaying an error message if not.
  */
-function islandora_workflow_init() {
+function _islandora_workflow_get_form($form_id) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
-  if (preg_match('/islandora_workflow/', request_uri()) && !fedora_available()) {
+  if (!fedora_available()) {
+    // i don't think this message is being sent, I think page_not_found is overriding it
     drupal_set_message(t('The Fedora server is not available'), 'error');
-    drupal_access_denied();
-    exit;
+    return drupal_not_found();
+  }
+  // if we get a form request with no parameters then $args = {function name}
+  // parameters appear in the array after that, in this case we handle the case
+  // of 1 param and 2
+  $args = func_get_args();
+  $num = func_num_args();
+  switch ($num) {
+    case 1:
+      return drupal_get_form($form_id);
+    case 2:
+      return drupal_get_form($form_id, $args[1]);
+    case 3:
+      return drupal_get_form($form_id, $args[1], $args[2]);
   }
 }
 
@@ -646,7 +659,7 @@ function islandora_workflow_menu() {
   $menu_entries['admin/settings/islandora_workflow_opts'] = array(
     'title' => 'Islandora workflow settings',
     'description' => 'Here you can change various settings for the islandora_workflow module.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => '_islandora_workflow_get_form',
     'page arguments' => array('islandora_workflow_admin'),
     'access arguments' => array('islandora_workflow_Administrator'),
     'type' => MENU_NORMAL_ITEM,
@@ -664,7 +677,7 @@ function islandora_workflow_menu() {
   $menu_entries['admin/settings/islandora_workflow_collections'] = array(
     'title' => 'Islandora workflow collections',
     'description' => 'Here you can set what collections to track via workflow.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => '_islandora_workflow_get_form',
     'page arguments' => array('islandora_workflow_collections'),
     'access arguments' => array('islandora_workflow_Administrator'),
     'type' => MENU_NORMAL_ITEM,
@@ -673,7 +686,7 @@ function islandora_workflow_menu() {
   $menu_entries['islandora_workflow'] = array(
     'title' => 'My Islandora work',
     'description' => 'This is the main access point to islandora_workflow',
-    'page callback' => 'drupal_get_form',
+    'page callback' => '_islandora_workflow_get_form',
     'page arguments' => array('islandora_workflow_work_form', 'work_in_progress'),
     'access callback' => 'islandora_workflow_check_permissions',
     'access arguments' => array(islandora_workflow_perm()),
@@ -681,7 +694,7 @@ function islandora_workflow_menu() {
   );
   $menu_entries['islandora_workflow/work_in_progress'] = array(
     'title' => 'Work In Progress',
-    'page callback' => 'drupal_get_form',
+    'page callback' => '_islandora_workflow_get_form',
     'page arguments' => array('islandora_workflow_work_form', 'work_in_progress'),
     'access callback' => 'islandora_workflow_check_permissions',
     'access arguments' => array(islandora_workflow_perm()),
@@ -690,7 +703,7 @@ function islandora_workflow_menu() {
   );
   $menu_entries['islandora_workflow/assigned'] = array(
     'title' => 'Assigned To Me',
-    'page callback' => 'drupal_get_form',
+    'page callback' => '_islandora_workflow_get_form',
     'page arguments' => array('islandora_workflow_work_form', 'assigned'),
     'access callback' => 'islandora_workflow_check_permissions',
     'access arguments' => array(islandora_workflow_perm()),
@@ -699,7 +712,7 @@ function islandora_workflow_menu() {
   );
   $menu_entries['islandora_workflow/unpublished'] = array(
     'title' => 'Unpublished Objects',
-    'page callback' => 'drupal_get_form',
+    'page callback' => '_islandora_workflow_get_form',
     'page arguments' => array('islandora_workflow_work_form', 'unpublished'),
     'access callback' => 'islandora_workflow_check_permissions',
     'access arguments' => array(islandora_workflow_perm()),
@@ -710,7 +723,7 @@ function islandora_workflow_menu() {
   $menu_entries['islandora_workflow_edit_note'] = array(
     'title' => 'Edit Note',
     'description' => 'You may edit the note on this object',
-    'page callback' => 'drupal_get_form',
+    'page callback' => '_islandora_workflow_get_form',
     'page arguments' => array('islandora_workflow_edit_note_form'),
     'access callback' => 'islandora_workflow_check_permissions',
     'access arguments' => array(islandora_workflow_perm()),
