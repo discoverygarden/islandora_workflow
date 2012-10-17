@@ -167,12 +167,8 @@ function _islandora_workflow_reject_access() {
  *
  * @param array $form_state
  *   The current form state.
- * @param string $tab
- *   The name of the current tab (local task).
- * @param int $page
- *   The current page number. Defaults to 1.
  */
-function islandora_workflow_work_form_common(&$form_state, $tab, $page) {
+function islandora_workflow_work_form_common(&$form_state) {
   $fieldset = array(
     'workflow' => array(
       '#type' => 'fieldset',
@@ -227,20 +223,18 @@ function islandora_workflow_tracked_collection_members($collection_id) {
  *   The current state of the form.
  * @param string $tab
  *   The active tab on the workflow page.
- * @param int $page
- *   The page of results that the workflow page is on.
  *
  * @return array
  *   A form definition.
  */
-function islandora_workflow_work_form_page_one(&$form_state, $tab, $page = 1) {
+function islandora_workflow_work_form_page_one(&$form_state, $tab) {
 
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
+  module_load_include('inc', 'fedora_repository', 'PagerSetup');
 
   global $user;
 
   $items_per_page = variable_get('islandora_workflow_items_per_page', 10);
-  $offset = ($page - 1) * $items_per_page;
 
   $items = array();
 
@@ -253,25 +247,19 @@ function islandora_workflow_work_form_page_one(&$form_state, $tab, $page = 1) {
   $possible_assignee_matrix = get_possible_assignees(array_keys($users_collections), array(), $format = TRUE);
 
   $form = array();
-  $form = islandora_workflow_work_form_common($form_state, $tab, $page);
+  $form = islandora_workflow_work_form_common($form_state);
 
   $elements = array();
 
   // Get items.
   switch ($tab) {
     case 'work_in_progress':
-      $items = _islandora_workflow_get_created_items($user, $limit = $items_per_page, $offset);
-      // If $items isn't full, fill it with assigned items up to the limit.
-      $item_count = count($items);
-      if ($item_count < $items_per_page) {
-        $items += islandora_workflow_assignment_by_user($user, $items_per_page - $item_count, $item_count);
-      }
-      $elements = array_slice($items, 0, $items_per_page);
+      $elements = _islandora_workflow_get_created_items($user);
+      $elements += islandora_workflow_assignment_by_user($user);
       break;
 
     case 'assigned':
-      $items = islandora_workflow_assignment_by_user($user, $limit = $items_per_page, $offset);
-      $elements = array_slice($items, 0, $items_per_page);
+      $elements = islandora_workflow_assignment_by_user($user);
       break;
 
     case 'unpublished':
@@ -283,21 +271,16 @@ function islandora_workflow_work_form_page_one(&$form_state, $tab, $page = 1) {
 
       foreach ($manager_collections as $collection_pid => $attributes) {
         $members = islandora_workflow_tracked_collection_members($collection_pid);
-        $items += array_filter($members, '_islandora_workflow_actionable_by_manager');
+        $elements += array_filter($members, '_islandora_workflow_actionable_by_manager');
       }
-      if (count($items) < $offset + $items_per_page) {
-        foreach ($editor_collections as $collection_pid => $attributes) {
-          $members = islandora_workflow_tracked_collection_members($collection_pid);
-          $items += array_filter($members, '_islandora_workflow_actionable_by_editor');
-        }
+      foreach ($editor_collections as $collection_pid => $attributes) {
+        $members = islandora_workflow_tracked_collection_members($collection_pid);
+        $elements += array_filter($members, '_islandora_workflow_actionable_by_editor');
       }
-      if (count($items) < $offset + $items_per_page) {
-        foreach ($submitter_collections as $collection_pid => $attributes) {
-          $members = islandora_workflow_tracked_collection_members($collection_pid);
-          $items += array_filter($members, '_islandora_workflow_actionable_by_submitter');
-        }
+      foreach ($submitter_collections as $collection_pid => $attributes) {
+        $members = islandora_workflow_tracked_collection_members($collection_pid);
+        $elements += array_filter($members, '_islandora_workflow_actionable_by_submitter');
       }
-      $elements = array_slice($items, $offset, $items_per_page);
       break;
 
     default:
@@ -305,6 +288,24 @@ function islandora_workflow_work_form_page_one(&$form_state, $tab, $page = 1) {
       exit;
       break;
   }
+
+  //Setup the pager.
+  $pager_id = 0;
+  $total_items = count($elements);
+  $page = fedora_repository_setup_pager($pager_id, $items_per_page, $total_items);
+
+  $offset = $page * $items_per_page;
+
+  if ($total_items > $items_per_page) {
+    $offset = $page * $items_per_page;
+    $elements = array_slice($elements, $offset, $items_per_page);
+  }
+
+  $form['workflow']['pager'] = array(
+    '#type' => 'markup',
+    '#weight' => 1000,
+    '#value' => theme('pager', array(), $items_per_page, $pager_id),
+  );
 
   foreach ($elements as $object_pid => $attributes) {
     $collection_pid = preg_replace('/^info:fedora\//', '', $attributes['collection_object']);
@@ -322,8 +323,6 @@ function islandora_workflow_work_form_page_one(&$form_state, $tab, $page = 1) {
   }
 
   // Perform additional processing (like filling in possible assignees).
-  // Set pager total now that we know how many objects there are.
-  // $pager_total[$pager_index] = ceil($object_count / $objects_per_page);
   $form['Submit'] = array(
     '#type' => 'submit',
     '#weight' => '1',
@@ -453,6 +452,24 @@ function islandora_workflow_work_form_page_two(&$form_state, $tab) {
   return $form;
 }
 
+/**
+ * Get the items created by the given user.
+ *
+ * @param object $account
+ *   A Drupal "user" object (or at least an object with the "name" property.
+ * @param int $limit
+ *   An integer representing the number of items to return.  The (default)
+ *   value -1 is magic, and causes all items to be returned.
+ * @param int $offset
+ *   An integer for the offset in the results, if performing paging or a
+ *   similar task.
+ *
+ * @return array
+ *   An associative array of associative arrays, mapping Fedora PIDs to the
+ *   results of the Sparql query in member_query.txt as given by 
+ *   ObjectHelper::performRiQuery(), with the exception of the "timestamp"
+ *   being remapped to "islandora_workflow_modified".
+ */
 function _islandora_workflow_get_created_items($account = NULL, $limit = -1, $offset = 0) {
 
   module_load_include('inc', 'fedora_repository', 'ObjectHelper');
