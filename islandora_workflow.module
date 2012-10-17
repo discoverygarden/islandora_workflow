@@ -71,6 +71,8 @@ function _islandora_workflow_get_form($form_id) {
 /**
  * Generate the main workflow page.
  *
+ * XXX: This even used?
+ *
  * @return string
  *   $page The html of the page to return
  */
@@ -79,6 +81,7 @@ function islandora_workflow_work() {
   $page_tabs = array(
     '#type' => 'tabset',
   );
+
   // Make the last page-changed tab selected.
   if (isset($_SESSION['workflow_page']['pager_page_array']) && isset($_GET['page'])) {
     $page = $_GET['page'];
@@ -234,7 +237,7 @@ function islandora_workflow_work_form_page_one(&$form_state, $tab) {
 
   global $user;
 
-  $items_per_page = variable_get('islandora_workflow_items_per_page', 10);
+  $items_per_page = intval(variable_get('islandora_workflow_items_per_page', 10));
 
   $items = array();
 
@@ -1207,7 +1210,6 @@ function islandora_workflow_preprocess_permissions_role_table(&$vars) {
  */
 function islandora_workflow_preprocess_workflow_table(&$vars) {
   // Drupal made me do it.
-  $vars['pager_index'] = $vars['list']['tab']['#value'];
 
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
   module_load_include('inc', 'fedora_repository', 'api/fedora_collection');

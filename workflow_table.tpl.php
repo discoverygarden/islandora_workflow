@@ -59,7 +59,4 @@
 	</TBODY>
 
 </TABLE>
-<?php
-$pager = theme('pager', NULL, NULL, $pager_index);
-print($pager);
-?>
+
