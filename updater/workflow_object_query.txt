@@ -1,4 +1,0 @@
-PREFIX workflow: <info:islandora/islandora-system:def/islandora_workflow#> 
-SELECT $object
-FROM <#ri> 
-WHERE {{$object workflow:state $state}}
