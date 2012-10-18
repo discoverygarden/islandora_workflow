@@ -6,5 +6,6 @@ dependencies[] = tabs
 dependencies[] = rules
 dependencies[] = token
 dependencies[] = islandora_workflow_assignment
+dependencies[] = islandora_xacml_api
 version = 6.1dev
 core = 6.x

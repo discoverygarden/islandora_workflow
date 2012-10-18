@@ -41,8 +41,8 @@ function islandora_workflow_rules_action_info() {
  */
 function islandora_workflow_rules_email_recipients($object, $settings) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
-  module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
-  module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
+  module_load_include('permissions.inc', 'islandora_workflow');
+  module_load_include('inc', 'islandora_workflow');
 
   //Variable in which to accumulate the array of recipients. (user ids)
   $recipients = array();

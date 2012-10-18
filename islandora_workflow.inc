@@ -31,8 +31,8 @@
  */
 function islandora_workflow_get_users_collections($permission_level = 'islandora_workflow_Manager', $account = NULL) {
 
-  module_load_include('inc', 'islandora_workflow', 'islandora_workflow.collection');
-  module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
+  module_load_include('collection.inc', 'islandora_workflow');
+  module_load_include('permissions.inc', 'islandora_workflow');
 
   global $user;
 
@@ -299,7 +299,7 @@ function islandora_workflow_reject_object($object_id) {
  *   FALSE if the approval was not attempted
  */
 function islandora_workflow_approve_object($object_id) {
-  module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
+  module_load_include('permissions.inc', 'islandora_workflow');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
 
   $label = islandora_workflow_get_object_label($object_id);
@@ -344,7 +344,7 @@ function islandora_workflow_approve_object($object_id) {
 function islandora_workflow_publish_object($object_id) {
 
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
-  module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
+  module_load_include('permissions.inc', 'islandora_workflow');
 
   $label = islandora_workflow_get_object_label($object_id);
 
@@ -387,7 +387,7 @@ function islandora_workflow_publish_object($object_id) {
  *   FALSE if the submission was not attempted
  */
 function islandora_workflow_submit_object($object_id) {
-  module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
+  module_load_include('permissions.inc', 'islandora_workflow');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
 
   $label = islandora_workflow_get_object_label($object_id);
@@ -450,7 +450,7 @@ function islandora_workflow_claim_object($object_id) {
  *   $result the return mesage from Fedora
  */
 function islandora_workflow_assign_object($object_id, $user_name) {
-  module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
+  module_load_include('permissions.inc', 'islandora_workflow');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
 
   global $user;
@@ -682,7 +682,7 @@ function islandora_workflow_get_object_label($object_id) {
  *   FALSE if the state of the object could not be changed by the current user.
  */
 function islandora_workflow_delete_object($object_id) {
-  module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
+  module_load_include('permissions.inc', 'islandora_workflow');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
 
   $label = islandora_workflow_get_object_label($object_id);
