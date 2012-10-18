@@ -553,37 +553,31 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
 
     $xacml->writeBackToFedora();
   }
-  else {
-    try {
-      /* XACML is disabled. delete the xacml datastream if
-       * it exists before it starts causing problems.*/
-      if (isset($item->datastreams['POLICY'])) {
-        $item->purge_datastream('POLICY');
-      }
-      $collection_item = new Fedora_Item($collection);
-      $collection_datastreams = $collection_item->datastreams;
-
-      if (isset($collection_item->datastreams['CHILD_SECURITY'])) {
-        $child_security = $collection_item->get_datastream_dissemination('CHILD_SECURITY');
-        $item->add_datastream_from_string(
-            $child_security,
-            $ds_id = 'POLICY',
-            $ds_label = 'security policy',
-            $mimetype = 'text/xml',
-            $control_group = 'X',
-            $log_message = 'Adding policy datastream.'
-        );
-      }
+  elseif ($state == 'published') {
+    // kill the xacml policy from the workflow module
+    if (isset($item->datastreams['POLICY'])) {
+      $item->purge_datastream('POLICY');
     }
-    catch (Exception $e) {
-      if ($e->http->code == 401) {
-        // It has a policy but we can't delete it.
-        drupal_set_message(t('This object has a policy datastream preventing it from being modified.'), 'error');
-        return FALSE;
-      }
-      else {
-        throw $e;
-      }
+
+    // add the child security policy
+    $collection_item = new Fedora_Item($collection);
+    if (isset($collection_item->datastreams['CHILD_SECURITY'])) {
+      $child_security = $collection_item->get_datastream_dissemination('CHILD_SECURITY');
+      $item->add_datastream_from_string(
+          $child_security,
+          $ds_id = 'POLICY',
+          $ds_label = 'security policy',
+          $mimetype = 'text/xml',
+          $control_group = 'X',
+          $log_message = 'Adding policy datastream.'
+      );
+    }
+  }
+  else {
+    /* XACML is disabled. delete the xacml datastream if
+     * it exists before it starts causing problems.*/
+    if (isset($item->datastreams['POLICY'])) {
+      $item->purge_datastream('POLICY');
     }
   }
 
