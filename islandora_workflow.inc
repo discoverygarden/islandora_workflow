@@ -517,68 +517,13 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
 
   global $user;
-
+  $workflow_parser = new DOMDocument();
   $item = new Fedora_Item($object_id);
-  if (!$item->exists()) {
-    return FALSE;
-  }
-
   // Get the collection of this object.
   $collection = islandora_workflow_get_object_parent($object_id);
 
-  $workflow_parser = new DOMDocument();
-
-  // Make sure there is an appropriate XACML datastream if there should be.
-  if (variable_get('islandora_workflow_enforce_security', 0) && module_exists('islandora_xacml_api') && $state != 'published') {
-    module_load_include('inc', 'islandora_xacml_api', 'IslandoraXacml');
-    module_load_include('permissions.inc', 'islandora_workflow');
-
-    $xacml = new IslandoraXacml($object_id);
-
-    // Get users and roles.
-    $creator = islandora_workflow_get_object_creator($object_id);
-
-    $perms = islandora_workflow_get_permission_state($collection, $state);
-    $perms['users'][] = $creator;
-
-    // We're going to add new settings...
-    $xacml->managementRule->clear();
-    $xacml->viewingRule->clear();
-
-    // Add the new settings.
-    $xacml->managementRule->addRole($perms['roles']);
-    $xacml->viewingRule->addRole($perms['roles']);
-    $xacml->managementRule->addUser($perms['users']);
-    $xacml->viewingRule->addUser($perms['users']);
-
-    $xacml->writeBackToFedora();
-  }
-  elseif ($state == 'published') {
-    // kill the xacml policy from the workflow module
-    if (isset($item->datastreams['POLICY'])) {
-      $item->purge_datastream('POLICY');
-    }
-
-    // add the child security policy
-    $collection_item = new Fedora_Item($collection);
-    if (isset($collection_item->datastreams['CHILD_SECURITY'])) {
-      $child_security = $collection_item->get_datastream_dissemination('CHILD_SECURITY');
-      $item->add_datastream_from_string(
-          $child_security,
-          $ds_id = 'POLICY',
-          $ds_label = 'security policy',
-          $mimetype = 'text/xml',
-          $control_group = 'X',
-          $log_message = 'Adding policy datastream.'
-      );
-    }
-  }
-  else {
-    /* XACML is disabled. delete the xacml datastream if
-     * it exists before it starts causing problems.*/
-    if (isset($item->datastreams['POLICY'])) {
-      $item->purge_datastream('POLICY');
-    }
+  if (!$item->exists()) {
+    return FALSE;
   }
 
   // Update last modified user/time.
@@ -653,7 +598,62 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
     $item->modify_object($label, 'I');
   }
   module_invoke_all('workflow_state_change', $object_id, $state);
-  return (islandora_workflow_set_object_relationship($object_id, 'state', $state));
+  $set_state_relationship_return = islandora_workflow_set_object_relationship($object_id, 'state', $state);
+
+  // Make sure there is an appropriate XACML datastream if there should be.
+  if (variable_get('islandora_workflow_enforce_security', 0) && module_exists('islandora_xacml_api') && $state != 'published') {
+    module_load_include('inc', 'islandora_xacml_api', 'IslandoraXacml');
+    module_load_include('permissions.inc', 'islandora_workflow');
+
+    $xacml = new IslandoraXacml($object_id);
+
+    // Get users and roles.
+    $creator = islandora_workflow_get_object_creator($object_id);
+
+    $perms = islandora_workflow_get_permission_state($collection, $state);
+    $perms['users'][] = $creator;
+
+    // We're going to add new settings...
+    $xacml->managementRule->clear();
+    $xacml->viewingRule->clear();
+
+    // Add the new settings.
+    $xacml->managementRule->addRole($perms['roles']);
+    $xacml->viewingRule->addRole($perms['roles']);
+    $xacml->managementRule->addUser($perms['users']);
+    $xacml->viewingRule->addUser($perms['users']);
+
+    $xacml->writeBackToFedora();
+  }
+  elseif ($state == 'published') {
+    // Kill the xacml policy from the workflow module.
+    if (isset($item->datastreams['POLICY'])) {
+      $item->purge_datastream('POLICY');
+    }
+
+    // Add the child security policy.
+    $collection_item = new Fedora_Item($collection);
+    if (isset($collection_item->datastreams['CHILD_SECURITY'])) {
+      $child_security = $collection_item->get_datastream_dissemination('CHILD_SECURITY');
+      $item->add_datastream_from_string(
+          $child_security,
+          $ds_id = 'POLICY',
+          $ds_label = 'security policy',
+          $mimetype = 'text/xml',
+          $control_group = 'X',
+          $log_message = 'Adding policy datastream.'
+      );
+    }
+  }
+  else {
+    /* XACML is disabled. delete the xacml datastream if
+     * it exists before it starts causing problems.*/
+    if (isset($item->datastreams['POLICY'])) {
+      $item->purge_datastream('POLICY');
+    }
+  }
+
+  return ($set_state_relationship_return);
 }
 
 /**
