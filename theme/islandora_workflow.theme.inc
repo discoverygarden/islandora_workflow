@@ -94,8 +94,6 @@ function islandora_workflow_preprocess_permissions_role_table(&$vars) {
 }
 
 function theme_workflow_table($form = NULL) {
-
-  dsm($form);
   $headers = array(
     array(
       'data' => '',
@@ -125,7 +123,6 @@ function theme_workflow_table($form = NULL) {
 
   $rows = array();
 
-
   foreach($form as $key => $value) {
     if(isset($value['table_info']['#value'])) {
       $info = $value['table_info']['#value'];
@@ -138,7 +135,7 @@ function theme_workflow_table($form = NULL) {
       $rows[] = array(
         drupal_render($value['Selecter']),
         l($info['label'] ? $info['label'] : $key, "fedora/repository/$key"),
-        $info['collection_object'],
+        $info['collection_label'] ? $info['collection_label'] : $info['collection_object'],
         $info['state'],
         format_date(strtotime($info['created_date']), $type = 'small'),
         format_date(strtotime($info['islandora_workflow_modified']), $type = 'small'),
