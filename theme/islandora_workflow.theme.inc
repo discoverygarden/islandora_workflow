@@ -93,6 +93,15 @@ function islandora_workflow_preprocess_permissions_role_table(&$vars) {
   }
 }
 
+/**
+ * Theme function for the workflow form.
+ *
+ * @param array $form
+ *   the form being themed
+ *
+ * @return string
+ *   the html to render
+ */
 function theme_workflow_table($form = NULL) {
   // Little hacky, but we get the headers from the form.
   $headers = $form['header']['#value'];
@@ -102,12 +111,6 @@ function theme_workflow_table($form = NULL) {
   foreach($form as $key => $value) {
     if(isset($value['table_info']['#value'])) {
       $info = $value['table_info']['#value'];
-      if ($info['note_subject']) {
-        $subject = l($member_note_subject, 'islandora_workflow_edit_note', array('query' => 'object=' . $key));
-      }
-      else {
-        $subject = l(t('Create Note'), 'islandora_workflow_edit_note', array('query' => 'object=' . $key));
-      }
       $rows[] = array(
         drupal_render($value['Selecter']),
         l($info['label'] ? $info['label'] : $key, "fedora/repository/$key"),
@@ -115,7 +118,7 @@ function theme_workflow_table($form = NULL) {
         $info['state'],
         format_date(strtotime($info['created_date']), $type = 'small'),
         format_date(strtotime($info['islandora_workflow_modified']), $type = 'small'),
-        $subject,
+        l($info['subject'] ? $info['subject'] : t('Create Note'), 'islandora_workflow_edit_note', array('query' => 'object=' . $key)),
         drupal_render($value['Assign']),
       );
     }

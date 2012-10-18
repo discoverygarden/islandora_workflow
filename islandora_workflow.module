@@ -1798,14 +1798,9 @@ function islandora_workflow_work_form_validate($form, &$form_state) {
       $selected_object_ids = array();
       // Get selected objects.
       $elements = $form_state['values']['workflow']['elements'];
-      foreach ($elements as $collection) {
-        // Prevent a warning.
-        if (is_array($collection)) {
-          foreach ($collection as $object_id => $object_form_elements) {
-            if ($object_form_elements['Selecter'] == 1) {
-              $selected_object_ids[] = $object_id;
-            }
-          }
+      foreach ($elements as $object_id => $values) {
+        if($values['Selecter'] == 1) {
+          $selected_object_ids[] = $object_id;
         }
       }
       if (empty($selected_object_ids)) {
@@ -1833,24 +1828,22 @@ function islandora_workflow_work_form_validate($form, &$form_state) {
  *   An easier to use version of $work_form_form
  */
 function islandora_workflow_work_form_submit($form, &$form_state) {
-  $clicked_button = $form_state['clicked_button']['#value'];
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
+  
+  $clicked_button = $form_state['clicked_button']['#value'];
   $selected_object_ids = array();
   $assignees = array();
   $assignee_indexes = array();
+
   // Get selected objects.
-  foreach ($form_state['values']['workflow']['elements'] as $collection) {
-    // Prevent a warning.
-    if (is_array($collection)) {
-      foreach ($collection as $object_id => $object_form_elements) {
-        if ($object_form_elements['Selecter'] == 1) {
-          $selected_object_ids[] = $object_id;
-          // Get selected assignees.
-          $assignees[$object_id] = $object_form_elements['Assign'];
-        }
-      }
+  foreach ($form_state['values']['workflow']['elements'] as $object_id => $values) {
+    if ($values['Selecter'] == 1) {
+      $selected_object_ids[] = $object_id;
+      // Get selected assignees.
+      $assignees[$object_id] = $values['Assign'];
     }
   }
+  
   // Handle buttons.
   if ($clicked_button == 'Submit') {
     foreach ($selected_object_ids as $object_id) {
@@ -2127,6 +2120,7 @@ function islandora_workflow_work_form_page_two_submit($form, &$form_state) {
       islandora_workflow_delete_object($object_id);
     }
   }
+  
   if ($form_state['clicked_button']['#value'] == t('Reject and Assign')) {
     foreach ($form_state['values']['assignees'] as $collection_id => $object) {
       foreach ($object as $object_id => $assignees) {
@@ -2142,6 +2136,7 @@ function islandora_workflow_work_form_page_two_submit($form, &$form_state) {
       }
     }
   }
+
   // Get rid of storage so the redirect can work.
   unset($form_state['storage']);
 }
