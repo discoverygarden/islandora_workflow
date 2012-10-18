@@ -415,12 +415,10 @@ function _islandora_workflow_get_created_items($account = NULL, $limit = -1, $of
   $query_file_handle = fopen($query_file_name, "r");
   $query = fread($query_file_handle, filesize($query_file_name));
   fclose($query_file_handle);
-
-  $pattern = '/(REGEX.+owner.+?\')(\.)(\')/';
+  $pattern = '/(REGEX.+owner.+?\')(\.\?)(\')/';
   $replacement = '\1' . $account->name . '\3';
 
   $query = preg_replace($pattern, $replacement, $query);
-
   $query_results = ObjectHelper::performRiQuery($query, 'sparql', $limit, $offset);
   $processed_results = array();
   foreach ($query_results as $result) {
@@ -435,7 +433,7 @@ function _islandora_workflow_get_created_items($account = NULL, $limit = -1, $of
 
 /**
  *
- * @param boolean $item
+ * @param array $item
  */
 function _islandora_workflow_actionable_by_manager($item) {
   return 'published' != $item['state'];
@@ -443,28 +441,36 @@ function _islandora_workflow_actionable_by_manager($item) {
 
 /**
  *
- * @param boolean $item
+ * @param array $item
  */
 function _islandora_workflow_actionable_by_editor($item) {
   return 'submitted' == $item['state'];
 }
 
 /**
+ * This function is used to check if a Fedora object
+ * can be operated on by a submitter. It assumes that the
+ * user has permission on the collection.
  *
- * @param boolean $item
+ * @param array $item
+ *   the returns from a SPARQL query that describe the Fedora object.
+ *
+ * @return boolean
+ *   True if the user has access false otherwise.
  */
 function _islandora_workflow_actionable_by_submitter($item) {
-
   global $user;
-  if ($item['owner'] != $user->name) {
-    return FALSE;
+
+  if ($item['owner'] == $user->name) {
+    return TRUE;
   }
-  return 'created' == $item['state'];
+
+  return FALSE;
 }
 
 /**
  *
- * @param boolean $form_state
+ * @param array $form_state
  */
 function islandora_workflow_overview_items(&$form_state) {
   $manager_collections = islandora_workflow_get_users_collections('islandora_workflow_Manager');
