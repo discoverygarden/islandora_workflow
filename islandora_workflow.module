@@ -59,7 +59,6 @@
 function _islandora_workflow_get_form($form_id) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
   if (!fedora_available()) {
-    // i don't think this message is being sent, I think page_not_found is overriding it
     drupal_set_message(t('The Fedora server is not available'), 'error');
     return drupal_not_found();
   }
@@ -220,7 +219,7 @@ function islandora_workflow_work_form_page_one(&$form_state, $tab) {
       break;
   }
 
-  //Setup the pager.
+  // Setup the pager.
   $pager_id = 0;
   $total_items = count($elements);
   $page = fedora_repository_setup_pager($pager_id, $items_per_page, $total_items);
