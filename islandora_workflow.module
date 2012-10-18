@@ -63,7 +63,7 @@ function _islandora_workflow_get_form($form_id) {
     drupal_set_message(t('The Fedora server is not available'), 'error');
     return drupal_not_found();
   }
- 
+
   $args = func_get_args();
   return call_user_func_array('drupal_get_form', $args);
 }
@@ -1137,8 +1137,6 @@ function islandora_workflow_preprocess_permissions_role_table(&$vars) {
  *   $vars the modified list of variables to send to the template
  */
 function islandora_workflow_preprocess_workflow_table(&$vars) {
-  // Drupal made me do it.
-
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
   module_load_include('inc', 'fedora_repository', 'api/fedora_collection');
 
