@@ -94,32 +94,8 @@ function islandora_workflow_preprocess_permissions_role_table(&$vars) {
 }
 
 function theme_workflow_table($form = NULL) {
-  $headers = array(
-    array(
-      'data' => '',
-    ),
-    array(
-      'data' => t('Title'),
-    ),
-    array(
-      'data' => t('Collection'),
-    ),
-    array(
-      'data' => t('Status'),
-    ),
-    array(
-      'data' => t('Object Created'),
-    ),
-    array(
-      'data' => t('Last Workflow Movement'),
-    ),
-    array(
-      'data' => t('Notes'),
-    ),
-    array(
-      'data' => t('Assignee'),
-    ),
-  );
+  // Little hacky, but we get the headers from the form.
+  $headers = $form['header']['#value'];
 
   $rows = array();
 

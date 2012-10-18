@@ -205,7 +205,56 @@ function islandora_workflow_work_form_page_one(&$form_state, $tab) {
       break;
   }
 
-  //Setup the pager.
+  // Setup table headers
+  $headers = array(
+    array(
+      'data' => ' ',
+    ),
+    array(
+      'data' => t('Title'),
+      'field' => 'label',
+    ),
+    array(
+      'data' => t('Collection'),
+      'field' => 'collection_label',
+    ),
+    array(
+      'data' => t('Status'),
+      'field' => 'state',
+    ),
+    array(
+      'data' => t('Object Created'),
+      'field' => 'created_date',
+    ),
+    array(
+      'data' => t('Last Workflow Movement'),
+      'field' => 'islandora_workflow_modified',
+      'sort' => 'desc',
+    ),
+    array(
+      'data' => t('Notes'),
+    ),
+    array(
+      'data' => t('Assignee'),
+      'field' => 'assignee',
+    ),
+  );
+
+  module_load_include('inc', 'islandora_workflow', 'islandora_workflow.sort');
+
+  $sort_field = tablesort_get_order($headers);
+  $sort_order = tablesort_get_sort($headers);
+  $sort_function = "islandora_workflow_sort_{$sort_field['sql']}_{$sort_order}";
+  
+  // We do the sort PHP side, hopefully this will scale.
+  uasort($elements, $sort_function);
+
+  // Add to form.
+  $form['workflow']['elements']['header'] = array(
+    '#value' => $headers,
+  );
+ 
+  // Setup the pager.
   $pager_id = 0;
   $total_items = count($elements);
   $page = fedora_repository_setup_pager($pager_id, $items_per_page, $total_items);
