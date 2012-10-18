@@ -461,7 +461,7 @@ function _islandora_workflow_actionable_by_editor($item) {
 function _islandora_workflow_actionable_by_submitter($item) {
   global $user;
 
-  if ($item['owner'] == $user->name  || $item['state'] == 'created') {
+  if ($item['owner'] == $user->name) {
     return TRUE;
   }
 
