@@ -3,7 +3,7 @@ PREFIX workflow: <info:islandora/islandora-system:def/islandora_workflow#>
 PREFIX fedora_relations: <info:fedora/fedora-system:def/relations-external#>
 PREFIX fedora_model: <info:fedora/fedora-system:def/model#>
 PREFIX fedora_view: <info:fedora/fedora-system:def/view#>
-SELECT ?label ?member_object ?collection_object ?state ?obj_state ?assignee ?created_date ?owner ?timestamp ?subject
+SELECT ?label ?member_object ?collection_object ?collection_label ?state ?obj_state ?assignee ?created_date ?owner ?timestamp ?subject
 FROM <#ri>
 WHERE {
   {
@@ -16,6 +16,7 @@ WHERE {
   ?member_object fedora_model:state ?obj_state .
   ?member_object fedora_model:ownerId ?owner .
   ?member_object workflow:state ?state
+  OPTIONAL {?collection_object fedora_model:label ?collection_label}
   OPTIONAL {?member_object workflow:assignee ?assignee}
   OPTIONAL {?member_object fedora_model:label ?label}
   OPTIONAL {?member_object fedora_model:createdDate ?created_date}
