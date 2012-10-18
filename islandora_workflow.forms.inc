@@ -32,9 +32,9 @@ function _islandora_workflow_get_form($form_id) {
  *   $form the array containing the appropriate form
  */
 function islandora_workflow_work_form(&$form_state, $tab) {
-  module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
-  module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
-  module_load_include('inc', 'islandora_workflow', 'islandora_workflow.collection');
+  module_load_include('permission.inc', 'islandora_workflow');
+  module_load_include('inc', 'islandora_workflow');
+  module_load_include('collection.inc', 'islandora_workflow');
 
   if (empty($form_state['storage']['form'])) {
     $form_state['storage']['form'] = 'main';
@@ -177,7 +177,7 @@ function islandora_workflow_work_form_main(&$form_state, $tab) {
     ),
   );
 
-  module_load_include('inc', 'islandora_workflow', 'islandora_workflow.sort');
+  module_load_include('sort.inc', 'islandora_workflow');
 
   $sort_field = tablesort_get_order($headers);
   $sort_order = tablesort_get_sort($headers);
@@ -438,7 +438,7 @@ function islandora_workflow_work_form_reject_submit($form, &$form_state) {
  *   An easier to use version of $work_form_form
  */
 function islandora_workflow_work_form_submit($form, &$form_state) {
-  module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
+  module_load_include('inc', 'islandora_workflow');
 
   $clicked_button = $form_state['clicked_button']['#value'];
   $selected_object_ids = array();

@@ -633,7 +633,7 @@ function islandora_workflow_get_users_with_module_permissions() {
  */
 function islandora_workflow_user_object_permission_check($object_id, $account = NULL) {
 
-  module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
+  module_load_include('inc', 'islandora_workflow');
 
   global $user;
 
@@ -681,7 +681,7 @@ function islandora_workflow_user_object_permission_check($object_id, $account = 
  */
 function islandora_workflow_user_collection_permission_check($collection_pid) {
 
-  module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
+  module_load_include('inc', 'islandora_workflow');
   $manager_permissions = islandora_workflow_get_users_collections('islandora_workflow_Manager');
   if ($manager_permissions[$collection_pid]) {
     return 'islandora_workflow_Manager';

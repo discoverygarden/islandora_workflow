@@ -95,8 +95,6 @@ function islandora_workflow_schema() {
  */
 function islandora_workflow_install() {
   drupal_install_schema('islandora_workflow');
-
-  variable_set('islandora_workflow_enforce_security', 0);
 }
 
 /**
@@ -116,3 +114,4 @@ function islandora_workflow_uninstall() {
     }
   }
 }
+
