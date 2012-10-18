@@ -397,7 +397,7 @@ function islandora_workflow_work_form_page_two(&$form_state, $tab) {
  *
  * @return array
  *   An associative array of associative arrays, mapping Fedora PIDs to the
- *   results of the Sparql query in member_query.txt as given by 
+ *   results of the Sparql query in member_query.sparql as given by
  *   ObjectHelper::performRiQuery(), with the exception of the "timestamp"
  *   being remapped to "islandora_workflow_modified".
  */
@@ -412,7 +412,7 @@ function _islandora_workflow_get_created_items($account = NULL, $limit = -1, $of
   }
 
   // Get the stored query.
-  $query_file_name = drupal_get_path('module', 'islandora_workflow') . '/member_query.txt';
+  $query_file_name = drupal_get_path('module', 'islandora_workflow') . '/sparql/member_query.sparql';
   $query_file_handle = fopen($query_file_name, "r");
   $query = fread($query_file_handle, filesize($query_file_name));
   fclose($query_file_handle);
@@ -2405,7 +2405,7 @@ function islandora_workflow_get_subcollections($collection_id = NULL) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
   module_load_include('inc', 'fedora_repository', 'ObjectHelper');
 
-  $query_file_name = drupal_get_path('module', 'islandora_workflow') . '/subcollection_query.sparql';
+  $query_file_name = drupal_get_path('module', 'islandora_workflow') . '/sparql/subcollection_query.sparql';
   $query_file_handle = fopen($query_file_name, "r");
   $query_string = fread($query_file_handle, filesize($query_file_name));
   fclose($query_file_handle);

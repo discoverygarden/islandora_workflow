@@ -116,7 +116,7 @@ function islandora_workflow_get_all_members_of_collection($collection_id) {
   module_load_include('inc', 'fedora_repository', 'ObjectHelper');
 
   // Get info for query.
-  $query_file_name = drupal_get_path('module', 'islandora_workflow') . '/member_query.txt';
+  $query_file_name = drupal_get_path('module', 'islandora_workflow') . '/sparql/member_query.sparql';
   $query_file_handle = fopen($query_file_name, "r");
   $query = fread($query_file_handle, filesize($query_file_name));
   fclose($query_file_handle);
