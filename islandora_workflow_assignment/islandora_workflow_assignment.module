@@ -260,7 +260,6 @@ function islandora_workflow_assignment_role_delete_batch($form, $form_state) {
  *   the object's new workflow state.
  */
 function islandora_workflow_assignment_workflow_state_change($object_pid, $state) {
-
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
 
   $assignee_name = islandora_workflow_get_object_assignee($object_pid);
