@@ -91,32 +91,6 @@ function _islandora_workflow_reject_access() {
 }
 
 /**
- * Initialize a fieldset common to various incarnations of the workflow form.
- *
- * @see islandora_workflow_work_form_page_one()
- * @see islandora_workflow_work_form_page_two()
- *
- * @param array $form_state
- *   The current form state.
- */
-function islandora_workflow_work_form_common(&$form_state) {
-  $fieldset = array(
-    'workflow' => array(
-      '#type' => 'fieldset',
-      '#title' => t('Workflow'),
-      '#collapsible' => FALSE,
-      '#collapsed' => FALSE,
-      '#tree' => TRUE,
-      '#description' => t('Perform work on objects you have access to'),
-      'elements' => array(
-        '#theme' => 'workflow_table',
-      ),
-    ),
-  );
-  return $fieldset;
-}
-
-/**
  * Get a list of items within a given collection that are tracked by workflow.
  *
  * @param string $collection_id
@@ -177,8 +151,19 @@ function islandora_workflow_work_form_page_one(&$form_state, $tab) {
   // Get an array of possible assignees, keyed by collection PID.
   $possible_assignee_matrix = get_possible_assignees(array_keys($users_collections), array(), $format = TRUE);
 
-  $form = array();
-  $form = islandora_workflow_work_form_common($form_state);
+  $form = array(
+    'workflow' => array(
+      '#type' => 'fieldset',
+      '#title' => t('Workflow'),
+      '#collapsible' => FALSE,
+      '#collapsed' => FALSE,
+      '#tree' => TRUE,
+      '#description' => t('Perform work on objects you have access to'),
+      'elements' => array(
+        '#theme' => 'workflow_table',
+      ),
+    ),
+  );
 
   $elements = array();
 
@@ -239,8 +224,7 @@ function islandora_workflow_work_form_page_one(&$form_state, $tab) {
   );
 
   foreach ($elements as $object_pid => $attributes) {
-    $collection_pid = preg_replace('/^info:fedora\//', '', $attributes['collection_object']);
-    $form['workflow']['elements'][$collection_pid][$object_pid] = array(
+    $form['workflow']['elements'][$object_pid] = array(
       'Selecter' => array(
         '#type' => 'checkbox',
         '#title' => '',
@@ -248,8 +232,9 @@ function islandora_workflow_work_form_page_one(&$form_state, $tab) {
       'Assign' => array(
         '#type' => 'select',
         '#default_value' => isset($attributes['assignee'])? $attributes['assignee'] : '',
-        '#options' => $possible_assignee_matrix[$collection_pid][$attributes['state']],
+        '#options' => $possible_assignee_matrix[$collection_pid][$attributes['state']] ? $possible_assignee_matrix[$collection_pid][$attributes['state']] : array(),
       ),
+      'table_info' => array('#value' => $attributes),
     );
   }
 
@@ -296,15 +281,6 @@ function islandora_workflow_work_form_page_one(&$form_state, $tab) {
 
   $form['#submit'][] = 'islandora_workflow_work_form_submit';
   $form['#validate'][] = 'islandora_workflow_work_form_validate';
-
-  /* Include the tab in the form array so that the
-   * preprocessor/theme can be aware of the tab it is.*/
-  // Drupal hack to pass a variable to my preprocessor function.
-  $form['workflow']['elements']['tab'] = array(
-    '#type' => 'textfield',
-    '#default_value' => 'my-work',
-    '#access' => FALSE,
-  );
 
   return $form;
 }
@@ -1030,8 +1006,7 @@ function islandora_workflow_theme() {
   );
   // Both workflow and overview tabs should be able to use this template.
   $themes['workflow_table'] = array(
-    'arguments' => array('list' => NULL, 'form' => NULL),
-    'template' => 'workflow_table',
+    'arguments' => array('form' => NULL),
     'path' => "$path/theme",
     'file' => "islandora_workflow.theme.inc",
   );

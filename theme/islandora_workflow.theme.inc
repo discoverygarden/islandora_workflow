@@ -93,78 +93,60 @@ function islandora_workflow_preprocess_permissions_role_table(&$vars) {
   }
 }
 
-/**
- * Theme preprocess function.
- *
- * This function handles making variables available to the theme template for
- * the workflow tabs of the 'work' page
- *
- * @param array $vars
- *   the list of variables (including the form) to send to the template
- *
- * @return array
- *   $vars the modified list of variables to send to the template
- */
-function islandora_workflow_preprocess_workflow_table(&$vars) {
-  // Drupal made me do it.
+function theme_workflow_table($form = NULL) {
 
-  module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
-  module_load_include('inc', 'fedora_repository', 'api/fedora_collection');
+  dsm($form);
+  $headers = array(
+    array(
+      'data' => '',
+    ),
+    array(
+      'data' => t('Title'),
+    ),
+    array(
+      'data' => t('Collection'),
+    ),
+    array(
+      'data' => t('Status'),
+    ),
+    array(
+      'data' => t('Object Created'),
+    ),
+    array(
+      'data' => t('Last Workflow Movement'),
+    ),
+    array(
+      'data' => t('Notes'),
+    ),
+    array(
+      'data' => t('Assignee'),
+    ),
+  );
 
-  $vars['collections'] = islandora_workflow_get_users_collections('all');
-  foreach ($vars['collections'] as $collection_id => $collection_information) {
-    $collection_name = $collection_information['label'];
-    $collection_members = islandora_workflow_get_all_members_of_collection($collection_id);
-    if ($collection_members) {
-      /* Makes it useful for theme as a list off all the
-       * members of all the collections.*/
-      $vars['collections'][$collection_id] = array($collection_name => $collection_members);
+  $rows = array();
 
-      foreach ($collection_members as $member => $member_attributes) {
-        /* The isset is here so that only populated
-         * items are rendered into HTML for display.*/
-        if (isset($vars['list'][$collection_id][$member])) {
 
-          $member_workflow_state = $member_attributes['state'];
-          // Make sure workflow data is present too.
-          if ($member_workflow_state) {
-            // Current workflow state.
-            $vars['list'][$collection_id][$member]['state'] = $member_workflow_state;
-
-            // Render each object element.
-            $vars['list'][$collection_id][$member]['Selecter'] = drupal_render($vars['list'][$collection_id][$member]['Selecter']);
-            $vars['list'][$collection_id][$member]['Assign'] = drupal_render($vars['list'][$collection_id][$member]['Assign']);
-
-            // Get the dates and provide them.
-            $vars['list'][$collection_id][$member]['when_created'] = format_date(strtotime($member_attributes['created_date']), $type = 'small');
-            $vars['list'][$collection_id][$member]['last_workflow_progression'] = format_date(strtotime($member_attributes['islandora_workflow_modified']), $type = 'small');
-
-            // If there is a note.
-            $member_note_subject = $member_attributes['subject'];
-            if ($member_note_subject) {
-              $vars['list'][$collection_id][$member]['note_subject'] = l($member_note_subject, 'islandora_workflow_edit_note', array('query' => 'object=' . $member));
-            }
-            // If there is no note.
-            else {
-              $vars['list'][$collection_id][$member]['note_subject'] = l(t('Create Note'), 'islandora_workflow_edit_note', array('query' => 'object=' . $member));
-            }
-
-            $member_label = $member_attributes['label'];
-            // If there is a label.
-            if ($member_label) {
-              $vars['list'][$collection_id][$member]['object'] = l($member_label, 'fedora/repository/' . $member);
-            }
-            else {
-              // No label, use the pid.
-              $vars['list'][$collection_id][$member]['object'] = l($member, 'fedora/repository/' . $member);
-            }
-          }
-        }
+  foreach($form as $key => $value) {
+    if(isset($value['table_info']['#value'])) {
+      $info = $value['table_info']['#value'];
+      if ($info['note_subject']) {
+        $subject = l($member_note_subject, 'islandora_workflow_edit_note', array('query' => 'object=' . $key));
       }
-    }
-    else {
-      // Remove the collection in it has no members.
-      unset($vars['collections'][$collection_id]);
+      else {
+        $subject = l(t('Create Note'), 'islandora_workflow_edit_note', array('query' => 'object=' . $key));
+      }
+      $rows[] = array(
+        drupal_render($value['Selecter']),
+        l($info['label'] ? $info['label'] : $key, "fedora/repository/$key"),
+        $info['collection_object'],
+        $info['state'],
+        format_date(strtotime($info['created_date']), $type = 'small'),
+        format_date(strtotime($info['islandora_workflow_modified']), $type = 'small'),
+        $subject,
+        drupal_render($value['Assign']),
+      );
     }
   }
+
+  return theme_table($headers, $rows);
 }
