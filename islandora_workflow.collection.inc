@@ -15,7 +15,7 @@
  */
 function islandora_workflow_get_collections() {
   module_load_include('inc', 'fedora_repository', 'ObjectHelper');
-  module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
+  module_load_include('inc', 'islandora_workflow');
 
   $query_file_name = drupal_get_path('module', 'islandora_workflow') . '/collection_workflow_states_query.txt';
   $query_file_handle = fopen($query_file_name, "r");
@@ -50,7 +50,7 @@ function islandora_workflow_get_collections() {
  *   fedora http response
  */
 function islandora_workflow_track_collection_in_workflow($object_pid) {
-  module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
+  module_load_include('inc', 'islandora_workflow');
   return (islandora_workflow_set_object_relationship($object_pid, 'is_tracked_by_workflow', 'TRUE'));
 }
 
@@ -64,7 +64,7 @@ function islandora_workflow_track_collection_in_workflow($object_pid) {
  *   Fedora HTTP response
  */
 function islandora_workflow_stop_tracking_collection_in_workflow($object_pid) {
-  module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
+  module_load_include('inc', 'islandora_workflow');
   return (islandora_workflow_set_object_relationship($object_pid, 'is_tracked_by_workflow', 'FALSE'));
 }
 
