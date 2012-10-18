@@ -208,7 +208,7 @@ function islandora_workflow_init_workflow($object_id) {
   $item->add_datastream_from_file(
       $default_xml_file_name,
       $dsid = 'islandora_workflow',
-      $ds_label = NULL,
+      $ds_label = 'Workflow Datastream',
       $mimetype = 'text/xml',
       $control_group = 'X',
       $log_message = 'Adding islandora_workflow datastream(editorial workflow tracking).'
