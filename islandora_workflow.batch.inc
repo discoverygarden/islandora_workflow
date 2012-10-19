@@ -7,7 +7,7 @@
  *   Either a string containing the Fedora PID of a collection whose childrens'
  *   POLICY stream we need to update, or an array containing multiple.
  */
-function islandora_workflow_update_childen($collection_pid, $assignee_to_nuke = NULL) {
+function islandora_workflow_update_children($collection_pid) {
   module_load_include('inc', 'islandora_workflow');
 
   $batch = array(

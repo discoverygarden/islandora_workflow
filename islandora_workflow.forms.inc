@@ -221,7 +221,7 @@ function islandora_workflow_work_form_main(&$form_state, $tab) {
       'Assign' => array(
         '#type' => 'select',
         '#default_value' => isset($attributes['assignee'])? $attributes['assignee'] : '',
-        '#options' => $possible_assignee_matrix[$collection_pid][$attributes['state']] ? $possible_assignee_matrix[$collection_pid][$attributes['state']] : array(),
+        '#options' => $possible_assignee_matrix[$attributes['collection_object']][$attributes['state']] ? $possible_assignee_matrix[$attributes['collection_object']][$attributes['state']] : array(),
       ),
       'table_info' => array('#value' => $attributes),
     );
@@ -270,7 +270,6 @@ function islandora_workflow_work_form_main(&$form_state, $tab) {
 
   $form['#submit'][] = 'islandora_workflow_work_form_submit';
   $form['#validate'][] = 'islandora_workflow_work_form_validate';
-
   return $form;
 }
 
