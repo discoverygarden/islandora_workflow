@@ -107,8 +107,26 @@ function islandora_workflow_work_form_main(&$form_state, $tab) {
   // Get items.
   switch ($tab) {
     case 'work_in_progress':
-      $elements = _islandora_workflow_get_created_items($user);
-      $elements += islandora_workflow_assignment_by_user($user);
+      $elements = islandora_workflow_assignment_by_user($user);
+      $elements += _islandora_workflow_get_created_items($user);
+
+      // Show everything created by the user except for submitters.
+      // Show everything created by and in a created state to submitters.
+      $manager_collections = islandora_workflow_get_users_collections('islandora_workflow_Manager');
+      $editor_collections = islandora_workflow_get_users_collections('islandora_workflow_Editor');
+      $editor_collections = array_diff_key($editor_collections, $manager_collections);
+      $submitter_collections = islandora_workflow_get_users_collections('islandora_workflow_Submitter');
+      $submitter_collections = array_diff_key($submitter_collections, $manager_collections, $editor_collections);
+
+      $submitter_objects_to_ommit = array();
+
+      foreach ($submitter_collections as $collection_pid => $attributes) {
+        $collection_members = islandora_workflow_tracked_collection_members($collection_pid);
+        $collection_members_in_progress = array_filter($collection_members, '_islandora_workflow_in_progress_by_submitter');
+        $submitter_objects_to_ommit += array_diff_key($collection_members, $collection_members_in_progress);
+      }
+
+      $elements = array_diff_key($elements, $submitter_objects_to_ommit);
       break;
 
     case 'assigned':
@@ -288,7 +306,7 @@ function islandora_workflow_work_form_main(&$form_state, $tab) {
  */
 function islandora_workflow_work_form_reject(&$form_state) {
   $form = array();
-  
+
   $objects = $form_state['storage']['selected_objects'];
   $elements = $form_state['storage']['elements'];
   $headers = $form_state['storage']['headers'];
@@ -391,7 +409,7 @@ function islandora_workflow_work_form_delete_submit($form, &$form_state) {
   }
 
   $form['#redirect'] = array('islandora_workflow');
-  
+
   // Get rid of storage so the redirect can work.
   unset($form_state['storage']);
 }
