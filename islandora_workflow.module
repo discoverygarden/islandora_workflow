@@ -184,8 +184,26 @@ function islandora_workflow_work_form_page_one(&$form_state, $tab) {
   // Get items.
   switch ($tab) {
     case 'work_in_progress':
-      $elements = _islandora_workflow_get_created_items($user);
-      $elements += islandora_workflow_assignment_by_user($user);
+      $elements = islandora_workflow_assignment_by_user($user);
+      $elements += _islandora_workflow_get_created_items($user);
+
+      // Show everything created by the user except for submitters.
+      // Show everything created by and in a created state to submitters.
+      $manager_collections = islandora_workflow_get_users_collections('islandora_workflow_Manager');
+      $editor_collections = islandora_workflow_get_users_collections('islandora_workflow_Editor');
+      $editor_collections = array_diff_key($editor_collections, $manager_collections);
+      $submitter_collections = islandora_workflow_get_users_collections('islandora_workflow_Submitter');
+      $submitter_collections = array_diff_key($submitter_collections, $manager_collections, $editor_collections);
+
+      $submitter_objects_to_ommit = array();
+
+      foreach ($submitter_collections as $collection_pid => $attributes) {
+        $collection_members = islandora_workflow_tracked_collection_members($collection_pid);
+        $collection_members_in_progress = array_filter($collection_members, '_islandora_workflow_in_progress_by_submitter');
+        $submitter_objects_to_ommit += array_diff_key($collection_members, $collection_members_in_progress);
+      }
+
+      $elements = array_diff_key($elements, $submitter_objects_to_ommit);
       break;
 
     case 'assigned':
@@ -469,6 +487,27 @@ function _islandora_workflow_actionable_by_submitter($item) {
 }
 
 /**
+ * This function is used to check if a Fedora object
+ * can be show to a submitter in the in_progress tab. It assumes that the
+ * user has permission on the collection.
+ *
+ * @param array $item
+ *   The returns from a SPARQL query that describe the Fedora object.
+ *
+ * @return boolean
+ *   True if the user should see the object false otherwise.
+ */
+function _islandora_workflow_in_progress_by_submitter($item) {
+  global $user;
+
+  if ($item['owner'] == $user->name && $item['state'] == 'created') {
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
+/**
  *
  * @param array $form_state
  */
@@ -532,29 +571,6 @@ function islandora_workflow_work_form(&$form_state, $tab, $page = 1) {
       exit;
   }
 }
-
-/**
- * Have multiple forms with the same ID on the same page without collision.
- *
- * @param string $form_id
- *   the string identifying the form
- * @param array $args
- *   an array containing the arguments provided to drupal_get_form()
- *
- * @return array
- *   $form_info an associative array containing the
- *   form_id callback and arguments
- */
-/*
-function islandora_workflow_forms($form_id, $args) {
-
-  $form_info['islandora_workflow_workflow_form'] = array('callback' => 'islandora_workflow_work_form', 'callback arguments' => array('workflow'));
-  $form_info['islandora_workflow_overview_form'] = array('callback' => 'islandora_workflow_work_form', 'callback arguments' => array('overview'));
-
-  return $form_info;
-}
- *
- */
 
 /**
  * Implements hook_form_FORM_ID_alter().
@@ -1837,7 +1853,6 @@ function islandora_workflow_batch_function($collection_pid, $members, $delete, &
       $creator = islandora_workflow_get_object_creator($pid);
       $perms = islandora_workflow_get_permission_state($collection_pid, $data['state']);
       $perms['users'][] = $creator;
-
       $xacml->managementRule->clear();
       $xacml->viewingRule->clear();
 
