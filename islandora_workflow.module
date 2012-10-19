@@ -211,33 +211,6 @@ function _islandora_workflow_in_progress_by_submitter($item) {
 }
 
 /**
- *
- * @param array $form_state
- */
-function islandora_workflow_overview_items(&$form_state) {
-  $manager_collections = islandora_workflow_get_users_collections('islandora_workflow_Manager');
-  $editor_collections = islandora_workflow_get_users_collections('islandora_workflow_Editor');
-  $editor_collections = array_diff_key($editor_collections, $manager_collections);
-  $submitter_collections = islandora_workflow_get_users_collections('islandora_workflow_Submitter');
-  $submitter_collections = array_diff_key($submitter_collections, $manager_collections, $editor_collections);
-
-  $items = array();
-  foreach ($manager_collections as $collection_pid => $attributes) {
-    $members = islandora_workflow_tracked_collection_members($collection_pid);
-    $items += array_filter($members, '_islandora_workflow_actionable_by_manager');
-  }
-  foreach ($editor_collections as $collection_pid => $attributes) {
-    $members = islandora_workflow_tracked_collection_members($collection_pid);
-    $items += array_filter($members, '_islandora_workflow_actionable_by_editor');
-  }
-  foreach ($submitter_collections as $collection_pid => $attributes) {
-    $members = islandora_workflow_tracked_collection_members($collection_pid);
-    $items += array_filter($members, '_islandora_workflow_actionable_by_submitter');
-  }
-  return $items;
-}
-
-/**
  * Implements hook_form_FORM_ID_alter().
  *
  * This form alter hook runs on object ingest to determine whether or not to
@@ -1484,5 +1457,27 @@ function islandora_workflow_fedora_repository_can_ingest($collection_pid) {
 
   module_load_include('permissions.inc', 'islandora_workflow');
   return (islandora_workflow_user_collection_permission_check($collection_pid) !== FALSE);
+
+}
+
+/**
+ * This function will set the initial policy to null if the
+ * parent object is workflow tracked.
+ *
+ * @param DOMDocumentFragment $policy_element
+ *   The XML document fragment holding the XACML
+ * @param string $PID
+ *   The Fedora PID of the object.
+ * @param string $collection_ID
+ *   The Fedora PID of the collection the object belongs to.
+ * @param string $content_model_PID
+ *   The PID of the content model of the object.
+ */
+function islandora_workflow_islandora_content_model_forms_policy_alter(&$policy_element, $PID, $collection_ID, $content_model_PID) {
+  module_load_include('collection.inc', 'islandora_workflow');
+
+  if(islandora_workflow_is_collection_workflow_tracked($collection_ID)) {
+    $policy_element = NULL;
+  }
 
 }
