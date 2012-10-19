@@ -72,7 +72,7 @@ function islandora_workflow_stop_tracking_collection_in_workflow($object_pid) {
  * Check an object's RELS-EXT to see if the collection is tracked in workflow.
  *
  * @param string $object_pid
- *   The PID of the object to check on
+ *   The PID of the collection object to check on
  *
  * @return boolean
  *   TRUE if the collection is tracked in workflow, FALSE otherwise.
