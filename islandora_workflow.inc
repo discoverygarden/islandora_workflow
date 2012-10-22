@@ -238,8 +238,8 @@ function islandora_workflow_reject_object($object_id) {
   $label = islandora_workflow_get_object_label($object_id);
 
   // Permission check.
-  $tmp = islandora_workflow_user_object_permission_check($object_id);
-  if ($tmp != 'islandora_workflow_Editor' && $tmp != 'islandora_workflow_Manager') {
+  $user_permission_level = islandora_workflow_user_object_permission_check($object_id);
+  if ($user_permission_level != 'islandora_workflow_Editor' && $user_permission_level != 'islandora_workflow_Manager') {
     drupal_set_message(t('The object <em>%label</em> (%pid) could not be rejected, you do not have the necessary permissions.', array(
       '%label' => $label,
       '%pid' => $object_id,
@@ -615,6 +615,8 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
       $xacml = new IslandoraXacml($object_id);
       $xacml->managementRule->clear();
       $xacml->viewingRule->clear();
+      $xacml->managementRule->addRole('administrator');
+      $xacml->managementRule->addUser('fedoraAdmin');
     }
     $xacml->writeBackToFedora();
   }
