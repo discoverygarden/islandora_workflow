@@ -1491,7 +1491,7 @@ function islandora_workflow_fedora_repository_can_ingest($collection_pid) {
 function islandora_workflow_islandora_content_model_forms_policy_alter(&$policy_element, $PID, $collection_ID, $content_model_PID) {
   module_load_include('collection.inc', 'islandora_workflow');
 
-  if(islandora_workflow_is_collection_workflow_tracked($collection_ID)) {
+  if (islandora_workflow_is_collection_workflow_tracked($collection_ID)) {
     $policy_element = NULL;
   }
 
