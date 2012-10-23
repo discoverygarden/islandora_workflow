@@ -134,11 +134,13 @@ function _islandora_workflow_get_created_items($account = NULL, $limit = -1, $of
   $query = fread($query_file_handle, filesize($query_file_name));
   fclose($query_file_handle);
 
-  $pattern = '/(REGEX.+owner.+?\')(\.\?)(\')/';
-  $replacement = '\1' . $account->name . '\3';
+  $pattern = 'BOUND(?owner)';
+  $account_name = $account->name;
+  $replacement = "?owner = \"$account_name\"";
+  $query = str_replace($pattern, $replacement, $query);
 
-  $query = preg_replace($pattern, $replacement, $query);
   $query_results = ObjectHelper::performRiQuery($query, 'sparql', $limit, $offset);
+
   $processed_results = array();
   foreach ($query_results as $result) {
     $index = preg_replace('/^info:fedora\//', '', $result['member_object']);
@@ -151,16 +153,30 @@ function _islandora_workflow_get_created_items($account = NULL, $limit = -1, $of
 }
 
 /**
+ * This function is used to check if a Fedora object
+ * can be operated on by a manager. It assumes that the
+ * user has permission on the collection.
  *
  * @param array $item
+ *   the returns from a SPARQL query that describe the Fedora object.
+ *
+ * @return boolean
+ *   True if the user has access false otherwise.
  */
 function _islandora_workflow_actionable_by_manager($item) {
   return 'published' != $item['state'];
 }
 
 /**
+ * This function is used to check if a Fedora object
+ * can be operated on by an editor. It assumes that the
+ * user has permission on the collection.
  *
  * @param array $item
+ *   the returns from a SPARQL query that describe the Fedora object.
+ *
+ * @return boolean
+ *   True if the user has access false otherwise.
  */
 function _islandora_workflow_actionable_by_editor($item) {
   return 'submitted' == $item['state'];
@@ -1475,7 +1491,7 @@ function islandora_workflow_fedora_repository_can_ingest($collection_pid) {
 function islandora_workflow_islandora_content_model_forms_policy_alter(&$policy_element, $PID, $collection_ID, $content_model_PID) {
   module_load_include('collection.inc', 'islandora_workflow');
 
-  if(islandora_workflow_is_collection_workflow_tracked($collection_ID)) {
+  if (islandora_workflow_is_collection_workflow_tracked($collection_ID)) {
     $policy_element = NULL;
   }
 

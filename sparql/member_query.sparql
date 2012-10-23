@@ -28,8 +28,8 @@ WHERE {
     ?member_object fedora_view:disseminates [workflow:has_workflow_timestamp ?timestamp]
   }
   FILTER (REGEX(STR(?obj_state), "info:fedora/fedora-system:def/model#Active") || REGEX(STR(?obj_state), "info:fedora/fedora-system:def/model#Inactive"))
-  FILTER (REGEX(STR(?collection_object),'.'))
-  FILTER (REGEX(STR(?owner),'.?'))
+  FILTER (BOUND(?collection_object))
+  FILTER (BOUND(?owner))
   FILTER (!BOUND(?assignee) || REGEX(STR(?assignee),'.?'))
   FILTER (?state != 'published')
 }
