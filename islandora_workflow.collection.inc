@@ -111,6 +111,8 @@ function islandora_workflow_is_collection_workflow_tracked($object_pid) {
  *   ='formated_user'
  */
 function get_possible_assignees($collections, $workflow_states = array(), $format = FALSE) {
+  module_load_include('permissions.inc', 'islandora_workflow');
+
   if (empty($workflow_states)) {
     // Check all workflow states.
     $workflow_states[] = 'rejected';
