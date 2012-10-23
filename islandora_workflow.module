@@ -153,16 +153,30 @@ function _islandora_workflow_get_created_items($account = NULL, $limit = -1, $of
 }
 
 /**
+ * This function is used to check if a Fedora object
+ * can be operated on by a manager. It assumes that the
+ * user has permission on the collection.
  *
  * @param array $item
+ *   the returns from a SPARQL query that describe the Fedora object.
+ *
+ * @return boolean
+ *   True if the user has access false otherwise.
  */
 function _islandora_workflow_actionable_by_manager($item) {
   return 'published' != $item['state'];
 }
 
 /**
+ * This function is used to check if a Fedora object
+ * can be operated on by an editor. It assumes that the
+ * user has permission on the collection.
  *
  * @param array $item
+ *   the returns from a SPARQL query that describe the Fedora object.
+ *
+ * @return boolean
+ *   True if the user has access false otherwise.
  */
 function _islandora_workflow_actionable_by_editor($item) {
   return 'submitted' == $item['state'];
