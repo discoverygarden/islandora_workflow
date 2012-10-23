@@ -103,7 +103,6 @@ function islandora_workflow_work_form_main(&$form_state, $tab) {
   );
 
   $elements = array();
-
   // Get items.
   switch ($tab) {
     case 'work_in_progress':
