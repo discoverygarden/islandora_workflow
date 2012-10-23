@@ -164,6 +164,7 @@ function _islandora_workflow_get_created_items($account = NULL, $limit = -1, $of
  *   True if the user has access false otherwise.
  */
 function _islandora_workflow_actionable_by_manager($item) {
+
   return 'published' != $item['state'];
 }
 
@@ -179,7 +180,14 @@ function _islandora_workflow_actionable_by_manager($item) {
  *   True if the user has access false otherwise.
  */
 function _islandora_workflow_actionable_by_editor($item) {
-  return 'submitted' == $item['state'];
+
+  global $user;
+
+  if (('published' != $item['state'] && 'approved' != $item['state']) || ($item['owner'] == $user->name && 'published' != $item['state'])) {
+    return TRUE;
+  }
+
+  return FALSE;
 }
 
 /**
@@ -197,7 +205,7 @@ function _islandora_workflow_actionable_by_submitter($item) {
 
   global $user;
 
-  if ($item['owner'] == $user->name) {
+  if ($item['owner'] == $user->name && 'published' != $item['state']) {
     return TRUE;
   }
 
