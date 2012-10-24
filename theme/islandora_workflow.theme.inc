@@ -108,19 +108,22 @@ function theme_workflow_table($form = NULL) {
 
   $rows = array();
 
-  foreach($form as $key => $value) {
-    if(isset($value['table_info']['#value'])) {
-      $info = $value['table_info']['#value'];
-      $rows[] = array(
-        drupal_render($value['Selecter']),
-        l($info['label'] ? $info['label'] : $key, "fedora/repository/$key"),
-        $info['collection_label'] ? $info['collection_label'] : $info['collection_object'],
-        $info['state'],
-        format_date(strtotime($info['created_date']), $type = 'small'),
-        format_date(strtotime($info['islandora_workflow_modified']), $type = 'small'),
-        l($info['subject'] ? $info['subject'] : t('Create Note'), 'islandora_workflow_edit_note', array('query' => 'object=' . $key)),
-        drupal_render($value['Assign']),
-      );
+  foreach ($form as $key => $value) {
+    // Array check prevents notice.
+    if (is_array($value)) {
+      if (isset($value['table_info']['#value'])) {
+        $info = $value['table_info']['#value'];
+        $rows[] = array(
+          drupal_render($value['Selecter']),
+          l($info['label'] ? $info['label'] : $key, "fedora/repository/$key"),
+          $info['collection_label'] ? $info['collection_label'] : $info['collection_object'],
+          $info['state'],
+          format_date(strtotime($info['created_date']), $type = 'small'),
+          format_date(strtotime($info['islandora_workflow_modified']), $type = 'small'),
+          l($info['subject'] ? $info['subject'] : t('Create Note'), 'islandora_workflow_edit_note', array('query' => 'object=' . $key)),
+          drupal_render($value['Assign']),
+        );
+      }
     }
   }
 
