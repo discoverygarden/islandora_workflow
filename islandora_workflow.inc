@@ -122,14 +122,12 @@ function islandora_workflow_get_all_members_of_collection($collection_id) {
   fclose($query_file_handle);
 
   // Inject collection value into the query.
-  $pattern = '/(REGEX.+collection_object.+?\')(\.)(\')/';
-  $replacement = '\1' . $collection_id . '\3';
+  $pattern = 'BOUND(?collection_object)';
+  $replacement = "?collection_object = <info:fedora/$collection_id>";
 
-  $query = preg_replace($pattern, $replacement, $query);
-
+  $query = str_replace($pattern, $replacement, $query);
   $limit = -1;
   $query_results = ObjectHelper::performRiQuery($query, 'sparql', $limit, $offset = 0);
-
   $processed_results = array();
   foreach ($query_results as $result) {
     $index = preg_replace('/^info:fedora\//', '', $result['member_object']);
