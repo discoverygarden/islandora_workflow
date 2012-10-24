@@ -300,6 +300,7 @@ function islandora_workflow_menu() {
     'page callback' => '_islandora_workflow_get_form',
     'page arguments' => array('islandora_workflow_collections'),
     'access arguments' => array('islandora_workflow_Administrator'),
+    'file' => 'islandora_workflow.forms.inc',
     'type' => MENU_LOCAL_TASK,
   );
   // Main working page for islandora_workflow.
@@ -351,6 +352,7 @@ function islandora_workflow_menu() {
     'page arguments' => array('islandora_workflow_edit_note_form'),
     'access callback' => 'islandora_workflow_check_permissions',
     'access arguments' => array(islandora_workflow_perm()),
+    'file' => 'islandora_workflow.forms.inc',
     'type' => MENU_CALLBACK,
   );
   return $menu_entries;
