@@ -251,7 +251,6 @@ function islandora_workflow_get_permission_state($collection, $state) {
   switch ($state) {
     case 'created':
     case 'rejected':
-      $permission[] = 'islandora_workflow_Submitter';
     case 'submitted':
       $permission[] = 'islandora_workflow_Editor';
     case 'approved':
