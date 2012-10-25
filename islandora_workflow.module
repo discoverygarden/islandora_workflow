@@ -1354,6 +1354,8 @@ function islandora_workflow_user_edit_batch($edit, $account, $category = NULL) {
  *   The parameters with which the original hook was called.
  *
  * @see fedora_repository_get_items()
+ *
+ * @todo: kill this evil function
  */
 function islandora_workflow_islandora_tabs_alter(&$tabs, $params) {
 
@@ -1410,23 +1412,6 @@ function islandora_workflow_islandora_tabs_alter(&$tabs, $params) {
       unset($tabs['add_tab']);
     }
   }
-
-  // Restrict object details/edit to appropriate permissions.
-  if (array_key_exists('fedora_object_details', $tabs)) {
-    if ($is_collection) {
-      // Managers and above.
-      $update_access = ('islandora_workflow_Manager' == $permission);
-    }
-    else {
-      // Submitters and above.
-      $update_access = !empty($permission);
-    }
-    if (!$update_access) {
-      unset($tabs['fedora_object_details']['tabset']['view']['purge']);
-      unset($tabs['fedora_object_details']['tabset']['edit']);
-    }
-  }
-
 }
 
 /**
