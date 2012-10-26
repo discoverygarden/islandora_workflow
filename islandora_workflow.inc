@@ -357,10 +357,6 @@ function islandora_workflow_publish_object($object_id) {
 
   if (islandora_workflow_get_object_workflow_state($object_id) != 'published') {
     islandora_workflow_set_object_workflow_state($object_id, 'published');
-    // Make the object viewable.
-    $label = islandora_workflow_get_object_label($object_id);
-    $item = new Fedora_Item($object_id);
-    $item->modify_object($label, 'A');
   }
   else {
     drupal_set_message(t('The object <em>%label</em> (%pid) could not be published, it was not in an appropriate workflow state.', array(
@@ -589,10 +585,10 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
   // Change the rels-int.
   islandora_workflow_set_object_relationship($object_id, 'has_workflow_timestamp', date('c'), 'islandora_workflow');
 
+  $label = islandora_workflow_get_object_label($object_id);
   /* Make sure that the object's fedora
    * state is going to be set to I if the object is still in workflow.*/
   if ($state != 'published' && islandora_workflow_get_object_fedora_state($object_id) != 'I') {
-    $label = islandora_workflow_get_object_label($object_id);
     $item->modify_object($label, 'I');
   }
   module_invoke_all('workflow_state_change', $object_id, $state);
@@ -602,6 +598,8 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
   module_load_include('inc', 'islandora_xacml_api', 'IslandoraXacml');
   module_load_include('permissions.inc', 'islandora_workflow');
   if ($state == 'published') {
+    // Make the object viewable(active).
+    $item->modify_object($label, 'A');
     // Add the child security policy.
     $collection_item = new Fedora_Item($collection);
     if (isset($collection_item->datastreams['CHILD_SECURITY'])) {
