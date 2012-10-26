@@ -1,4 +1,7 @@
 <?php
+/**
+ *
+ */
 
 /**
  *
@@ -30,7 +33,7 @@ function _islandora_workflow_base_rule($options) {
             ),
           ),
           'eval input' => array(
-            'message', 'subject'
+            'message', 'subject',
           ),
         ),
         '#name' => 'islandora_workflow_rules_email_someone',

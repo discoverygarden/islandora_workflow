@@ -44,7 +44,7 @@ function islandora_workflow_rules_email_recipients($object, $settings) {
   module_load_include('permissions.inc', 'islandora_workflow');
   module_load_include('inc', 'islandora_workflow');
 
-  //Variable in which to accumulate the array of recipients. (user ids)
+  // Variable in which to accumulate the array of recipients. (user ids)
   $recipients = array();
 
   // Get everyone who has the given workflow roles for the parent collection.
@@ -101,8 +101,8 @@ function islandora_workflow_rules_email_someone($object, $settings) {
   $recipients = islandora_workflow_rules_email_recipients($object, $settings);
   foreach ($recipients as $recipient) {
     $account = user_load($recipient);
-    //TODO:  Find some way to make the language actually send the message in
-    //  the preferred language of the user.
+    // TODO:  Find some way to make the language actually send the message in
+    // the preferred language of the user.
     drupal_mail('islandora_workflow', NULL, $account->mail, user_preferred_language($account), $settings);
     watchdog('iw_rules', 'Sending message about %object to %address', array(
       '%object' => $object->pid,
