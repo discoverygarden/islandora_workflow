@@ -6,44 +6,12 @@
  * @author
  *   William Panting
  *
- * @todo
- *   Alow for the sorting of columns: requires signifigent
- *   refactoring. Likely dump all data to JS? scaleable?
- *
- * @todo
- *   Alow collapsible columns.
- *
- * @todo
- *   Fix bug with pager/tabs not working on first page change:
- *   the tab is not being remembered,
- *   this may requre a refactor from doing this server side.
- *
- * @todo
- *   Would it be good to create a workflow fedora object that derives
- *   the islandora fedora api object? This COULD impact performance.
- *   A way to transfer this to the pre-processor func should be
- *   found so the ir queries are not being repeated.
- *   The schema will be changing so that the last modified date and
- *   current note subject will be in the rels-int, large refactor here.
- *
  *  @todo
  *    Address being able to add not-in-workflow objects
  *    and broken workflow objects to a workflow state.
  *    The distinction between the two states.
  *    I think this should be an integration piece: that
  *    the 'reject to workflow' should go in an object management UI.
- *
- * Two different techniqes are being used for generating
- * similar tables in tabs here:
- *
- * 1. The work tabs use the same function but pass a parameter to change the
- *   content of the form because the only
- *   difference is some missing elements in the workflow
- *   tab vs the overview tab.
- *
- * 2. The permission tabs use seperate functions because the have enough
- *   differences (especialy in the submit funciton) to make
- *   this easier to follow.
  *
  * This module treates the object owner as the creator for its purposes.
  */
