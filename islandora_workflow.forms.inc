@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ *   This file holds form related functions for the islandora_workflow module.
+ */
 
 /**
  * Defer a drupal_get_form() call.
@@ -11,7 +15,6 @@
 function _islandora_workflow_get_form($form_id) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
   if (!fedora_available()) {
-    // i don't think this message is being sent, I think page_not_found is overriding it
     drupal_set_message(t('The Fedora server is not available'), 'error');
     return drupal_not_found();
   }
@@ -159,7 +162,7 @@ function islandora_workflow_work_form_main(&$form_state, $tab) {
       break;
   }
 
-  // Setup table headers
+  // Setup table headers.
   $headers = array(
     array(
       'data' => ' ',
@@ -311,11 +314,11 @@ function islandora_workflow_work_form_reject(&$form_state) {
   $headers = $form_state['storage']['headers'];
 
   $collections = array();
-  foreach($objects as $object) {
+  foreach ($objects as $object) {
     $collections[] = $elements[$object]['collection_object'];
   }
 
-  foreach($headers as $key => $header) {
+  foreach ($headers as $key => $header) {
     unset($headers[$key]['field']);
   }
 
@@ -332,7 +335,7 @@ function islandora_workflow_work_form_reject(&$form_state) {
     '#tree' => TRUE,
   );
 
-  foreach($objects as $object) {
+  foreach ($objects as $object) {
     $collection_pid = $elements[$object]['collection_object'];
     $options = $possible_assignees[$collection_pid]['rejected'];
 
@@ -428,7 +431,7 @@ function islandora_workflow_work_form_reject_submit($form, &$form_state) {
   if ($form_state['clicked_button']['#value'] == t('Reject and Assign')) {
     foreach ($form_state['values']['assignees'] as $pid => $values) {
       islandora_workflow_reject_object($pid);
-      if(empty($values['assignee'])) {
+      if (empty($values['assignee'])) {
         islandora_workflow_assignment_remove($pid);
       }
       else {
@@ -539,7 +542,7 @@ function islandora_workflow_work_form_validate($form, &$form_state) {
       // Get selected objects.
       $elements = $form_state['values']['workflow']['elements'];
       foreach ($elements as $object_id => $values) {
-        if($values['Selecter'] == 1) {
+        if ($values['Selecter'] == 1) {
           $selected_object_ids[] = $object_id;
         }
       }
