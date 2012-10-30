@@ -322,7 +322,7 @@ function islandora_workflow_assignment_workflow_permission_change($collection_pi
   module_load_include('collection.inc', 'islandora_workflow');
 
   // @TODO have this return an array of operations when invoked as a hook.
-  $possible_assignees = get_possible_assignees(array($collection_pid));
+  $possible_assignees = get_possible_assignees_for_collections(array($collection_pid));
   $members = islandora_workflow_assignment_by_collection($collection_pid);
   foreach ($members as $member) {
     if (empty($member->assignee)) {

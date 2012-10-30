@@ -88,9 +88,6 @@ function islandora_workflow_work_form_main(&$form_state, $tab) {
    *  to be used in the assign-to-user drop down. */
   $users_collections_members = islandora_workflow_get_all_users_with_collection_permissions(array_keys($users_collections));
 
-  // Get an array of possible assignees, keyed by collection PID.
-  $possible_assignee_matrix = get_possible_assignees(array_keys($users_collections), array(), $format = TRUE);
-
   $form = array(
     'workflow' => array(
       '#type' => 'fieldset',
@@ -233,6 +230,11 @@ function islandora_workflow_work_form_main(&$form_state, $tab) {
   );
 
   foreach ($elements as $object_pid => $attributes) {
+    // Get possible assignees for the object.
+    $possible_assignees = get_possible_assignees(array($object_pid), array(), $format = TRUE);
+    $possible_assignees = $possible_assignees[$object_pid];
+
+    // Populate the selector and assignee drop down.
     $form['workflow']['elements'][$object_pid] = array(
       'Selecter' => array(
         '#type' => 'checkbox',
@@ -241,7 +243,7 @@ function islandora_workflow_work_form_main(&$form_state, $tab) {
       'Assign' => array(
         '#type' => 'select',
         '#default_value' => isset($attributes['assignee'])? $attributes['assignee'] : '',
-        '#options' => $possible_assignee_matrix[$attributes['collection_object']][$attributes['state']] ? $possible_assignee_matrix[$attributes['collection_object']][$attributes['state']] : array(),
+        '#options' => $possible_assignees[$attributes['state']] ? $possible_assignees[$attributes['state']] : array(),
       ),
       'table_info' => array('#value' => $attributes),
     );
@@ -307,22 +309,17 @@ function islandora_workflow_work_form_main(&$form_state, $tab) {
  *   The form definition
  */
 function islandora_workflow_work_form_reject(&$form_state) {
+  module_load_include('collection.inc', 'islandora_workflow');
   $form = array();
 
   $objects = $form_state['storage']['selected_objects'];
   $elements = $form_state['storage']['elements'];
   $headers = $form_state['storage']['headers'];
 
-  $collections = array();
-  foreach ($objects as $object) {
-    $collections[] = $elements[$object]['collection_object'];
-  }
-
   foreach ($headers as $key => $header) {
     unset($headers[$key]['field']);
   }
 
-  $possible_assignees = get_possible_assignees($collections);
 
   $form['assignees'] = array(
     '#type' => 'fieldset',
@@ -336,8 +333,9 @@ function islandora_workflow_work_form_reject(&$form_state) {
   );
 
   foreach ($objects as $object) {
-    $collection_pid = $elements[$object]['collection_object'];
-    $options = $possible_assignees[$collection_pid]['rejected'];
+
+    $possible_assignees = get_possible_assignees(array($object), array(), $format = TRUE);
+    $options = $possible_assignees[$object]['rejected'];
 
     $form['assignees'][$object] = array(
       '#type' => 'fieldset',
