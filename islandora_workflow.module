@@ -106,9 +106,7 @@ function _islandora_workflow_get_created_items($account = NULL, $limit = -1, $of
   $account_name = $account->name;
   $replacement = "?owner = \"$account_name\"";
   $query = str_replace($pattern, $replacement, $query);
-
   $query_results = ObjectHelper::performRiQuery($query, 'sparql', $limit, $offset);
-
   $processed_results = array();
   foreach ($query_results as $result) {
     $index = preg_replace('/^info:fedora\//', '', $result['member_object']);
@@ -323,6 +321,30 @@ function islandora_workflow_menu() {
     'file' => 'islandora_workflow.forms.inc',
     'type' => MENU_CALLBACK,
   );
+  $menu_entries['islandora_workflow/ahah/tracked_collections_user'] = array(
+    'page callback' => 'islandora_workflow_ahah_tracked_collections_user',
+    'access callback' => 'islandora_workflow_check_permissions',
+    'access arguments' => array(islandora_workflow_perm()),
+    'type' => MENU_CALLBACK, 
+  );
+  $menu_entries['islandora_workflow/ahah/tracked_collections_role'] = array(
+    'page callback' => 'islandora_workflow_ahah_tracked_collections_role',
+    'access callback' => 'islandora_workflow_check_permissions',
+    'access arguments' => array(islandora_workflow_perm()),
+    'type' => MENU_CALLBACK, 
+  );
+  $menu_entries['islandora_workflow/ahah/active_collections'] = array(
+    'page callback' => 'islandora_workflow_ahah_active_collections',
+    'access callback' => 'islandora_workflow_check_permissions',
+    'access arguments' => array(islandora_workflow_perm()),
+    'type' => MENU_CALLBACK, 
+  );
+  $menu_entries['islandora_workflow/ahah/inactive_collections'] = array(
+    'page callback' => 'islandora_workflow_ahah_inactive_collections',
+    'access callback' => 'islandora_workflow_check_permissions',
+    'access arguments' => array(islandora_workflow_perm()),
+    'type' => MENU_CALLBACK, 
+  );
   return $menu_entries;
 }
 
@@ -427,11 +449,54 @@ function islandora_workflow_check_permissions($permission_array) {
 function islandora_workflow_collections(&$form_state) {
   module_load_include('inc', 'islandora_workflow');
   module_load_include('collection.inc', 'islandora_workflow');
+  
+  if (!$form_state['storage']['workflow_collections']['inactive'] && !$form_state['storage']['workflow_collections']['active']) {
+    $collection_data = islandora_workflow_get_collections();
+  }
+  elseif ($form_state['storage']['workflow_collections']['active'] && $form_state['storage']['workflow_collections']['inactive']) {
+    $collection_data = islandora_workflow_get_collections('both');
+  }
+  elseif ($form_state['storage']['workflow_collections']['active']) {
+    $collection_data = islandora_workflow_get_collections('active');
+  } 
+  elseif ($form_state['storage']['workflow_collections']['inactive']) {
+    $collection_data = islandora_workflow_get_collections('inactive');
+  }
 
-  $collection_data = islandora_workflow_get_collections();
-
-  $form = array();
-
+  $form = array(
+    '#prefix' => '<div id="islandora_workflow_collection_filtering">',
+    '#suffix' => '</div>',
+  );
+  if (!$form_state['storage']['workflow_collections']) {
+    $form_state['storage']['workflow_collections']['active'] = FALSE;
+    $form_state['storage']['workflow_collections']['inactive'] = FALSE;
+  }
+  $form['workflow_filtering'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Collection filtering'),
+    '#collapsible' => FALSE,
+    '#collapsed' => TRUE,
+    '#description' => t('Filter the results of the collections shown below. By default all collections regardless of state are shown.')
+  );
+  $form['workflow_filtering']['workflow_active_collections'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Display active collections?'),
+    '#default_value' => $form_state['storage']['workflow_collections']['active'] ? TRUE : FALSE,
+    '#ahah' => array(
+      'path' => 'islandora_workflow/ahah/active_collections',
+      'wrapper' => 'islandora_workflow_collection_filtering',
+    ),
+  );
+  $form['workflow_filtering']['workflow_inactive_collections'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Display inactive collections?'),
+    '#default_value' => $form_state['storage']['workflow_collections']['inactive'] ? TRUE : FALSE,
+    '#ahah' => array(
+      'path' => 'islandora_workflow/ahah/inactive_collections',
+      'wrapper' => 'islandora_workflow_collection_filtering',
+    ),
+  );
+  
   // Make the form.
   // $form['#theme'] = 'workflow_collections';
   foreach ($collection_data as $collection_pid => $collection_info) {
@@ -446,6 +511,9 @@ function islandora_workflow_collections(&$form_state) {
     '#type' => 'submit',
     '#value' => t('Save collection configuration'),
   );
+  if (isset($form_state['action'])) {
+    $form['#action'] = $form_state['action'];
+  }
   $form['#submit'] = array('islandora_workflow_collections_submit');
   return $form;
 }
@@ -467,8 +535,20 @@ function islandora_workflow_collections(&$form_state) {
 function islandora_workflow_collections_submit($form, &$form_state) {
 
   module_load_include('collection.inc', 'islandora_workflow');
-
-  $collections = islandora_workflow_get_collections();
+  
+  if (!$form_state['storage']['workflow_collections']['inactive'] && !$form_state['storage']['workflow_collections']['active']) {
+    $collections = islandora_workflow_get_collections();
+  }
+  elseif ($form_state['storage']['workflow_collections']['active'] && $form_state['storage']['workflow_collections']['inactive']) {
+    $collections = islandora_workflow_get_collections('both');
+  }
+  elseif ($form_state['storage']['workflow_collections']['active']) {
+    $collections = islandora_workflow_get_collections('active');
+  } 
+  elseif ($form_state['storage']['workflow_collections']['inactive']) {
+    $collections = islandora_workflow_get_collections('inactive');
+  }
+  
   foreach ($collections as $collection_pid => $collection_data) {
     if ($form_state['values'][$collection_pid] != $form[$collection_pid]['#default_value']) {
       if ($form_state['values'][$collection_pid]) {
@@ -612,18 +692,32 @@ function islandora_workflow_collection_permissions() {
  * This function builds the form that allows users to
  * modify role based permissions for individual collections
  *
+ * @param array $form_state
+ *   The state of a previously submitted form.
+ *
  * @return array
  *   $form the array containing the form.
  */
-function islandora_workflow_role_permissions_form() {
+function islandora_workflow_role_permissions_form(&$form_state) {
   module_load_include('permissions.inc', 'islandora_workflow');
   module_load_include('inc', 'islandora_workflow');
-  $form = array();
+  module_load_include('inc', 'php_lib', 'Ahah');
+  
+  Ahah::get_ahah_js();
+    
+  $form = array(
+    '#prefix' => '<div id="islandora_workflow_role_perm">',
+    '#suffix' => '</div>',
+  );
   $current_module_permissions = array();
 
   // Collect current state data.
-  $my_collections = islandora_workflow_get_users_collections();
-
+  if ($form_state['storage']['tracked_collections_role']) {
+    $my_collections = islandora_workflow_get_users_collections(NULL, NULL, TRUE);
+  }
+  else {
+    $my_collections = islandora_workflow_get_users_collections();
+  }
   // Used to get what roles to display and avaialbe options for selects.
   $current_module_permissions = islandora_workflow_get_roles_with_module_permissions();
   // Used to find the default options for slects.
@@ -635,31 +729,47 @@ function islandora_workflow_role_permissions_form() {
     '#collapsible' => FALSE,
     '#collapsed' => FALSE,
     '#tree' => TRUE,
-    '#description' => t('Assign collection level permissions to roles.'),
+    '#description' => count($my_collections) > 0 ? t('Assign collection level permissions to roles.') : t('No collections currently tracked in workflow!'),
   );
-  // Theme.
-  $form['islandora_workflow_collection_permissions_table']['permissions_table'] = array(
-    '#theme' => 'permissions_role_table',
+  $form['islandora_workflow_collection_permissions_table']['workflow_tracked_role'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Display only workflow tracked collections?'),
+    '#default_value' => $form_state['storage']['tracked_collections_role'] ? TRUE : FALSE,
+    '#ahah' => array(
+      'path' => 'islandora_workflow/ahah/tracked_collections_role',
+      'wrapper' => 'islandora_workflow_role_perm',
+    ),
   );
-
-  // Collection selector and submit button.
-  $my_collections_ids = array();
-
-  foreach ($my_collections as $collection_id => $collection_info) {
-    if (!isset($_SESSION['workflow_permissions_page']['active_collection'])) {
-      $_SESSION['workflow_permissions_page']['active_collection'] = $collection_id;
-    }
-    $my_collections_ids[$collection_id] = $collection_info['label'] . ' [' . $collection_id . ']';
+  // Needed to get around a Drupal AHAH / Submit problem
+  if (isset($form_state['action'])) {
+    $form['#action'] = $form_state['action'];
   }
-  $form['islandora_workflow_collection_permissions_table']['permissions_table']['collection_selector'] = array(
-    '#type' => 'select',
-    '#options' => $my_collections_ids,
-    '#default_value' => $_SESSION['workflow_permissions_page']['active_collection'],
-  );
-  $form['islandora_workflow_collection_permissions_table']['permissions_table']['collection_submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Select Collection'),
-  );
+  if (count($my_collections) > 0) {
+    // Theme.
+    $form['islandora_workflow_collection_permissions_table']['permissions_table'] = array(
+      '#theme' => 'permissions_role_table',
+    );
+
+    // Collection selector and submit button.
+    $my_collections_ids = array();
+    foreach ($my_collections as $collection_id => $collection_info) {
+      if (!isset($_SESSION['workflow_permissions_page']['active_collection'])) {
+        $_SESSION['workflow_permissions_page']['active_collection'] = $collection_id;
+      }
+      $my_collections_ids[$collection_id] = $collection_info['label'] . ' [' . $collection_id . ']';
+    }
+    $form['islandora_workflow_collection_permissions_table']['permissions_table']['collection_selector'] = array(
+      '#type' => 'select',
+      '#options' => $my_collections_ids,
+      '#default_value' => $_SESSION['workflow_permissions_page']['active_collection'],
+    );
+    $form['islandora_workflow_collection_permissions_table']['permissions_table']['collection_submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Select Collection'),
+    );
+  }
+  else {
+  }
 
   // Submit button.
   $form['update'] = array(
@@ -671,62 +781,63 @@ function islandora_workflow_role_permissions_form() {
     '#type' => 'submit',
     '#value' => t('Restore'),
     '#weight' => '2');
-
-  // Populate the form, Roles.
-  foreach ($current_module_permissions as $role_id => $role_name) {
-    if (sizeof($current_module_permissions[$role_id][key($role_name)]) == 1) {
+  if (count($my_collections) > 0) {
+    // Populate the form, Roles.
+    foreach ($current_module_permissions as $role_id => $role_name) {
+      if (sizeof($current_module_permissions[$role_id][key($role_name)]) == 1) {
+        if (in_array('islandora_workflow_Administrator', $current_module_permissions[$role_id][key($role_name)])) {
+          // This role has Admin permissions only.
+          continue;
+        }
+      }
+      // Add none to the possible options.
+      array_unshift($current_module_permissions[$role_id][key($role_name)], '');
+      // Remove the islandora_workflow_Administrator permission.
       if (in_array('islandora_workflow_Administrator', $current_module_permissions[$role_id][key($role_name)])) {
-        // This role has Admin permissions only.
-        continue;
+        unset($current_module_permissions[$role_id][key($role_name)][array_search('islandora_workflow_Administrator', $current_module_permissions[$role_id][key($role_name)])]);
       }
-    }
-    // Add none to the possible options.
-    array_unshift($current_module_permissions[$role_id][key($role_name)], '');
-    // Remove the islandora_workflow_Administrator permission.
-    if (in_array('islandora_workflow_Administrator', $current_module_permissions[$role_id][key($role_name)])) {
-      unset($current_module_permissions[$role_id][key($role_name)][array_search('islandora_workflow_Administrator', $current_module_permissions[$role_id][key($role_name)])]);
-    }
-    // Change the left over permission strings to be more user friendly.
-    if (in_array('islandora_workflow_Manager', $current_module_permissions[$role_id][key($role_name)])) {
-      $current_module_permissions[$role_id][key($role_name)][array_search('islandora_workflow_Manager', $current_module_permissions[$role_id][key($role_name)])] = 'Manager';
-    }
-    if (in_array('islandora_workflow_Editor', $current_module_permissions[$role_id][key($role_name)])) {
-      $current_module_permissions[$role_id][key($role_name)][array_search('islandora_workflow_Editor', $current_module_permissions[$role_id][key($role_name)])] = 'Editor';
-    }
-    if (in_array('islandora_workflow_Submitter', $current_module_permissions[$role_id][key($role_name)])) {
-      $current_module_permissions[$role_id][key($role_name)][array_search('islandora_workflow_Submitter', $current_module_permissions[$role_id][key($role_name)])] = 'Submitter';
-    }
-    $collection_id = $_SESSION['workflow_permissions_page']['active_collection'];
+      // Change the left over permission strings to be more user friendly.
+      if (in_array('islandora_workflow_Manager', $current_module_permissions[$role_id][key($role_name)])) {
+        $current_module_permissions[$role_id][key($role_name)][array_search('islandora_workflow_Manager', $current_module_permissions[$role_id][key($role_name)])] = 'Manager';
+      }
+      if (in_array('islandora_workflow_Editor', $current_module_permissions[$role_id][key($role_name)])) {
+        $current_module_permissions[$role_id][key($role_name)][array_search('islandora_workflow_Editor', $current_module_permissions[$role_id][key($role_name)])] = 'Editor';
+      }
+      if (in_array('islandora_workflow_Submitter', $current_module_permissions[$role_id][key($role_name)])) {
+        $current_module_permissions[$role_id][key($role_name)][array_search('islandora_workflow_Submitter', $current_module_permissions[$role_id][key($role_name)])] = 'Submitter';
+      }
+      $collection_id = $_SESSION['workflow_permissions_page']['active_collection'];
 
-    /* Change the default permission
-     * string to be inline with the user friendly strings.*/
-    $default_value = '';
-    if (array_key_exists($role_id, $current_collection_permissions)) {
-      if (array_key_exists($collection_id, $current_collection_permissions[$role_id])) {
-        if ($current_collection_permissions[$role_id][$collection_id] == 'islandora_workflow_Manager') {
-          $current_collection_permissions[$role_id][$collection_id] = 'Manager';
+      /* Change the default permission
+       * string to be inline with the user friendly strings.*/
+      $default_value = '';
+      if (array_key_exists($role_id, $current_collection_permissions)) {
+        if (array_key_exists($collection_id, $current_collection_permissions[$role_id])) {
+          if ($current_collection_permissions[$role_id][$collection_id] == 'islandora_workflow_Manager') {
+            $current_collection_permissions[$role_id][$collection_id] = 'Manager';
+          }
+          if ($current_collection_permissions[$role_id][$collection_id] == 'islandora_workflow_Editor') {
+            $current_collection_permissions[$role_id][$collection_id] = 'Editor';
+          }
+          if ($current_collection_permissions[$role_id][$collection_id] == 'islandora_workflow_Submitter') {
+            $current_collection_permissions[$role_id][$collection_id] = 'Submitter';
+          }
+          $default_value = array_search($current_collection_permissions[$role_id][$collection_id], $current_module_permissions[$role_id][key($role_name)]);
         }
-        if ($current_collection_permissions[$role_id][$collection_id] == 'islandora_workflow_Editor') {
-          $current_collection_permissions[$role_id][$collection_id] = 'Editor';
-        }
-        if ($current_collection_permissions[$role_id][$collection_id] == 'islandora_workflow_Submitter') {
-          $current_collection_permissions[$role_id][$collection_id] = 'Submitter';
-        }
-        $default_value = array_search($current_collection_permissions[$role_id][$collection_id], $current_module_permissions[$role_id][key($role_name)]);
       }
+      // Drupal made me do it...
+      $form['islandora_workflow_collection_permissions_table']['permissions_table'][$role_id][$collection_id] = array(
+        '#type' => 'select',
+        /* Default value works, but if you hit refresh on the page the values
+         * do not go back to the
+         * default... navigating away does reset the value.
+         * make this into whatever the current setting
+         * is for that collection/role
+         * what are available to the current role*/
+        '#default_value' => $default_value,
+        '#options' => $current_module_permissions[$role_id][key($role_name)],
+      );
     }
-    // Drupal made me do it...
-    $form['islandora_workflow_collection_permissions_table']['permissions_table'][$role_id][$collection_id] = array(
-      '#type' => 'select',
-      /* Default value works, but if you hit refresh on the page the values
-       * do not go back to the
-       * default... navigating away does reset the value.
-       * make this into whatever the current setting
-       * is for that collection/role
-       * what are available to the current role*/
-      '#default_value' => $default_value,
-      '#options' => $current_module_permissions[$role_id][key($role_name)],
-    );
   }
   return $form;
 }
@@ -869,12 +980,24 @@ function islandora_workflow_role_permissions_form_submit($form, &$form_state) {
 function islandora_workflow_user_permissions_form(&$form_state) {
   module_load_include('inc', 'islandora_workflow');
   module_load_include('permissions.inc', 'islandora_workflow');
-  $form = array();
+  module_load_include('inc', 'php_lib', 'Ahah');
+  
+  Ahah::get_ahah_js();
+  $form = array(
+    '#prefix' => '<div id="islandora_workflow_user_perm">',
+    '#suffix' => '</div>',
+  );
+    
   $current_module_permissions = array();
 
   // Collect current state data.
   // Used to get list of collections to display.
-  $my_collections = islandora_workflow_get_users_collections();
+  if ($form_state['storage']['tracked_collections_user']) {
+    $my_collections = islandora_workflow_get_users_collections(NULL, NULL, TRUE);
+  }
+  else {
+    $my_collections = islandora_workflow_get_users_collections();
+  }
   // Used to get what users to display and avaialbe options for selects.
   $current_module_permissions = islandora_workflow_get_users_with_module_permissions();
   // Used to find the default options for slects.
@@ -887,31 +1010,45 @@ function islandora_workflow_user_permissions_form(&$form_state) {
     '#collapsible' => FALSE,
     '#collapsed' => FALSE,
     '#tree' => TRUE,
-    '#description' => t('Assign collection level permissions to users.'),
+    '#description' => count($my_collections) > 0 ? t('Assign collection level permissions to roles.') : t('No collections currently tracked in workflow!'),
   );
-  // Set theme.
-  $form['islandora_workflow_collection_permissions_table']['permissions_table'] = array(
-    '#theme' => 'permissions_user_table',
+  $form['islandora_workflow_collection_permissions_table']['workflow_tracked_user'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Display only workflow tracked collections?'),
+    '#default_value' => $form_state['storage']['tracked_collections_user'] ? TRUE : FALSE,
+    '#ahah' => array(
+      'path' => 'islandora_workflow/ahah/tracked_collections_user',
+      'wrapper' => 'islandora_workflow_user_perm',
+    ),
   );
-
-  // Collection selector and submit button.
-  $my_collections_ids = array();
-  foreach ($my_collections as $collection_id => $collection_information) {
-    if (!isset($_SESSION['workflow_permissions_page']['active_collection'])) {
-      $_SESSION['workflow_permissions_page']['active_collection'] = $collection_id;
-    }
-    $my_collections_ids[$collection_id] = $collection_information['label'] . ' [' . $collection_id . ']';
+  // Needed to get around a Drupal AHAH / Submit problem
+  if (isset($form_state['action'])) {
+    $form['#action'] = $form_state['action'];
   }
-  $form['islandora_workflow_collection_permissions_table']['permissions_table']['collection_selector'] = array(
-    '#type' => 'select',
-    '#options' => $my_collections_ids,
-    '#default_value' => $_SESSION['workflow_permissions_page']['active_collection'],
-  );
-  $form['islandora_workflow_collection_permissions_table']['permissions_table']['collection_submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Select Collection'),
-  );
+  if (count($my_collections) > 0) {
+    // Set theme.
+    $form['islandora_workflow_collection_permissions_table']['permissions_table'] = array(
+      '#theme' => 'permissions_user_table',
+    );
 
+    // Collection selector and submit button.
+    $my_collections_ids = array();
+    foreach ($my_collections as $collection_id => $collection_information) {
+      if (!isset($_SESSION['workflow_permissions_page']['active_collection'])) {
+        $_SESSION['workflow_permissions_page']['active_collection'] = $collection_id;
+      }
+      $my_collections_ids[$collection_id] = $collection_information['label'] . ' [' . $collection_id . ']';
+    }
+    $form['islandora_workflow_collection_permissions_table']['permissions_table']['collection_selector'] = array(
+      '#type' => 'select',
+      '#options' => $my_collections_ids,
+      '#default_value' => $_SESSION['workflow_permissions_page']['active_collection'],
+    );
+    $form['islandora_workflow_collection_permissions_table']['permissions_table']['collection_submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Select Collection'),
+    );
+  }
   // Submit button.
   $form['update'] = array(
     '#type' => 'submit',
@@ -925,52 +1062,54 @@ function islandora_workflow_user_permissions_form(&$form_state) {
 
   // Populate the form.
   // Users.
-  foreach ($current_module_permissions as $user_id => $user_name) {
-    // Add none to the possible options.
-    array_unshift($current_module_permissions[$user_id][key($user_name)], '');
-    // Rmove the islandora_workflow_Administrator permission.
-    if (in_array('islandora_workflow_Administrator', $current_module_permissions[$user_id][key($user_name)])) {
-      unset($current_module_permissions[$user_id][key($user_name)][array_search('islandora_workflow_Administrator', $current_module_permissions[$user_id][key($user_name)])]);
-    }
-    // Change the left over permission strings to be more user friendly.
-    if (in_array('islandora_workflow_Manager', $current_module_permissions[$user_id][key($user_name)])) {
-      $current_module_permissions[$user_id][key($user_name)][array_search('islandora_workflow_Manager', $current_module_permissions[$user_id][key($user_name)])] = 'Manager';
-    }
-    if (in_array('islandora_workflow_Editor', $current_module_permissions[$user_id][key($user_name)])) {
-      $current_module_permissions[$user_id][key($user_name)][array_search('islandora_workflow_Editor', $current_module_permissions[$user_id][key($user_name)])] = 'Editor';
-    }
-    if (in_array('islandora_workflow_Submitter', $current_module_permissions[$user_id][key($user_name)])) {
-      $current_module_permissions[$user_id][key($user_name)][array_search('islandora_workflow_Submitter', $current_module_permissions[$user_id][key($user_name)])] = 'Submitter';
-    }
-    $collection_id = $_SESSION['workflow_permissions_page']['active_collection'];
-    /* Change the default permission string to be
-     * inline with the user friendly strings.*/
-    $default_value = '';
-    if (array_key_exists($user_id, $current_collection_permissions)) {
-      if (array_key_exists($collection_id, $current_collection_permissions[$user_id])) {
-        if ($current_collection_permissions[$user_id][$collection_id] == 'islandora_workflow_Manager') {
-          $current_collection_permissions[$user_id][$collection_id] = 'Manager';
-        }
-        if ($current_collection_permissions[$user_id][$collection_id] == 'islandora_workflow_Editor') {
-          $current_collection_permissions[$user_id][$collection_id] = 'Editor';
-        }
-        if ($current_collection_permissions[$user_id][$collection_id] == 'islandora_workflow_Submitter') {
-          $current_collection_permissions[$user_id][$collection_id] = 'Submitter';
-        }
-        $default_value = array_search($current_collection_permissions[$user_id][$collection_id], $current_module_permissions[$user_id][key($user_name)]);
+  if (count($my_collections) > 0) {
+    foreach ($current_module_permissions as $user_id => $user_name) {
+      // Add none to the possible options.
+      array_unshift($current_module_permissions[$user_id][key($user_name)], '');
+      // Rmove the islandora_workflow_Administrator permission.
+      if (in_array('islandora_workflow_Administrator', $current_module_permissions[$user_id][key($user_name)])) {
+        unset($current_module_permissions[$user_id][key($user_name)][array_search('islandora_workflow_Administrator', $current_module_permissions[$user_id][key($user_name)])]);
       }
+      // Change the left over permission strings to be more user friendly.
+      if (in_array('islandora_workflow_Manager', $current_module_permissions[$user_id][key($user_name)])) {
+        $current_module_permissions[$user_id][key($user_name)][array_search('islandora_workflow_Manager', $current_module_permissions[$user_id][key($user_name)])] = 'Manager';
+      }
+      if (in_array('islandora_workflow_Editor', $current_module_permissions[$user_id][key($user_name)])) {
+        $current_module_permissions[$user_id][key($user_name)][array_search('islandora_workflow_Editor', $current_module_permissions[$user_id][key($user_name)])] = 'Editor';
+      }
+      if (in_array('islandora_workflow_Submitter', $current_module_permissions[$user_id][key($user_name)])) {
+        $current_module_permissions[$user_id][key($user_name)][array_search('islandora_workflow_Submitter', $current_module_permissions[$user_id][key($user_name)])] = 'Submitter';
+      }
+      $collection_id = $_SESSION['workflow_permissions_page']['active_collection'];
+      /* Change the default permission string to be
+       * inline with the user friendly strings.*/
+      $default_value = '';
+      if (array_key_exists($user_id, $current_collection_permissions)) {
+        if (array_key_exists($collection_id, $current_collection_permissions[$user_id])) {
+          if ($current_collection_permissions[$user_id][$collection_id] == 'islandora_workflow_Manager') {
+            $current_collection_permissions[$user_id][$collection_id] = 'Manager';
+          }
+          if ($current_collection_permissions[$user_id][$collection_id] == 'islandora_workflow_Editor') {
+            $current_collection_permissions[$user_id][$collection_id] = 'Editor';
+          }
+          if ($current_collection_permissions[$user_id][$collection_id] == 'islandora_workflow_Submitter') {
+            $current_collection_permissions[$user_id][$collection_id] = 'Submitter';
+          }
+          $default_value = array_search($current_collection_permissions[$user_id][$collection_id], $current_module_permissions[$user_id][key($user_name)]);
+        }
+      }
+      // Drupal made me do it...
+      $form['islandora_workflow_collection_permissions_table']['permissions_table'][$user_id][$collection_id] = array(
+        '#type' => 'select',
+        /* Default value works, but if you hit refresh on the page the values
+         * do not go back to the default... navigating away does reset the value
+         * Make this into whatever the current setting
+         * is for that collection/user.*/
+        '#default_value' => $default_value,
+        // What are available to the current user.
+        '#options' => $current_module_permissions[$user_id][key($user_name)],
+      );
     }
-    // Drupal made me do it...
-    $form['islandora_workflow_collection_permissions_table']['permissions_table'][$user_id][$collection_id] = array(
-      '#type' => 'select',
-      /* Default value works, but if you hit refresh on the page the values
-       * do not go back to the default... navigating away does reset the value
-       * Make this into whatever the current setting
-       * is for that collection/user.*/
-      '#default_value' => $default_value,
-      // What are available to the current user.
-      '#options' => $current_module_permissions[$user_id][key($user_name)],
-    );
   }
   return $form;
 }
@@ -1458,4 +1597,77 @@ function islandora_workflow_islandora_content_model_forms_policy_alter(&$policy_
     $policy_element = NULL;
   }
 
+}
+
+
+function islandora_workflow_ahah_tracked_collections_user() {
+  module_load_include('inc', 'php_lib', 'Ahah');
+  
+  list($form_id, $form_build_id, $form, $form_state) = Ahah::getFormInfo();
+  
+  if ($form_state['storage']['tracked_collections_user']) {
+    $form_state['storage']['tracked_collections_user'] = FALSE;
+  }
+  else {
+    $form_state['storage']['tracked_collections_user'] = TRUE;
+  }
+  $form_state['action'] = $form['#action'];
+  $form = Ahah::rebuildForm($form_id, $form_build_id, $form, $form_state);
+  
+  Ahah::respond($form);
+  exit();
+}
+
+function islandora_workflow_ahah_tracked_collections_role() {
+  module_load_include('inc', 'php_lib', 'Ahah');
+  
+  list($form_id, $form_build_id, $form, $form_state) = Ahah::getFormInfo();
+  
+  if ($form_state['storage']['tracked_collections_role']) {
+    $form_state['storage']['tracked_collections_role'] = FALSE;
+  }
+  else {
+    $form_state['storage']['tracked_collections_role'] = TRUE;
+  }
+  $form_state['action'] = $form['#action'];
+  $form = Ahah::rebuildForm($form_id, $form_build_id, $form, $form_state);
+  
+  Ahah::respond($form);
+  exit();
+}
+
+function islandora_workflow_ahah_active_collections() {
+  module_load_include('inc', 'php_lib', 'Ahah');
+  
+  list($form_id, $form_build_id, $form, $form_state) = Ahah::getFormInfo();
+  
+  if ($form_state['storage']['workflow_collections']['active']) {
+    $form_state['storage']['workflow_collections']['active'] = FALSE;
+  }
+  else {
+    $form_state['storage']['workflow_collections']['active'] = TRUE;
+  }
+  $form_state['action'] = $form['#action'];
+  $form = Ahah::rebuildForm($form_id, $form_build_id, $form, $form_state);
+  
+  Ahah::respond($form);
+  exit();
+}
+
+function islandora_workflow_ahah_inactive_collections() {
+  module_load_include('inc', 'php_lib', 'Ahah');
+  
+  list($form_id, $form_build_id, $form, $form_state) = Ahah::getFormInfo();
+  
+  if ($form_state['storage']['workflow_collections']['inactive']) {
+    $form_state['storage']['workflow_collections']['inactive'] = FALSE;
+  }
+  else {
+    $form_state['storage']['workflow_collections']['inactive'] = TRUE;
+  }
+  $form_state['action'] = $form['#action'];
+  $form = Ahah::rebuildForm($form_id, $form_build_id, $form, $form_state);
+  
+  Ahah::respond($form);
+  exit();
 }
