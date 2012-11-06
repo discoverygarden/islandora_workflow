@@ -13,15 +13,15 @@
  * @return array
  *   $collection_list an associated array of collection pids and names
  */
-function islandora_workflow_get_collections() {
+function islandora_workflow_get_collections($state_tracked = NULL) {
   module_load_include('inc', 'fedora_repository', 'ObjectHelper');
   module_load_include('inc', 'islandora_workflow');
-
+  
   $query_file_name = drupal_get_path('module', 'islandora_workflow') . '/collection_workflow_states_query.txt';
   $query_file_handle = fopen($query_file_name, "r");
   $query_string = fread($query_file_handle, filesize($query_file_name));
   fclose($query_file_handle);
-
+  
   $query_results = ObjectHelper::performRiQuery($query_string, 'sparql');
   $collections = array();
   foreach ($query_results as $result) {
@@ -30,10 +30,40 @@ function islandora_workflow_get_collections() {
     if (empty($collection_pid)) {
       continue;
     }
-    $collections[$collection_pid] = array(
-      'label' => $result['label'],
-      'workflow_tracking' => 'TRUE' == $result['workflow_tracking'],
-    );
+        
+    if ($state_tracked) {
+      if ($state_tracked == 'active') {
+        if ($result['state'] == 'fedora-system:def/model#Active') {
+          $collections[$collection_pid] = array(
+            'label' => $result['label'],
+            'workflow_tracking' => 'TRUE' == $result['workflow_tracking'],
+          );
+        }
+      }
+      elseif ($state_tracked == 'inactive') {
+        if ($result['state'] == 'fedora-system:def/model#Inactive') {
+          $collections[$collection_pid] = array(
+            'label' => $result['label'],
+            'workflow_tracking' => 'TRUE' == $result['workflow_tracking'],
+          );
+        }
+      }
+      elseif ($state_tracked == 'both') {
+        if ($result['state'] == 'fedora-system:def/model#Active' || $result['state'] == 'fedora-system:def/model#Inactive') {
+          $collections[$collection_pid] = array(
+            'label' => $result['label'],
+            'workflow_tracking' => 'TRUE' == $result['workflow_tracking'],
+          );
+        }
+      }
+    }
+    // Return all collections
+    else {
+      $collections[$collection_pid] = array(
+        'label' => $result['label'],
+        'workflow_tracking' => 'TRUE' == $result['workflow_tracking'],
+      );
+    }
   }
   // Strip out non-applicable collections via namespace.
   $collections = islandora_workflow_limit_collections_by_namespace($collections);
@@ -88,7 +118,7 @@ function islandora_workflow_is_collection_workflow_tracked($object_pid) {
     return FALSE;
   }
   $workflow_relationships = $item->get_rdf_relationships($workflow_namespace);
-  if (!empty($workflow_relationships)) {
+  if (!empty($workflow_relationships) && !empty($workflow_relationships['is_tracked_by_workflow'])) {
     return (in_array('TRUE', $workflow_relationships['is_tracked_by_workflow']));
   }
   return FALSE;
