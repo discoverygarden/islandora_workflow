@@ -126,6 +126,40 @@ function islandora_workflow_is_collection_workflow_tracked($object_pid) {
 }
 
 /**
+ * Check an object's content model to determine whether it is a collection.
+ * 
+ * @param string $object_pid
+ * 
+ * @return boolean
+ *   FALSE if the object or its parent is not the 'islandora:collectionCModel'
+ */
+function islandora_workflow_check_collection_content_model($object_pid) {
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+  
+  $item = new Fedora_Item($object_pid);
+  $object_relations = $item->get_rdf_relationships();
+  
+  if (count($object_relations['fedora-model:hasModel']) > 0) {
+    if (in_array('islandora:collectionCModel', $object_relations['fedora-model:hasModel'])) {
+      return TRUE; 
+    }
+    else {
+      foreach ($object_relations['fedora-model:hasModel'] as $object_model) {
+        $parent_model = new Fedora_Item($object_model);
+        $parent_relations = $parent_model->get_rdf_relationships();
+        
+        if (count($parent_relations['fedora-model:hasModel']) > 0) {
+          if (in_array('islandora:collectionCModel', $parent_relations['fedora-model:hasModel'])) {
+            return TRUE;
+          }
+        }
+      }
+    }
+  }
+  return FALSE;
+}
+
+/**
  * @todo
  *   remove this function when get_possible_assignees is refactored
  */

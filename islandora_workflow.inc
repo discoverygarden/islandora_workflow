@@ -194,12 +194,13 @@ function islandora_workflow_limit_collections_by_namespace($existing_collections
  */
 function islandora_workflow_init_workflow($object_id) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+  module_load_include('collection.inc', 'islandora_workflow');
 
   $item = new Fedora_Item($object_id);
   if (!$item->exists()) {
     return FALSE;
   }
-
+  
   // Attach default workflow.
   $default_xml_file_name = drupal_get_path('module', 'islandora_workflow') . '/start_workflow.xml';
 
@@ -211,7 +212,17 @@ function islandora_workflow_init_workflow($object_id) {
       $control_group = 'X',
       $log_message = 'Adding islandora_workflow datastream(editorial workflow tracking).'
   );
-
+    
+  if (islandora_workflow_check_collection_content_model($object_id)) {
+    islandora_workflow_track_collection_in_workflow($object_id);
+        drupal_set_message(t('Collection <em>%label</em> (%pid) is now tracked in workflow.',
+            array(
+              '%label' => $item->objectProfile->objLabel,
+              '%pid' => $object_id,
+            )
+        ));
+  }
+   
   // Set state.
   $result = islandora_workflow_set_object_workflow_state($object_id, 'created');
 
@@ -446,22 +457,21 @@ function islandora_workflow_claim_object($object_id) {
 function islandora_workflow_assign_object($object_id, $user_name) {
   module_load_include('permissions.inc', 'islandora_workflow');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+  module_load_include('collection.inc', 'islandora_workflow');
 
   global $user;
 
   $item = new Fedora_Item($object_id);
   $label = $item->objectProfile->objLabel;
 
-  $relationships = $item->get_rdf_relationships();
-  if (isset($relationships['hasModel'])) {
-    if (in_array('islandora:collectionCModel', $relationships['hasModel'])) {
-      drupal_set_message(t('The object <em>%label</em> (%pid) is a collection and cannot be assigned.', array(
-        '%label' => $label,
-        '%pid' => $object_id,
-      )));
-      return FALSE;
-    }
+  if (islandora_workflow_check_collection_content_model($object_id)) {
+    drupal_set_message(t('The object <em>%label</em> (%pid) is a collection and cannot be assigned.', array(
+      '%label' => $label,
+      '%pid' => $object_id,
+    )));
+    return FALSE;
   }
+  
 
   $present_assignee = islandora_workflow_get_object_assignee($object_id);
   if ($present_assignee == $user_name) {
