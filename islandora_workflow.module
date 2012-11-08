@@ -1225,7 +1225,7 @@ function islandora_workflow_role_delete_batch($form, $form_state) {
     $collections = db_query('SELECT collection AS pid
       FROM {islandora_workflow_role_permissions} WHERE role = %d',
       $form_state['values']['rid']);
-    clear_role_permissions($form_state['values']['rid']);
+    islandora_workflow_clear_role_permissions($form_state['values']['rid']);
 
     while ($collection = db_fetch_array($collections)) {
       $members = islandora_workflow_get_all_members_of_collection($collection['pid']);
@@ -1319,7 +1319,7 @@ function islandora_workflow_user_edit_batch($edit, $account, $category = NULL) {
   $collections = array_unique($collections);
 
   // Delete all rows in the table for the user/permission changes.
-  normalize_users_permissions($account);
+  islandora_workflow_normalize_users_permissions($account);
 
   while ($collection = mysql_fetch_assoc($collections)) {
     $members = islandora_workflow_get_all_members_of_collection($collection['pid']);

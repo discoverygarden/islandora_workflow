@@ -52,7 +52,7 @@ function islandora_workflow_normalize_assignee($object_pid, $state = NULL) {
   if (!$assignee_name) {
     return;
   }
-  $possible_assignees = get_possible_assignees(array($object_pid), $workflow_states = array($state), $format = FALSE);
+  $possible_assignees = islandora_workflow_get_possible_assignees(array($object_pid), $workflow_states = array($state), $format = FALSE);
   if (!in_array($assignee_name, $possible_assignees[$object_pid][$state])) {
       islandora_workflow_remove_assignee($object_pid, $assignee_name);
   }
@@ -65,7 +65,7 @@ function islandora_workflow_normalize_assignee($object_pid, $state = NULL) {
  *   The PID of the parent collection.
  */
 function islandora_workflow_normalize_members_assignees($collection_pid) {
-  $possible_assignees = get_possible_assignees_for_collections(array($collection_pid));
+  $possible_assignees = islandora_workflow_get_possible_assignees_for_collections(array($collection_pid));
   $members = islandora_workflow_assignment_by_collection($collection_pid);
 
   foreach ($members as $member) {
@@ -80,7 +80,7 @@ function islandora_workflow_normalize_members_assignees($collection_pid) {
     }
     // If the state is created/rejected check the object's possible assignees.
     else {
-      $member_possible_assignees = get_possible_assignees(array($object), $workflow_states = array(), $format = FALSE);
+      $member_possible_assignees = islandora_workflow_get_possible_assignees(array($object), $workflow_states = array(), $format = FALSE);
       if (!in_array($member['assignee'], $member_possible_assignees[$member['pid']][$member['state']])) {
         islandora_workflow_remove_assignee($member['pid'], $member['assignee']);
       }
@@ -102,7 +102,7 @@ function islandora_workflow_normalize_members_assignees($collection_pid) {
  * @return array
  *   $assignees[collection_pid][workflow_state]=>possible_object_assignees
  */
-function get_possible_assignees_for_collections($collections, $workflow_states = array(), $format = FALSE) {
+function islandora_workflow_get_possible_assignees_for_collections($collections, $workflow_states = array(), $format = FALSE) {
   module_load_include('permissions.inc', 'islandora_workflow');
 
   if (empty($workflow_states)) {
@@ -193,7 +193,7 @@ function get_possible_assignees_for_collections($collections, $workflow_states =
  * @return array
  *   $possible_assignees[object_pid][workflow_state]=>possible_object_assignees
  */
-function get_possible_assignees($objects, $workflow_states = array(), $format = FALSE) {
+function islandora_workflow_get_possible_assignees($objects, $workflow_states = array(), $format = FALSE) {
   module_load_include('permissions.inc', 'islandora_workflow');
   module_load_include('inc', 'islandora_workflow');
 

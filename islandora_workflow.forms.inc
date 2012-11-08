@@ -232,7 +232,7 @@ function islandora_workflow_work_form_main(&$form_state, $tab) {
 
   foreach ($elements as $object_pid => $attributes) {
     // Get possible assignees for the object.
-    $possible_assignees = get_possible_assignees(array($object_pid), array(), $format = TRUE);
+    $possible_assignees = islandora_workflow_get_possible_assignees(array($object_pid), array(), $format = TRUE);
     $possible_assignees = $possible_assignees[$object_pid];
 
     // Populate the selector and assignee drop down.
@@ -335,7 +335,7 @@ function islandora_workflow_work_form_reject(&$form_state) {
 
   foreach ($objects as $object) {
 
-    $possible_assignees = get_possible_assignees(array($object), array(), $format = TRUE);
+    $possible_assignees = islandora_workflow_get_possible_assignees(array($object), array(), $format = TRUE);
     $options = $possible_assignees[$object]['rejected'];
 
     $form['assignees'][$object] = array(
