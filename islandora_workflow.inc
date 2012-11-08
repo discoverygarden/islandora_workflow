@@ -20,26 +20,26 @@
  * if (islandora_workflow_get_users_collections($perm)!=FALSE) {}
  * if (islandora_workflow_get_users_collections()) {}
  *
- * @param string $permission_level
- *   the permission level we are looking for if it is the string
- *   'all' it will get all collections the user has any access to
- *
  * @return $collection_list
  *   an associated array of collection PIDs and names.
  * @return boolean
  *   FALSE if the current user doesn't have the permission for any collection.
  */
-function islandora_workflow_get_users_collections($permission_level = 'islandora_workflow_Manager', $account = NULL) {
+function islandora_workflow_get_users_collections($permission_level = NULL, $account = NULL, $workflow_tracked = NULL) {
 
   module_load_include('collection.inc', 'islandora_workflow');
   module_load_include('permissions.inc', 'islandora_workflow');
 
   global $user;
-
+  
+  if (is_null($permission_level)) {
+    $permission_level = 'islandora_workflow_Manager';
+  }
+  
   if (empty($account)) {
     $account = drupal_clone($user);
   }
-
+  
   $permitted_collections = array();
   $collection_list = array();
   if (user_access('islandora_workflow_Administrator', $account) || user_access('administer', $account)) {
@@ -88,6 +88,17 @@ function islandora_workflow_get_users_collections($permission_level = 'islandora
   else {
     return array();
   }
+  
+  if ($workflow_tracked) {
+    $tracked_collections = array();
+    foreach ($collection_list as $key => $value) {
+      if ($value['workflow_tracking']) {
+        $tracked_collections[$key] = $value;
+      }
+    }
+    $collection_list = $tracked_collections;
+  }
+  
   return $collection_list;
 }
 
@@ -194,27 +205,45 @@ function islandora_workflow_limit_collections_by_namespace($existing_collections
  */
 function islandora_workflow_init_workflow($object_id) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+  module_load_include('collection.inc', 'islandora_workflow');
 
   $item = new Fedora_Item($object_id);
   if (!$item->exists()) {
     return FALSE;
   }
+  
+  // Object passed in is a collection.
+  if (islandora_workflow_check_collection_content_model($object_id)) {
+    $parent_pid = islandora_workflow_get_object_parent($object_id);
+    
+    if ($parent_pid) {
+        if (islandora_workflow_is_collection_workflow_tracked($parent_pid)) {
+          drupal_set_message(t('Collection <em>%label</em> (%pid) is now tracked in workflow.',
+                array(
+                    '%label' => $item->objectProfile->objLabel,
+                    '%pid' => $object_id,
+                )
+            ));
+          return islandora_workflow_track_collection_in_workflow($object_id);
+        }
+    }
+  }
+  else {
+    // Attach default workflow.
+    $default_xml_file_name = drupal_get_path('module', 'islandora_workflow') . '/start_workflow.xml';
 
-  // Attach default workflow.
-  $default_xml_file_name = drupal_get_path('module', 'islandora_workflow') . '/start_workflow.xml';
+    $item->add_datastream_from_file(
+        $default_xml_file_name,
+        $dsid = 'islandora_workflow',
+        $ds_label = 'Workflow Datastream',
+        $mimetype = 'text/xml',
+        $control_group = 'X',
+        $log_message = 'Adding islandora_workflow datastream(editorial workflow tracking).'
+    );
 
-  $item->add_datastream_from_file(
-      $default_xml_file_name,
-      $dsid = 'islandora_workflow',
-      $ds_label = 'Workflow Datastream',
-      $mimetype = 'text/xml',
-      $control_group = 'X',
-      $log_message = 'Adding islandora_workflow datastream(editorial workflow tracking).'
-  );
-
-  // Set state.
-  $result = islandora_workflow_set_object_workflow_state($object_id, 'created');
-
+    // Set state.
+    $result = islandora_workflow_set_object_workflow_state($object_id, 'created');
+  }
   return $result;
 }
 
@@ -446,22 +475,21 @@ function islandora_workflow_claim_object($object_id) {
 function islandora_workflow_assign_object($object_id, $user_name) {
   module_load_include('permissions.inc', 'islandora_workflow');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+  module_load_include('collection.inc', 'islandora_workflow');
 
   global $user;
 
   $item = new Fedora_Item($object_id);
   $label = $item->objectProfile->objLabel;
 
-  $relationships = $item->get_rdf_relationships();
-  if (isset($relationships['hasModel'])) {
-    if (in_array('islandora:collectionCModel', $relationships['hasModel'])) {
-      drupal_set_message(t('The object <em>%label</em> (%pid) is a collection and cannot be assigned.', array(
-        '%label' => $label,
-        '%pid' => $object_id,
-      )));
-      return FALSE;
-    }
+  if (islandora_workflow_check_collection_content_model($object_id)) {
+    drupal_set_message(t('The object <em>%label</em> (%pid) is a collection and cannot be assigned.', array(
+      '%label' => $label,
+      '%pid' => $object_id,
+    )));
+    return FALSE;
   }
+  
 
   $present_assignee = islandora_workflow_get_object_assignee($object_id);
   if ($present_assignee == $user_name) {
