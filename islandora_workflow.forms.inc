@@ -75,6 +75,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
  */
 function islandora_workflow_work_form_main(&$form_state, $tab) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
+  module_load_include('inc', 'islandora_workflow', 'normalize_assignees');
   module_load_include('inc', 'fedora_repository', 'PagerSetup');
 
   global $user;
@@ -231,7 +232,7 @@ function islandora_workflow_work_form_main(&$form_state, $tab) {
 
   foreach ($elements as $object_pid => $attributes) {
     // Get possible assignees for the object.
-    $possible_assignees = get_possible_assignees(array($object_pid), array(), $format = TRUE);
+    $possible_assignees = islandora_workflow_get_possible_assignees(array($object_pid), array(), $format = TRUE);
     $possible_assignees = $possible_assignees[$object_pid];
 
     // Populate the selector and assignee drop down.
@@ -309,7 +310,7 @@ function islandora_workflow_work_form_main(&$form_state, $tab) {
  *   The form definition
  */
 function islandora_workflow_work_form_reject(&$form_state) {
-  module_load_include('collection.inc', 'islandora_workflow');
+  module_load_include('inc', 'islandora_workflow', 'normalize_assignees');
   $form = array();
 
   $objects = $form_state['storage']['selected_objects'];
@@ -334,7 +335,7 @@ function islandora_workflow_work_form_reject(&$form_state) {
 
   foreach ($objects as $object) {
 
-    $possible_assignees = get_possible_assignees(array($object), array(), $format = TRUE);
+    $possible_assignees = islandora_workflow_get_possible_assignees(array($object), array(), $format = TRUE);
     $options = $possible_assignees[$object]['rejected'];
 
     $form['assignees'][$object] = array(
@@ -344,8 +345,8 @@ function islandora_workflow_work_form_reject(&$form_state) {
 
     $form['assignees'][$object]['assignee'] = array(
       '#type' => 'select',
-      '#options' => array_combine($options, $options),
-      '#default_value' => $elements[$object]['assignee'],
+      '#default_value' => isset($elements[$object]['assignee'])? $elements[$object]['assignee'] : '',
+      '#options' => $options ? $options : array(),
     );
   }
 
@@ -425,6 +426,7 @@ function islandora_workflow_work_form_delete_submit($form, &$form_state) {
  *   The existing form state
  */
 function islandora_workflow_work_form_reject_submit($form, &$form_state) {
+  module_load_include('inc', 'islandora_workflow');
 
   if ($form_state['clicked_button']['#value'] == t('Reject and Assign')) {
     foreach ($form_state['values']['assignees'] as $pid => $values) {
@@ -456,7 +458,6 @@ function islandora_workflow_work_form_reject_submit($form, &$form_state) {
  */
 function islandora_workflow_work_form_submit($form, &$form_state) {
   module_load_include('inc', 'islandora_workflow');
-
   $clicked_button = $form_state['clicked_button']['#value'];
   $selected_object_ids = array();
   $assignees = array();

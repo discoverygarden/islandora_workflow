@@ -278,7 +278,7 @@ function islandora_workflow_get_permission_state($collection, $state) {
     $users[] = $user['name'];
   }
 
-  $users = array_merge(user_access_list('islandora_workflow_Administrator'), $users);
+  $users = array_merge(islandora_workflow_user_access_list('islandora_workflow_Administrator'), $users);
 
   return array('users' => $users, 'roles' => $roles);
 }
@@ -355,7 +355,7 @@ function islandora_workflow_get_all_users_with_collection_permissions($collectio
   // All users that may be in collections.
   $possible_users = islandora_workflow_get_users_with_module_permissions();
   $users = array();
-  $admins = user_access_list('islandora_workflow_Administrator');
+  $admins = islandora_workflow_user_access_list('islandora_workflow_Administrator');
 
   /* Make sure those users with admin rights show up for every
   collection/perm level.*/
@@ -428,7 +428,7 @@ function islandora_workflow_get_all_users_with_collection_permissions($collectio
  *   $users the list of users with the permission in the form
  *   users[user_id]=user_name or false
  */
-function user_access_list($perm = NULL) {
+function islandora_workflow_user_access_list($perm = NULL) {
   $users = FALSE;
   if (isset($perm)) {
     $users_query = "SELECT u.uid, u.name FROM {users} u, {users_roles} ur, {permission} p
@@ -582,10 +582,10 @@ function islandora_workflow_get_users_with_module_permissions() {
   $privileged_users = array();
 
   // Use user_roles for each permission individualy.
-  $admin_users = user_access_list('islandora_workflow_Administrator');
-  $manager_users = user_access_list('islandora_workflow_Manager');
-  $editor_users = user_access_list('islandora_workflow_Editor');
-  $submitter_users = user_access_list('islandora_workflow_Submitter');
+  $admin_users = islandora_workflow_user_access_list('islandora_workflow_Administrator');
+  $manager_users = islandora_workflow_user_access_list('islandora_workflow_Manager');
+  $editor_users = islandora_workflow_user_access_list('islandora_workflow_Editor');
+  $submitter_users = islandora_workflow_user_access_list('islandora_workflow_Submitter');
   /* Modify the returned arrays to include the permission name,
   and merge into one array [role_pid][role_name][0...4]permission. */
   foreach ($admin_users as $user_id => $user_name) {
@@ -696,4 +696,71 @@ function islandora_workflow_user_collection_permission_check($collection_pid) {
   }
   // Permission denied.
   return FALSE;
+}
+
+/**
+ *  This function will remove any out of date references
+ *  in the islandora_workflow_user_permissions regarding the
+ *  indicated user.
+ *
+ * @param object $account
+ *   A Drupal "user" object
+ */
+function islandora_workflow_normalize_users_permissions($account = NULL) {
+
+  if (is_null($account)) {
+    global $user;
+    $account = drupal_clone($user);
+  }
+
+  $possible_perms = islandora_workflow_perm();
+  foreach ($possible_perms as $permission) {
+    if (!user_access($permission, $account)) {
+      db_query('DELETE FROM {islandora_workflow_user_permissions}
+        WHERE user = %d AND permission = %d', $account->uid, $permission);
+    }
+  }
+}
+
+/**
+ * This function will clear any role level permissions in the
+ * Drupal database regarding workflow collections.  It will
+ * also normalize all the permissions of users who have that role.
+ *
+ * @param object $role_id
+ *   A Drupal role id.
+ */
+function islandora_workflow_clear_role_permissions($role_id) {
+  db_query('DELETE FROM {islandora_workflow_role_permissions} WHERE role = %d', $role_id);
+
+  // Get all users with the role and normalize their perms.
+  $users = islandora_workflow_get_users_by_roles($role_id);
+  foreach ($users as $user_data) {
+    islandora_workflow_normalize_users_permissions(user_load($user_data['uid']));
+  }
+}
+
+/**
+ * This function will return all users with a given role.
+ *
+ * @param int $role_id
+ *   A Drupal role id.
+ *
+ * @return array
+ *   $users[$result->uid] = $result->name;
+ */
+function islandora_workflow_get_users_by_roles($role_id) {
+  $users = array();
+  $sql = "SELECT u.uid, u.name
+    FROM {users} u
+    INNER JOIN {users_roles} ur
+    ON u.uid = ur.uid
+    WHERE ur.rid = %d";
+
+  $results = db_query($sql, $role_id);
+  while ($result = db_fetch_object($results)) {
+    $users[$result->uid] = $result->name;
+  }
+
+  return $users;
 }
