@@ -1599,7 +1599,12 @@ function islandora_workflow_islandora_content_model_forms_policy_alter(&$policy_
 
 }
 
-
+/**
+ * AHAH callback for filtering collection results by only workflow
+ * tracked collections in the 'Users' tab on the Workflow Permissions page.
+ * 
+ * @see islandora_workflow_menu() 
+ */
 function islandora_workflow_ahah_tracked_collections_user() {
   module_load_include('inc', 'php_lib', 'Ahah');
   
@@ -1618,6 +1623,12 @@ function islandora_workflow_ahah_tracked_collections_user() {
   exit();
 }
 
+/**
+ * AHAH callback for filtering collection results by only workflow
+ * tracked collections in the 'Roles' tab on the Workflow Permissions page.
+ * 
+ * @see islandora_workflow_menu() 
+ */
 function islandora_workflow_ahah_tracked_collections_role() {
   module_load_include('inc', 'php_lib', 'Ahah');
   
@@ -1636,6 +1647,12 @@ function islandora_workflow_ahah_tracked_collections_role() {
   exit();
 }
 
+/**
+ * AHAH callback for filtering collection results by active
+ * collections on the Workflow Collections page.
+ * 
+ * @see islandora_workflow_menu() 
+ */
 function islandora_workflow_ahah_active_collections() {
   module_load_include('inc', 'php_lib', 'Ahah');
   
@@ -1654,6 +1671,12 @@ function islandora_workflow_ahah_active_collections() {
   exit();
 }
 
+/**
+ * AHAH callback for filtering collection results by inactive
+ * collections on the Workflow Collections page.
+ * 
+ * @see islandora_workflow_menu() 
+ */
 function islandora_workflow_ahah_inactive_collections() {
   module_load_include('inc', 'php_lib', 'Ahah');
   
