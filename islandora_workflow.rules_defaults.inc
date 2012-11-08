@@ -1,6 +1,7 @@
 <?php
 /**
- *
+ * @file
+ *   A default set of rules for the workflow module.
  */
 
 /**
