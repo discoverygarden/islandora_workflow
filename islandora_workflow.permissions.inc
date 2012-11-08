@@ -697,3 +697,70 @@ function islandora_workflow_user_collection_permission_check($collection_pid) {
   // Permission denied.
   return FALSE;
 }
+
+/**
+ *  This function will remove any out of date references
+ *  in the islandora_workflow_user_permissions regarding the
+ *  indicated user.
+ *
+ * @param object $account
+ *   A Drupal "user" object
+ */
+function normalize_users_permissions($account = NULL) {
+
+  if (is_null($account)) {
+    global $user;
+    $account = drupal_clone($user);
+  }
+
+  $possible_perms = islandora_workflow_perm();
+  foreach ($possible_perms as $permission) {
+    if (!user_access($permission, $account)) {
+      db_query('DELETE FROM {islandora_workflow_user_permissions}
+        WHERE user = %d AND permission = %d', $account->uid, $permission);
+    }
+  }
+}
+
+/**
+ * This function will clear any role level permissions in the
+ * Drupal database regarding workflow collections.  It will
+ * also normalize all the permissions of users who have that role.
+ *
+ * @param object $role_id
+ *   A Drupal role id.
+ */
+function clear_role_permissions($role_id) {
+  db_query('DELETE FROM {islandora_workflow_role_permissions} WHERE role = %d', $role_id);
+
+  // Get all users with the role and normalize their perms.
+  $users = get_users_by_roles($role_id);
+  foreach ($users as $user_data) {
+    normalize_users_permissions(user_load($user_data['uid']));
+  }
+}
+
+/**
+ * This function will return all users with a given role.
+ *
+ * @param int $role_id
+ *   A Drupal role id.
+ *
+ * @return array
+ *   $users[$result->uid] = $result->name;
+ */
+function get_users_by_roles($role_id) {
+  $users = array();
+  $sql = "SELECT u.uid, u.name
+    FROM {users} u
+    INNER JOIN {users_roles} ur
+    ON u.uid = ur.uid
+    WHERE ur.rid = %d";
+
+  $results = db_query($sql, $role_id);
+  while ($result = db_fetch_object($results)) {
+    $users[$result->uid] = $result->name;
+  }
+
+  return $users;
+}

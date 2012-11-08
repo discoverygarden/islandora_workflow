@@ -72,7 +72,7 @@ function islandora_workflow_tracked_collection_members($collection_id) {
  * Get the items created by the given user.
  *
  * @param object $account
- *   A Drupal "user" object (or at least an object with the "name" property.
+ *   A Drupal "user" object (or at least an object with the "name" property).
  * @param int $limit
  *   An integer representing the number of items to return.  The (default)
  *   value -1 is magic, and causes all items to be returned.
@@ -87,12 +87,10 @@ function islandora_workflow_tracked_collection_members($collection_id) {
  *   being remapped to "islandora_workflow_modified".
  */
 function _islandora_workflow_get_created_items($account = NULL, $limit = -1, $offset = 0) {
-
   module_load_include('inc', 'fedora_repository', 'ObjectHelper');
 
-  global $user;
-
-  if (empty($account)) {
+  if (is_null($account)) {
+    global $user;
     $account = drupal_clone($user);
   }
 
@@ -255,6 +253,7 @@ function islandora_workflow_menu() {
     'access callback' => 'islandora_workflow_check_permissions',
     'access arguments' => array(array('islandora_workflow_Administrator', 'islandora_workflow_Manager')),
     'type' => MENU_NORMAL_ITEM,
+    'description' => 'Edit workflow tracked collections and colleciton level workflow permissions.',
   );
   $menu_entries['admin/settings/islandora_workflow/perm'] = array(
     'title' => 'Islandora Workflow Permissions',
@@ -744,6 +743,7 @@ function islandora_workflow_role_permissions_form() {
  */
 function islandora_workflow_role_permissions_form_submit($form, &$form_state) {
   module_load_include('permissions.inc', 'islandora_workflow');
+  module_load_include('inc', 'islandora_workflow', 'normalize_assignees');
 
   $clicked_button = $form_state['clicked_button']['#value'];
   // Handle updating the page.
@@ -834,7 +834,7 @@ function islandora_workflow_role_permissions_form_submit($form, &$form_state) {
 
     $collection_pid = $_SESSION['workflow_permissions_page']['active_collection'];
 
-    islandora_workflow_assignment_workflow_permission_change($collection_pid);
+    islandora_workflow_normalize_members_assignees($collection_pid);
 
     module_load_include('batch.inc', 'islandora_workflow');
     islandora_workflow_update_children($collection_pid);
@@ -988,6 +988,8 @@ function islandora_workflow_user_permissions_form(&$form_state) {
  */
 function islandora_workflow_user_permissions_form_submit($form, &$form_state) {
   module_load_include('permissions.inc', 'islandora_workflow');
+  module_load_include('inc', 'islandora_workflow', 'normalize_assignees');
+
   $clicked_button = $form_state['clicked_button']['#value'];
   // Handle updating the page.
   if ($clicked_button == 'Update') {
@@ -1079,7 +1081,7 @@ function islandora_workflow_user_permissions_form_submit($form, &$form_state) {
     $collection_pid = $_SESSION['workflow_permissions_page']['active_collection'];
 
 
-    islandora_workflow_assignment_workflow_permission_change($collection_pid);
+    islandora_workflow_normalize_members_assignees($collection_pid);
 
     module_load_include('batch.inc', 'islandora_workflow');
     islandora_workflow_update_children($collection_pid);
@@ -1143,20 +1145,24 @@ function islandora_workflow_mail($key, &$message, $params) {
  * Implements hook_user().
  */
 function islandora_workflow_user($op, &$edit, &$account, $category = NULL) {
+  module_load_include('inc', 'islandora_workflow', 'normalize_assignees');
   $batch_operations = array();
   switch ($op) {
     case 'delete':
-      $batch_operations = module_invoke_all('user_delete_batch', $edit, $account, $category);
+      $workflow_operations = islandora_workflow_user_delete_batch($edit, $account, $category);
+      $normalize_assignee_operations = islandora_workflow_user_delete_assignees_batch($account, $category);
+      $batch_operations = array_merge($workflow_operations, $normalize_assignee_operations);
       break;
 
-    case 'edit':
-      $batch_operations = module_invoke_all('user_edit_batch', $edit, $account, $category);
+    case 'after_update':
+      $workflow_operations = islandora_workflow_user_edit_batch($edit, $account, $category);
+      $normalize_assignee_operations = islandora_workflow_user_edit_assignees_batch($edit, $account, $category);
+      $batch_operations = array_merge($workflow_operations, $normalize_assignee_operations);
       break;
-
   }
   if (!empty($batch_operations)) {
     $batch = array(
-      'title' => t('Updating XACML Policies'),
+      'title' => t('Updating workflow tracked objects and database.'),
       'operations' => $batch_operations,
       'finished' => 'islandora_workflow_batch_finished',
       'file' => drupal_get_path('module', 'islandora_workflow') . '/islandora_workflow.batch.inc',
@@ -1167,9 +1173,13 @@ function islandora_workflow_user($op, &$edit, &$account, $category = NULL) {
 
 /**
  * Implements hook_form_FORM_ID_alter().
+ *
+ * There is no hook for the altering of roles so we fake it by
+ * shoving in our own submit handler so we can do operations when
+ * roles are deleted.
  */
 function islandora_workflow_form_user_admin_role_alter(&$form, &$form_state) {
-  array_unshift($form['#submit'], 'islandora_workflow_delete_role');
+  array_unshift($form['#submit'], 'islandora_workflow_role_delete');
 }
 
 /**
@@ -1184,11 +1194,14 @@ function islandora_workflow_form_user_admin_role_alter(&$form, &$form_state) {
  * @param array $form_state
  *   The form state
  */
-function islandora_workflow_delete_role($form, &$form_state) {
-  $batch_operations = module_invoke_all('role_delete_batch', $form, $form_state);
+function islandora_workflow_role_delete($form, &$form_state) {
+  module_load_include('inc', 'islandora_workflow', 'normalize_assignees');
+
+  $batch_operations = islandora_workflow_role_delete_batch($form, $form_state);
+
   if (!empty($batch_operations)) {
     $batch = array(
-      'title' => t('Updating XACML Policies'),
+      'title' => t('Updating workflow tracked objects and database.'),
       'operations' => $batch_operations,
       'finished' => 'islandora_workflow_batch_finished',
       'file' => drupal_get_path('module', 'islandora_workflow') . '/islandora_workflow.batch.inc',
@@ -1204,18 +1217,15 @@ function islandora_workflow_delete_role($form, &$form_state) {
  * for every collection that has them.
  */
 function islandora_workflow_role_delete_batch($form, $form_state) {
-
   module_load_include('inc', 'islandora_workflow');
   module_load_include('permissions.inc', 'islandora_workflow');
-
   $operations = array();
 
-  if ($form_state['values']['op'] == t('Delete role')) {
+  if ($form_state['clicked_button']['#id'] == 'edit-delete') {
     $collections = db_query('SELECT collection AS pid
       FROM {islandora_workflow_role_permissions} WHERE role = %d',
       $form_state['values']['rid']);
-    db_query('DELETE FROM {islandora_workflow_role_permissions} WHERE role = %d',
-      $form_state['values']['rid']);
+    clear_role_permissions($form_state['values']['rid']);
 
     while ($collection = db_fetch_array($collections)) {
       $members = islandora_workflow_get_all_members_of_collection($collection['pid']);
@@ -1227,6 +1237,13 @@ function islandora_workflow_role_delete_batch($form, $form_state) {
           FALSE,
         ),
       );
+      // Normalize the assignee on all possilby effected objects.
+      foreach ($members as $PID => $object_info) {
+        $operations[] = array(
+          'islandora_workflow_normalize_assignee_batch',
+          array($PID),
+        );
+      }
     }
   }
   return $operations;
@@ -1248,19 +1265,19 @@ function islandora_workflow_role_delete_batch($form, $form_state) {
 function islandora_workflow_user_delete_batch($edit, $account, $category = NULL) {
   module_load_include('inc', 'islandora_workflow');
   module_load_include('permissions.inc', 'islandora_workflow');
+  $operations = array();
 
   // Get all the objects for which this user has permissions.
   $options = array('user' => $account->uid);
   $rows = islandora_workflow_get_user_permissions($options);
-  // Delete the ex-user's permissions.
-  $operations = array();
+
+  // Delete user specific permissions from the database.
+  db_query("DELETE FROM {islandora_workflow_user_permissions}
+    WHERE user = %d", $account->uid);
+
   foreach ($rows as $row) {
     $collection_pid = $row['collection'];
     $permission = $row['permission'];
-
-    db_query("DELETE FROM {islandora_workflow_user_permissions}
-      WHERE user = %d AND collection = '%s' AND permission = '%s'",
-      $account->uid, $collection_pid, $permission);
 
     // Perform batch operations.
     $members = islandora_workflow_get_all_members_of_collection($collection_pid);
@@ -1294,22 +1311,24 @@ function islandora_workflow_user_edit_batch($edit, $account, $category = NULL) {
   $operations = array();
 
   $roles_diff_keys = array_diff_key($existing_roles, $new_roles);
-  while ($rid = key($roles_diff_keys)) {
-    // Get all values of 'collection' for the user/permission combo.
-    $collections = db_query('SELECT collection AS pid
-      FROM {islandora_workflow_role_permissions}
-      WHERE user = %d AND role = %d', $user->uid, $rid);
-    // Delete all rows in the table for the user/permission combo.
-    db_query('DELETE FROM {islandora_workflow_role_permissions}
-      WHERE user = %d AND role = %d', $user->uid, $rid);
-    while ($collection = mysql_fetch_assoc($collections)) {
-      $members = islandora_workflow_get_all_members_of_collection($collection['pid']);
-      $operations[] = array(
-        'islandora_workflow_batch_function',
-        array($collection['pid'], $members, $delete = FALSE),
-      );
-    }
+
+  // Get all values of 'collection' for the user/permission combo.
+  $collections = db_query('SELECT collection AS pid
+    FROM {islandora_workflow_user_permissions}
+    WHERE user = %d', $account->uid);
+  $collections = array_unique($collections);
+
+  // Delete all rows in the table for the user/permission changes.
+  normalize_users_permissions($account);
+
+  while ($collection = mysql_fetch_assoc($collections)) {
+    $members = islandora_workflow_get_all_members_of_collection($collection['pid']);
+    $operations[] = array(
+      'islandora_workflow_batch_function',
+      array($collection['pid'], $members, $delete = FALSE),
+    );
   }
+
   return $operations;
 }
 
@@ -1326,7 +1345,6 @@ function islandora_workflow_user_edit_batch($edit, $account, $category = NULL) {
  * @todo: kill this evil function
  */
 function islandora_workflow_islandora_tabs_alter(&$tabs, $params) {
-
   module_load_include('inc', 'islandora_workflow');
   module_load_include('permissions.inc', 'islandora_workflow');
   module_load_include('inc', 'fedora_repository', 'CollectionClass');
