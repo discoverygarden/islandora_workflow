@@ -483,6 +483,7 @@ function islandora_workflow_collections(&$form_state) {
     '#title' => t('Display active collections?'),
     '#default_value' => $form_state['storage']['workflow_collections']['active'] ? TRUE : FALSE,
     '#ahah' => array(
+      'event' => 'click',
       'path' => 'islandora_workflow/ahah/active_collections',
       'wrapper' => 'islandora_workflow_collection_filtering',
     ),
@@ -492,6 +493,7 @@ function islandora_workflow_collections(&$form_state) {
     '#title' => t('Display inactive collections?'),
     '#default_value' => $form_state['storage']['workflow_collections']['inactive'] ? TRUE : FALSE,
     '#ahah' => array(
+      'event' => 'click',
       'path' => 'islandora_workflow/ahah/inactive_collections',
       'wrapper' => 'islandora_workflow_collection_filtering',
     ),
@@ -736,6 +738,7 @@ function islandora_workflow_role_permissions_form(&$form_state) {
     '#title' => t('Display only workflow tracked collections?'),
     '#default_value' => $form_state['storage']['tracked_collections_role'] ? TRUE : FALSE,
     '#ahah' => array(
+      'event' => 'click',
       'path' => 'islandora_workflow/ahah/tracked_collections_role',
       'wrapper' => 'islandora_workflow_role_perm',
     ),
@@ -1017,6 +1020,7 @@ function islandora_workflow_user_permissions_form(&$form_state) {
     '#title' => t('Display only workflow tracked collections?'),
     '#default_value' => $form_state['storage']['tracked_collections_user'] ? TRUE : FALSE,
     '#ahah' => array(
+      'event' => 'click',
       'path' => 'islandora_workflow/ahah/tracked_collections_user',
       'wrapper' => 'islandora_workflow_user_perm',
     ),
