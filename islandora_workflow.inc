@@ -508,6 +508,8 @@ function islandora_workflow_assign_object($object_id, $user_name) {
  *   $result the return mesage from Fedora
  */
 function islandora_workflow_set_object_workflow_state($object_id, $state) {
+  module_load_include('object.inc', 'islandora_workflow');
+  module_load_include('inc', 'islandora_workflow', 'normalize_assignees');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
 
   global $user;
@@ -591,7 +593,9 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
   if ($state != 'published' && islandora_workflow_get_object_fedora_state($object_id) != 'I') {
     $item->modify_object($label, 'I');
   }
-  module_invoke_all('workflow_state_change', $object_id, $state);
+  // Normalize the assignee for the future state of the object.
+  islandora_workflow_normalize_assignee($object_id, $state);
+  // Set the workflow state.
   $set_state_relationship_return = islandora_workflow_set_object_relationship($object_id, 'state', $state);
 
   // Make sure there is an appropriate XACML datastream if there should be.

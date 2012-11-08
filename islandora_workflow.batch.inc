@@ -1,4 +1,9 @@
 <?php
+/**
+ * @file
+ *   This file holds functions used by workflow's batch processes.
+ *
+ */
 
 /**
  * Start a Drupal batch process to update all children of a collection.
@@ -18,7 +23,7 @@ function islandora_workflow_update_children($collection_pid) {
     'file' => __FILE__,
   );
 
-  foreach ((array)$collection_pid as $collection) {
+  foreach ((array) $collection_pid as $collection) {
     $members = islandora_workflow_get_all_members_of_collection($collection);
     if ($members) {
       $batch['operations'][] = array(
@@ -156,4 +161,31 @@ function islandora_workflow_batch_finished($success, $results, $operations) {
     }
   }
 }
+/**
+ * This is a simple wrapper that calls a funciton in normalize_assignee.inc
+ * It exists because the Batch API only lets one file be included for batch ops.
+ *
+ * @param string $object_pid
+ *   The PID of the Fedora object
+ * @param string $assignee
+ *   The Drupal username of the assignee.
+ *
+ * @return boolean
+ *   TRUE if any relationships were purged, FALSE otherwise.
+ */
+function islandora_workflow_remove_assignee_batch($object_pid, $assignee = NULL) {
+  module_load_include('inc', 'islandora_workflow', 'normalize_assignees');
+  islandora_workflow_remove_assignee($object_pid, $assignee);
+}
 
+/**
+ * This is a simple wrapper that calls a funciton in normalize_assignee.inc
+ * It exists because the Batch API only lets one file be included for batch ops.
+ *
+ * @param string $object_pid
+ *   the PID of the object.
+ */
+function islandora_workflow_normalize_assignee_batch($object_pid) {
+  module_load_include('inc', 'islandora_workflow', 'normalize_assignees');
+  islandora_workflow_normalize_assignee($object_pid, NULL);
+}
