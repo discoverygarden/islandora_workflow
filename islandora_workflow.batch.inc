@@ -13,6 +13,7 @@
  *   POLICY stream we need to update, or an array containing multiple.
  */
 function islandora_workflow_update_children($collection_pid) {
+  module_load_include('collection.inc', 'islandora_workflow');
   module_load_include('inc', 'islandora_workflow');
 
   $batch = array(

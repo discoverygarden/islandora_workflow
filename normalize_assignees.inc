@@ -29,12 +29,11 @@ function islandora_workflow_remove_assignee($object_pid, $assignee = NULL) {
   }
 
   $item->purge_relationships($predicate, $assignee, $islandora_workflow_namespace, RELS_TYPE_PLAIN_LITERAL);
-  drupal_set_message("$assignee has been removed as the assignee to $object_pid.");
 }
 
 /**
  * Check that an object's assignee still has the right permissions
- * for the indeicated workflow state. If not, remove the assignee.
+ * for the indicated workflow state. If not, remove the assignee.
  *
  * @param string $object_pid
  *   the PID of the object.
