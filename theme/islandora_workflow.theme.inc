@@ -18,9 +18,9 @@
   *   $vars the modified list of variables to send to the template
   */
 function islandora_workflow_preprocess_workflow_collections(&$vars) {
-
   module_load_include('inc', 'islandora_workflow');
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow.collection');
+  module_load_include('inc', 'islandora_workflow', 'fedora_object_functions');
 
   $collections = islandora_workflow_get_collections();
 
@@ -49,6 +49,7 @@ function islandora_workflow_preprocess_workflow_collections(&$vars) {
   */
 function islandora_workflow_preprocess_permissions_user_table(&$vars) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
+  module_load_include('inc', 'islandora_workflow', 'fedora_object_functions');
 
   $vars['users'] = islandora_workflow_get_users_with_module_permissions();
   $vars['list']['collection_selector'] = drupal_render($vars['list']['collection_selector']);
@@ -78,6 +79,7 @@ function islandora_workflow_preprocess_permissions_user_table(&$vars) {
  */
 function islandora_workflow_preprocess_permissions_role_table(&$vars) {
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow.permissions');
+  module_load_include('inc', 'islandora_workflow', 'fedora_object_functions');
 
   $vars['roles'] = islandora_workflow_get_roles_with_module_permissions();
   $vars['list']['collection_selector'] = drupal_render($vars['list']['collection_selector']);

@@ -4,7 +4,9 @@
  * This is a collection of helper functions for the islandora_workflow module.
  * @author
  *   William Panting
- * @todo: refactor out object and collection level funcs to their own .incs
+ * @TODO: refactor out object and collection level functions to their own .incs
+ * @TODO: refactor to remove as many calls to workflow modules functional
+ *   code that substitutes for Fedora item functionality as reasonable.
  */
 
 /**
@@ -16,7 +18,7 @@
  * the drupal database table 'islandora_workflow_permissions'
  * to compile a list of
  * collections that the user has the supplied permission to
- * This is also handy to determin if the user has any permissions at that lvl:
+ * This is also handy to determine if the user has any permissions at that lvl:
  * if (islandora_workflow_get_users_collections($perm)!=FALSE) {}
  * if (islandora_workflow_get_users_collections()) {}
  *
@@ -31,15 +33,15 @@ function islandora_workflow_get_users_collections($permission_level = NULL, $acc
   module_load_include('permissions.inc', 'islandora_workflow');
 
   global $user;
-  
+
   if (is_null($permission_level)) {
     $permission_level = 'islandora_workflow_Manager';
   }
-  
+
   if (empty($account)) {
     $account = drupal_clone($user);
   }
-  
+
   $permitted_collections = array();
   $collection_list = array();
   if (user_access('islandora_workflow_Administrator', $account) || user_access('administer', $account)) {
@@ -88,7 +90,7 @@ function islandora_workflow_get_users_collections($permission_level = NULL, $acc
   else {
     return array();
   }
-  
+
   if ($workflow_tracked) {
     $tracked_collections = array();
     foreach ($collection_list as $key => $value) {
@@ -98,7 +100,7 @@ function islandora_workflow_get_users_collections($permission_level = NULL, $acc
     }
     $collection_list = $tracked_collections;
   }
-  
+
   return $collection_list;
 }
 
@@ -211,21 +213,21 @@ function islandora_workflow_init_workflow($object_id) {
   if (!$item->exists()) {
     return FALSE;
   }
-  
+
   // Object passed in is a collection.
   if (islandora_workflow_check_collection_content_model($object_id)) {
     $parent_pid = islandora_workflow_get_object_parent($object_id);
-    
+
     if ($parent_pid) {
-        if (islandora_workflow_is_collection_workflow_tracked($parent_pid)) {
-          drupal_set_message(t('Collection <em>%label</em> (%pid) is now tracked in workflow.',
-                array(
-                    '%label' => $item->objectProfile->objLabel,
-                    '%pid' => $object_id,
-                )
-            ));
-          return islandora_workflow_track_collection_in_workflow($object_id);
-        }
+      if (islandora_workflow_is_collection_workflow_tracked($parent_pid)) {
+        drupal_set_message(t('Collection <em>%label</em> (%pid) is now tracked in workflow.',
+            array(
+              '%label' => $item->objectProfile->objLabel,
+              '%pid' => $object_id,
+            )
+          ));
+        return islandora_workflow_track_collection_in_workflow($object_id);
+      }
     }
   }
   else {
@@ -261,6 +263,7 @@ function islandora_workflow_init_workflow($object_id) {
 function islandora_workflow_reject_object($object_id) {
   module_load_include('permissions.inc', 'islandora_workflow');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+  module_load_include('inc', 'islandora_workflow', 'fedora_object_functions');
 
   $label = islandora_workflow_get_object_label($object_id);
 
@@ -328,6 +331,7 @@ function islandora_workflow_reject_object($object_id) {
 function islandora_workflow_approve_object($object_id) {
   module_load_include('permissions.inc', 'islandora_workflow');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+  module_load_include('inc', 'islandora_workflow', 'fedora_object_functions');
 
   $label = islandora_workflow_get_object_label($object_id);
 
@@ -369,9 +373,9 @@ function islandora_workflow_approve_object($object_id) {
  *   FALSE if the publication was not attempted
  */
 function islandora_workflow_publish_object($object_id) {
-
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   module_load_include('permissions.inc', 'islandora_workflow');
+  module_load_include('inc', 'islandora_workflow', 'fedora_object_functions');
 
   $label = islandora_workflow_get_object_label($object_id);
 
@@ -386,6 +390,7 @@ function islandora_workflow_publish_object($object_id) {
 
   if (islandora_workflow_get_object_workflow_state($object_id) != 'published') {
     islandora_workflow_set_object_workflow_state($object_id, 'published');
+    islandora_workflow_DSM_about_object($object_id, 'has been published.', $label);
   }
   else {
     drupal_set_message(t('The object <em>%label</em> (%pid) could not be published, it was not in an appropriate workflow state.', array(
@@ -412,6 +417,7 @@ function islandora_workflow_publish_object($object_id) {
 function islandora_workflow_submit_object($object_id) {
   module_load_include('permissions.inc', 'islandora_workflow');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+  module_load_include('inc', 'islandora_workflow', 'fedora_object_functions');
 
   $label = islandora_workflow_get_object_label($object_id);
 
@@ -448,7 +454,9 @@ function islandora_workflow_submit_object($object_id) {
  *   the return mesage from Fedora
  */
 function islandora_workflow_claim_object($object_id) {
+  module_load_include('inc', 'islandora_workflow', 'fedora_object_functions');
   global $user;
+
   $label = islandora_workflow_get_object_label($object_id);
   $present_assignee = islandora_workflow_get_object_assignee($object_id);
   if ($present_assignee == $user->name) {
@@ -489,7 +497,7 @@ function islandora_workflow_assign_object($object_id, $user_name) {
     )));
     return FALSE;
   }
-  
+
 
   $present_assignee = islandora_workflow_get_object_assignee($object_id);
   if ($present_assignee == $user_name) {
@@ -539,6 +547,7 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
   module_load_include('object.inc', 'islandora_workflow');
   module_load_include('inc', 'islandora_workflow', 'normalize_assignees');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+  module_load_include('inc', 'islandora_workflow', 'fedora_object_functions');
 
   global $user;
   $workflow_parser = new DOMDocument();
@@ -673,32 +682,6 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
 }
 
 /**
- * Get the label for a Fedora object with a given PID.
- *
- * @param string $object_id
- *   The object to get the label of
- *
- * @return string $label
- *   The label of the object specified.
- *
- * @return boolean
- *   FALSE if there is an exception in geting the label
- */
-function islandora_workflow_get_object_label($object_id) {
-
-  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
-
-  $item = new Fedora_Item($object_id);
-  if (!$item->exists()) {
-    return FALSE;
-  }
-  if (!isset($item->objectProfile->objLabel)) {
-    return '';
-  }
-  return $item->objectProfile->objLabel;
-}
-
-/**
  * Set the Fedora state of an object to Deleted.
  *
  * This function does not purge an object.
@@ -714,6 +697,7 @@ function islandora_workflow_get_object_label($object_id) {
 function islandora_workflow_delete_object($object_id) {
   module_load_include('permissions.inc', 'islandora_workflow');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+  module_load_include('inc', 'islandora_workflow', 'fedora_object_functions');
 
   $label = islandora_workflow_get_object_label($object_id);
 
