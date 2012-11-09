@@ -428,12 +428,13 @@ function islandora_workflow_work_form_delete_submit($form, &$form_state) {
  */
 function islandora_workflow_work_form_reject_submit($form, &$form_state) {
   module_load_include('inc', 'islandora_workflow');
+  module_load_include('inc', 'islandora_workflow', 'normalize_assignees');
 
   if ($form_state['clicked_button']['#value'] == t('Reject and Assign')) {
     foreach ($form_state['values']['assignees'] as $pid => $values) {
       islandora_workflow_reject_object($pid);
       if (empty($values['assignee'])) {
-        islandora_workflow_assignment_remove($pid);
+        islandora_workflow_remove_assignee($pid);
       }
       else {
         islandora_workflow_assign_object($pid, $values['assignee']);
@@ -459,6 +460,7 @@ function islandora_workflow_work_form_reject_submit($form, &$form_state) {
  */
 function islandora_workflow_work_form_submit($form, &$form_state) {
   module_load_include('inc', 'islandora_workflow');
+
   $clicked_button = $form_state['clicked_button']['#value'];
   $selected_object_ids = array();
   $assignees = array();

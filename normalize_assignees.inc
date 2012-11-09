@@ -20,6 +20,7 @@
  */
 function islandora_workflow_remove_assignee($object_pid, $assignee = NULL) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+
   $islandora_workflow_namespace = 'info:islandora/islandora-system:def/islandora_workflow#';
   $predicate = 'assignee';
 
