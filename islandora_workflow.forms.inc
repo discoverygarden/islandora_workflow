@@ -74,6 +74,7 @@ function islandora_workflow_work_form(&$form_state, $tab) {
  *   A form definition.
  */
 function islandora_workflow_work_form_main(&$form_state, $tab) {
+  module_load_include('collection.inc', 'islandora_workflow');
   module_load_include('inc', 'islandora_workflow', 'islandora_workflow');
   module_load_include('inc', 'islandora_workflow', 'normalize_assignees');
   module_load_include('inc', 'fedora_repository', 'PagerSetup');
