@@ -190,7 +190,7 @@ function _islandora_workflow_actionable_by_submitter($item) {
 function _islandora_workflow_in_progress_by_submitter($item) {
   global $user;
 
-  if ($item['owner'] == $user->name && $item['state'] == 'created') {
+  if ($item['owner'] == $user->name && ($item['state'] == 'created' || $item['state'] == 'rejected')) {
     return TRUE;
   }
 
