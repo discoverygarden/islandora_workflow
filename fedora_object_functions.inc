@@ -8,6 +8,10 @@
  * This code was being used allot in the module for feedback to the user
  * so it has been pulled out into a utility function.  It will send a
  * drupal_set_message with the object's label, PID and the message supplied.
+ * This is more about insuring a consistent UI than clean code.
+
+ * @TODO
+ *   Provide a link to the object in the message.
  *
  * @param string $PID
  *   The Fedora PID of the object to write the Drupal message about.
@@ -21,6 +25,9 @@ function islandora_workflow_DSM_about_object($PID, $message, $label = NULL) {
   // Set $label if it is not supplied.
   if (is_null($label)) {
     $label = islandora_workflow_get_object_label($PID);
+    if (!$label) {
+      $label = '';
+    }
   }
 
   // Send the drupal_set_message
