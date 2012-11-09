@@ -32,7 +32,7 @@ function islandora_workflow_DSM_about_object($PID, $message, $label = NULL) {
 
   // Send the drupal_set_message
   drupal_set_message(
-    t('The object <em>%label</em> (%PID) %message',
+    t('The object %label (%PID) %message',
       array(
         '%label' => $label,
         '%PID' => $PID,

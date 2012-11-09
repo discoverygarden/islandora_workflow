@@ -134,15 +134,10 @@ function islandora_workflow_approve_object($object_id) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   module_load_include('inc', 'islandora_workflow', 'fedora_object_functions');
 
-  $label = islandora_workflow_get_object_label($object_id);
-
   // Permission check.
   $tmp = islandora_workflow_user_object_permission_check($object_id);
   if ($tmp != 'islandora_workflow_Editor' && $tmp != 'islandora_workflow_Manager') {
-    drupal_set_message(t('The object <em>%label</em> (%pid) could not be approved, you do not have the necessary permissions.', array(
-      '%label' => $label,
-      '%pid' => $object_id,
-    )));
+    islandora_workflow_DSM_about_object($object_id, 'could not be approved, you do not have the necessary permissions.');
     return FALSE;
   }
 
@@ -154,10 +149,7 @@ function islandora_workflow_approve_object($object_id) {
     return (islandora_workflow_set_object_workflow_state($object_id, 'approved'));
   }
   else {
-    drupal_set_message(t('The object <em>%label</em> (%pid) could not be approved, it was not in an appropriate workflow state.', array(
-      '%label' => $label,
-      '%pid' => $object_id,
-    )));
+    islandora_workflow_DSM_about_object($object_id, 'could not be approved, it was not in an appropriate workflow state.');
   }
   return FALSE;
 }
@@ -211,11 +203,9 @@ function islandora_workflow_submit_object($object_id) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   module_load_include('inc', 'islandora_workflow', 'fedora_object_functions');
 
-  $label = islandora_workflow_get_object_label($object_id);
-
   // Permission check.
   if (!islandora_workflow_user_object_permission_check($object_id)) {
-    drupal_set_message(t('The object <em>%label</em> (%pid) could not be submitted, you do not have the necessary permissions.', array('%pid' => $object_id)));
+    islandora_workflow_DSM_about_object($object_id, 'could not be published, you do not have the necessary permissions.');
     return FALSE;
   }
 
@@ -228,10 +218,7 @@ function islandora_workflow_submit_object($object_id) {
     return (islandora_workflow_set_object_workflow_state($object_id, 'submitted'));
   }
   else {
-    drupal_set_message(t('The object <em>%label</em> (%pid) could not be submitted, it was not in an appropriate workflow state.', array(
-      '%label' => $label,
-      '%pid' => $object_id,
-    )));
+    islandora_workflow_DSM_about_object($object_id, 'could not be submitted, it was not in an appropriate workflow state.');
   }
   return FALSE;
 }
@@ -242,20 +229,16 @@ function islandora_workflow_submit_object($object_id) {
  * @param string $object_id
  *   the Fedora PID of the object to modify
  *
- * @return string
- *   the return mesage from Fedora
+ * @return mixed
+ *   The return message from Fedora or FALSE if we will not assign the object.
  */
 function islandora_workflow_claim_object($object_id) {
   module_load_include('inc', 'islandora_workflow', 'fedora_object_functions');
   global $user;
 
-  $label = islandora_workflow_get_object_label($object_id);
   $present_assignee = islandora_workflow_get_object_assignee($object_id);
   if ($present_assignee == $user->name) {
-    drupal_set_message(t('The object <em>%label</em> (%pid) is already assigned to you.', array(
-      '%pid' => $object_id,
-      '%label' => $label,
-    )));
+    islandora_workflow_DSM_about_object($object_id, 'is already assigned to you.');
     return FALSE;
   }
   return (islandora_workflow_assign_object($object_id, $user->name));
@@ -276,47 +259,33 @@ function islandora_workflow_assign_object($object_id, $user_name) {
   module_load_include('permissions.inc', 'islandora_workflow');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   module_load_include('collection.inc', 'islandora_workflow');
+  module_load_include('inc', 'islandora_workflow', 'fedora_object_functions');
 
   global $user;
 
-  $item = new Fedora_Item($object_id);
-  $label = $item->objectProfile->objLabel;
-
   if (islandora_workflow_check_collection_content_model($object_id)) {
-    drupal_set_message(t('The object <em>%label</em> (%pid) is a collection and cannot be assigned.', array(
-      '%label' => $label,
-      '%pid' => $object_id,
-    )));
+    islandora_workflow_DSM_about_object($object_id, 'is a collection and cannot be assigned.');
     return FALSE;
   }
-
 
   $present_assignee = islandora_workflow_get_object_assignee($object_id);
   if ($present_assignee == $user_name) {
     if ($user_name == $user->name) {
-      drupal_set_message(t('The object <em>%label</em> (%pid) is already assigned to you.', array(
-        '%label' => $label,
-        '%pid' => $object_id,
-      )));
+      islandora_workflow_DSM_about_object($object_id, 'is already assigned to you.');
     }
     else {
-      drupal_set_message(t('The object <em>%label</em> (%pid) is already assigned to <em>%username</em>.', array(
-        '%label' => $label,
-        '%pid' => $object_id,
-        '%username' => $user_name,
-      )));
+      islandora_workflow_DSM_about_object($object_id, 'is already assigned to ' . $user_name . '.');
     }
     return FALSE;
   }
 
   // Permission check.
   if (!islandora_workflow_user_object_permission_check($object_id)) {
-    drupal_set_message(t('The object <em>%label</em> (%pid) could not be assigned, you do not have the necessary permissions.', array(
-      '%label' => $label,
-      '%pid' => $object_id,
-    )));
+    islandora_workflow_DSM_about_object($object_id, 'could not be assigned, you do not have the necessary permissions.');
     return FALSE;
   }
+
+  $item = new Fedora_Item($object_id);
   rules_invoke_event('islandora_workflow_rules_assign_object', $item);
   // Assign object.
   return (islandora_workflow_set_object_relationship($object_id, 'assignee', $user_name));
@@ -353,7 +322,7 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
 
   // Update last modified user/time.
   if (isset($item->datastreams['islandora_workflow'])) {
-    // Build xml from DS.
+    // Build XML from DS.
     $workflow_string = $item->get_datastream_dissemination('islandora_workflow');
     $workflow_parser->loadXML($workflow_string);
     // Get elements to populate dynamicaly.
@@ -482,7 +451,7 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
  *   the Fedora PID of the object to modify
  *
  * @return string
- *   $result the return mesage from Fedora
+ *   $result the return message from Fedora
  * @return boolean
  *   FALSE if the state of the object could not be changed by the current user.
  */
@@ -495,10 +464,7 @@ function islandora_workflow_delete_object($object_id) {
 
   // Permission check.
   if (!islandora_workflow_user_object_permission_check($object_id)) {
-    drupal_set_message(t('The object <em>%label</em> (%pid) could not be deleted, you do not have the necessary permissions.', array(
-      '%label' => $label,
-      '%pid' => $object_id,
-    )));
+    islandora_workflow_DSM_about_object($object_id, 'could not be deleted, you do not have the necessary permissions.', $label);
     return FALSE;
   }
 
@@ -564,7 +530,7 @@ function islandora_workflow_get_object_creator($object_id) {
  *   the Fedora PID of the object to check the status of
  *
  * @return string
- *   $state The string reperesenting the state of the object in fedora
+ *   $state The string representing the state of the object in fedora
  * @return boolean
  *   FALSE if the state of the object could not be retrieved.
  */
@@ -602,7 +568,7 @@ function islandora_workflow_get_object_fedora_state($object_id) {
  *   the Fedora PID of the object to check the status of
  *
  * @return string
- *   $state The string reperesenting the state of the object in the workflow
+ *   $state The string representing the state of the object in the workflow
  * @return boolean
  *   FALSE if no workflow state has been set.
  */
