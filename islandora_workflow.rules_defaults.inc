@@ -102,12 +102,12 @@ function islandora_workflow_rules_defaults() {
       'object_label' => t('The object that has been approved'),
       'settings' => array(
         'subject' => 'An object has been approved',
-        'message' => 'Object [object:fedora-object-pid] has been approved and is awaiting publication.',
+        'message' => 'The object <em>[object:fedora-object-title]</em> ([object:fedora-object-pid]) has been approved and is awaiting publication.',
         'roles' => array('islandora_workflow_Editor'),
         'notify_creator' => 1,
         'notify_assignee' => 0,
       ),
-      'show_message' => 'The object [object:fedora-object-pid] has been approved.',
+      'show_message' => 'The object <em>[object:fedora-object-title]</em> ([object:fedora-object-pid]) has been approved.',
     ),
     'rejected' => array(
       'set' => 'event_islandora_workflow_rules_reject_object',
@@ -116,12 +116,12 @@ function islandora_workflow_rules_defaults() {
       'object_label' => t('The object that has been rejected'),
       'settings' => array(
         'subject' => 'An object has been rejected',
-        'message' => 'Object [object:fedora-object-pid] has been rejected.',
+        'message' => 'The object <em>[object:fedora-object-title]</em> ([object:fedora-object-pid]) has been rejected.',
         'roles' => array('islandora_workflow_Editor'),
         'notify_creator' => 1,
         'notify_assignee' => 0,
       ),
-      'show_message' => 'The object [object:fedora-object-pid] has been rejected.',
+      'show_message' => 'The object <em>[object:fedora-object-title]</em> ([object:fedora-object-pid]) has been rejected.',
     ),
     'submitted' => array(
       'set' => 'event_islandora_workflow_rules_submit_object',
@@ -130,12 +130,12 @@ function islandora_workflow_rules_defaults() {
       'object_label' => t('The object that has been submitted'),
       'settings' => array(
         'subject' => 'An object has been submitted',
-        'message' => 'Object [object:fedora-object-pid] has been submitted for approval.',
+        'message' => 'The object <em>[object:fedora-object-title]</em> ([object:fedora-object-pid]) has been submitted for approval.',
         'roles' => array('islandora_workflow_Editor'),
         'notify_creator' => 0,
         'notify_assignee' => 0,
       ),
-      'show_message' => 'The object [object:fedora-object-pid] has been submitted.',
+      'show_message' => 'The object <em>[object:fedora-object-title]</em> ([object:fedora-object-pid]) has been submitted.',
     ),
     'assigned' => array(
       'set' => 'event_islandora_workflow_rules_assign_object',
@@ -144,12 +144,12 @@ function islandora_workflow_rules_defaults() {
       'object_label' => t('The object that has been assigned'),
       'settings' => array(
         'subject' => 'An object has been assigned',
-        'message' => 'Object [object:fedora-object-pid] has been assigned.',
+        'message' => 'The object <em>[object:fedora-object-title]</em> ([object:fedora-object-pid]) has been assigned.',
         'roles' => array(),
         'notify_creator' => 0,
         'notify_assignee' => 1,
       ),
-      'show_message' => 'The object [object:fedora-object-pid] has been assigned.',
+      'show_message' => 'The object <em>[object:fedora-object-title]</em> ([object:fedora-object-pid]) has been assigned.',
     ),
   );
 
