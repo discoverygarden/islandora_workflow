@@ -69,24 +69,20 @@ function islandora_workflow_init_workflow($object_id) {
  *   the Fedora PID of the object to modify
  *
  * @return string
- *   the return mesage from Fedora
+ *   the return message from Fedora
  * @return boolean
  *   FALSE if the rejection was not attempted
  */
 function islandora_workflow_reject_object($object_id) {
+  module_load_include('inc', 'islandora_workflow', 'fedora_object_functions');
   module_load_include('permissions.inc', 'islandora_workflow');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   module_load_include('inc', 'islandora_workflow', 'fedora_object_functions');
 
-  $label = islandora_workflow_get_object_label($object_id);
-
   // Permission check.
   $user_permission_level = islandora_workflow_user_object_permission_check($object_id);
   if ($user_permission_level != 'islandora_workflow_Editor' && $user_permission_level != 'islandora_workflow_Manager') {
-    drupal_set_message(t('The object <em>%label</em> (%pid) could not be rejected, you do not have the necessary permissions.', array(
-      '%label' => $label,
-      '%pid' => $object_id,
-    )));
+    islandora_workflow_DSM_about_object($object_id, 'could not be rejected, you do not have the necessary permissions.');
     return FALSE;
   }
 
@@ -97,12 +93,10 @@ function islandora_workflow_reject_object($object_id) {
     global $user;
     if ($workflow_state == 'published' && module_exists('islandora_xacml_api') && $user->uid != 1) {
       module_load_include('inc', 'islandora_xacml_api', 'IslandoraXacml');
+
       $xacml = new IslandoraXacml($object_id);
       if (!$xacml->managementRule->hasPermission($user->name, $user->roles)) {
-        drupal_set_message(t('The object <em>%label</em> (%pid) could not be rejected, you do not have XACML access to the object.', array(
-          '%label' => $label,
-          '%pid' => $object_id,
-        )));
+        islandora_workflow_DSM_about_object($object_id, 'could not be rejected, you do not have XACML access to the object.');
         return FALSE;
       }
     }
@@ -114,18 +108,12 @@ function islandora_workflow_reject_object($object_id) {
       rules_invoke_event('islandora_workflow_rules_reject_object', $object);
     }
     else {
-      drupal_set_message(t('No email sent for the rejection of <em>%label</em> (%pid)', array(
-        '%label' => $label,
-        '%pid' => $object_id,
-      )));
+      islandora_workflow_DSM_about_object($object_id, 'had an unknown creator, so no email was sent on rejection.');
     }
     return (islandora_workflow_set_object_workflow_state($object_id, 'rejected'));
   }
   else {
-    drupal_set_message(t('The object <em>%label</em> (%pid) could not be rejected, it was not in an appropriate workflow state.', array(
-      '%label' => $label,
-      '%pid' => $object_id,
-    )));
+    islandora_workflow_DSM_about_object($object_id, 'could not be rejected, it was not in an appropriate workflow state.');
     return FALSE;
   }
 }
@@ -189,20 +177,18 @@ function islandora_workflow_publish_object($object_id) {
   module_load_include('permissions.inc', 'islandora_workflow');
   module_load_include('inc', 'islandora_workflow', 'fedora_object_functions');
 
-  $label = islandora_workflow_get_object_label($object_id);
-
   // Permission check.
   if (islandora_workflow_user_object_permission_check($object_id) != 'islandora_workflow_Manager') {
-    islandora_workflow_DSM_about_object($object_id, 'could not be published, you do not have the necessary permissions.', $label);
+    islandora_workflow_DSM_about_object($object_id, 'could not be published, you do not have the necessary permissions.');
     return FALSE;
   }
 
   if (islandora_workflow_get_object_workflow_state($object_id) != 'published') {
     islandora_workflow_set_object_workflow_state($object_id, 'published');
-    islandora_workflow_DSM_about_object($object_id, 'has been published.', $label);
+    islandora_workflow_DSM_about_object($object_id, 'has been published.');
   }
   else {
-    islandora_workflow_DSM_about_object($object_id, 'could not be published, it was not in an appropriate workflow state.', $label);
+    islandora_workflow_DSM_about_object($object_id, 'could not be published, it was not in an appropriate workflow state.');
     return FALSE;
   }
 }

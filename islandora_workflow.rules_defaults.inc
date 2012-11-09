@@ -5,11 +5,13 @@
  */
 
 /**
+ * A helper function for generating a rule.
  *
  * @param array $options
  *   A set of options.
  *
  * @return array
+ *   A rule datastructure.
  */
 function _islandora_workflow_base_rule($options) {
   $base_rule = array(
