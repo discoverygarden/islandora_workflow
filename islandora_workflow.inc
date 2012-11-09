@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * This is a collection of helper functions for the islandora_workflow module.
+ *   This is a collection of helper functions for the islandora_workflow module.
  * @author
  *   William Panting
  * @TODO: refactor out object and collection level functions to their own .incs
@@ -10,200 +10,13 @@
  */
 
 /**
- * Get a list of collections for which the current user has a given permission.
- *
- * This function uses the get_all_collections() function
- * in the case of an admin user
- * but otherwise will use the supplied permission string to search
- * the drupal database table 'islandora_workflow_permissions'
- * to compile a list of
- * collections that the user has the supplied permission to
- * This is also handy to determine if the user has any permissions at that lvl:
- * if (islandora_workflow_get_users_collections($perm)!=FALSE) {}
- * if (islandora_workflow_get_users_collections()) {}
- *
- * @return $collection_list
- *   an associated array of collection PIDs and names.
- * @return boolean
- *   FALSE if the current user doesn't have the permission for any collection.
- */
-function islandora_workflow_get_users_collections($permission_level = NULL, $account = NULL, $workflow_tracked = NULL) {
-
-  module_load_include('collection.inc', 'islandora_workflow');
-  module_load_include('permissions.inc', 'islandora_workflow');
-
-  global $user;
-
-  if (is_null($permission_level)) {
-    $permission_level = 'islandora_workflow_Manager';
-  }
-
-  if (empty($account)) {
-    $account = drupal_clone($user);
-  }
-
-  $permitted_collections = array();
-  $collection_list = array();
-  if (user_access('islandora_workflow_Administrator', $account) || user_access('administer', $account)) {
-    // Admin show all.
-    $collection_list = islandora_workflow_get_collections();
-  }
-  elseif (user_access($permission_level, $account) || $permission_level == 'all') {
-    // Manager show permitted.
-    $collection_list = islandora_workflow_get_collections();
-    // Figure out owned collections.
-    // Role perms.
-    $users_role_collection_permissions = islandora_workflow_get_users_role_permissions($account);
-
-    foreach ($users_role_collection_permissions as $role_id => $collections) {
-      foreach ($collections as $collection_id => $permission) {
-        // All available permissions.
-        if ($permission_level == 'all') {
-          $permitted_collections[] = $collection_id;
-        }
-        elseif ($permission == $permission_level) {
-          $permitted_collections[] = $collection_id;
-        }
-      }
-    }
-    // User perms.
-    $users_user_collection_permissions = islandora_workflow_get_users_user_permissions($account);
-
-    foreach ($users_user_collection_permissions as $role_id => $collections) {
-      foreach ($collections as $collection_id => $permission) {
-        if ($permission_level == 'all') {
-          // All available permissions.
-          $permitted_collections[] = $collection_id;
-        }
-        elseif ($permission == $permission_level) {
-          $permitted_collections[] = $collection_id;
-        }
-      }
-    }
-    // Only send back owned collection pids and names.
-    foreach ($collection_list as $collection_pid => $collection_information) {
-      if (!in_array($collection_pid, $permitted_collections)) {
-        unset($collection_list[$collection_pid]);
-      }
-    }
-  }
-  else {
-    return array();
-  }
-
-  if ($workflow_tracked) {
-    $tracked_collections = array();
-    foreach ($collection_list as $key => $value) {
-      if ($value['workflow_tracking']) {
-        $tracked_collections[$key] = $value;
-      }
-    }
-    $collection_list = $tracked_collections;
-  }
-
-  return $collection_list;
-}
-
-/**
- * Get all members of a collection.
- *
- * This function gets all the members (with a workflow status)
- * of a collection through the relationship of 'isMemberOf'
- * and 'isMemberOfCollection' the two relationships need to be
- * checked because there is no
- * Fedora enforced standard.
- * @author
- *   William Panting
- *
- * @param array $collection_id
- *   The PID of the collection.
- *
- * @return array
- *   $member_list_full The array containing all the pids and relevent
- *   info from the RI.
- * @return boolean
- *   FALSE if there are no members of the collection.
- */
-function islandora_workflow_get_all_members_of_collection($collection_id) {
-
-  module_load_include('inc', 'fedora_repository', 'ObjectHelper');
-
-  // Get info for query.
-  $query_file_name = drupal_get_path('module', 'islandora_workflow') . '/sparql/member_query.sparql';
-  $query_file_handle = fopen($query_file_name, "r");
-  $query = fread($query_file_handle, filesize($query_file_name));
-  fclose($query_file_handle);
-
-  // Inject collection value into the query.
-  $pattern = 'BOUND(?collection_object)';
-  $replacement = "?collection_object = <info:fedora/$collection_id>";
-
-  $query = str_replace($pattern, $replacement, $query);
-  $limit = -1;
-  $query_results = ObjectHelper::performRiQuery($query, 'sparql', $limit, $offset = 0);
-  $processed_results = array();
-  foreach ($query_results as $result) {
-    $index = preg_replace('/^info:fedora\//', '', $result['member_object']);
-    $result['islandora_workflow_modified'] = $result['timestamp'];
-    unset($result['timestamp']);
-    $processed_results[$index] = $result;
-  }
-
-  return $processed_results;
-}
-
-/**
- * Filter a list of collections by a set of namespaces.
- *
- * This function will reduce the results on a collection search down to those
- * applicable to this install of Islandora.
- * @author
- *   Paul Pound
- * @author
- *   William Panting
- *
- * @param array $existing_collections
- *   The list of collections before modification
- * @param array $pid_namespaces
- *   The list of namespaces that are applicable to this Islandora install
- *
- * @return array
- *   $collections  The collections that exist in the indicated namespaces
- */
-function islandora_workflow_limit_collections_by_namespace($existing_collections, $pid_namespaces = NULL) {
-  /* If no namespace list supplied get it
-   * from fedora_repository module's varaiables.*/
-  if (variable_get('fedora_namespace_restriction_enforced', TRUE)) {
-    if ($pid_namespaces == NULL) {
-      $pid_namespaces = array();
-      foreach (explode(' ', trim(variable_get('fedora_pids_allowed', 'default: demo: changeme: Islandora: ilives: '))) as $namespace) {
-        $pid_namespaces[$namespace] = $namespace;
-      }
-    }
-
-    $collections = array();
-    foreach ($existing_collections as $collection => $value) {
-      foreach ($pid_namespaces as $key => $namespace) {
-        if (strpos($collection, $namespace) === 0) {
-          $collections[$collection] = $value;
-        }
-      }
-    }
-    return $collections;
-  }
-  else {
-    return $existing_collections;
-  }
-}
-
-/**
  * Add a workflow tracking datastream to a Fedora object.
  *
  * @param string $object_id
  *   the Fedora PID of the object to modify
  *
  * @return string
- *   $result the return mesage from fedora
+ *   $result the return message from Fedora
  */
 function islandora_workflow_init_workflow($object_id) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
@@ -373,7 +186,6 @@ function islandora_workflow_approve_object($object_id) {
  *   FALSE if the publication was not attempted
  */
 function islandora_workflow_publish_object($object_id) {
-  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   module_load_include('permissions.inc', 'islandora_workflow');
   module_load_include('inc', 'islandora_workflow', 'fedora_object_functions');
 
@@ -381,10 +193,7 @@ function islandora_workflow_publish_object($object_id) {
 
   // Permission check.
   if (islandora_workflow_user_object_permission_check($object_id) != 'islandora_workflow_Manager') {
-    drupal_set_message(t('The object <em>%label</em> (%pid) could not be published, you do not have the necessary permissions.', array(
-      '%label' => $label,
-      '%pid' => $object_id,
-    )));
+    islandora_workflow_DSM_about_object($object_id, 'could not be published, you do not have the necessary permissions.', $label);
     return FALSE;
   }
 
@@ -393,10 +202,7 @@ function islandora_workflow_publish_object($object_id) {
     islandora_workflow_DSM_about_object($object_id, 'has been published.', $label);
   }
   else {
-    drupal_set_message(t('The object <em>%label</em> (%pid) could not be published, it was not in an appropriate workflow state.', array(
-      '%label' => $label,
-      '%pid' => $object_id,
-    )));
+    islandora_workflow_DSM_about_object($object_id, 'could not be published, it was not in an appropriate workflow state.', $label);
     return FALSE;
   }
 }
