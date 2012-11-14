@@ -449,18 +449,22 @@ function islandora_workflow_check_permissions($permission_array) {
 function islandora_workflow_collections(&$form_state) {
   module_load_include('inc', 'islandora_workflow');
   module_load_include('collection.inc', 'islandora_workflow');
-
+  
   if (!$form_state['storage']['workflow_collections']['inactive'] && !$form_state['storage']['workflow_collections']['active']) {
     $collection_data = islandora_workflow_get_collections();
+    $tracked_option = 'workflow tracked';
   }
   elseif ($form_state['storage']['workflow_collections']['active'] && $form_state['storage']['workflow_collections']['inactive']) {
     $collection_data = islandora_workflow_get_collections('both');
+    $tracked_option = 'inactive or active';
   }
   elseif ($form_state['storage']['workflow_collections']['active']) {
     $collection_data = islandora_workflow_get_collections('active');
+    $tracked_option = 'active';
   }
   elseif ($form_state['storage']['workflow_collections']['inactive']) {
     $collection_data = islandora_workflow_get_collections('inactive');
+    $tracked_option = 'inactive';
   }
 
   $form = array(
@@ -499,13 +503,25 @@ function islandora_workflow_collections(&$form_state) {
     ),
   );
 
-  // Make the form.
-  // $form['#theme'] = 'workflow_collections';
-  foreach ($collection_data as $collection_pid => $collection_info) {
-    $form[$collection_pid] = array(
-      '#type' => 'checkbox',
-      '#title' => ($collection_info['label']) ? $collection_info['label'] : $collection_pid,
-      '#default_value' => ($collection_info['workflow_tracking']) ? 1 : 0,
+ if (count($collection_data) > 0) {
+   // Make the form.
+   // $form['#theme'] = 'workflow_collections';
+   foreach ($collection_data as $collection_pid => $collection_info) {
+     $form[$collection_pid] = array(
+       '#type' => 'checkbox',
+       '#title' => ($collection_info['label']) ? $collection_info['label'] : $collection_pid,
+       '#default_value' => ($collection_info['workflow_tracking']) ? 1 : 0,
+     );
+   }
+ }
+ else {
+   $form['no_collections'] = array(
+      '#type' => 'item',
+      '#value' =>  t('No %tracked collections found!',
+          array(
+            '%tracked' => $tracked_option,
+          )
+        )
     );
   }
 

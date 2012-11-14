@@ -6,13 +6,13 @@ FROM <#ri>
 WHERE {
 {
 $collection_object fedora_model:hasModel $collection_content_model .
-$collection_content_model fedora_model:hasModel <info:fedora/islandora:collectionCModel> .
-$collection_object fedora_model:state $state
+$collection_content_model fedora_model:hasModel <info:fedora/islandora:collectionCModel>
 }
 UNION
 {
 $collection_object fedora_model:hasModel <info:fedora/islandora:collectionCModel>
 }
+$collection_object fedora_model:state $state
 OPTIONAL
 {
 $collection_object fedora_model:label $label
