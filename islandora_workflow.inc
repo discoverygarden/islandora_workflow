@@ -424,7 +424,12 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
     $xacml = new IslandoraXacml($object_id);
 
     $perms = islandora_workflow_get_permission_state($collection, $state);
-    $perms['users'][] = $creator;
+
+    // Only set this if the creator is in the FOXML.
+    // Anonymous will not be in the FOXML.
+    if ($creator) {
+      $perms['users'][] = $creator;
+    }
 
     // We're going to add new settings...
     $xacml->managementRule->clear();

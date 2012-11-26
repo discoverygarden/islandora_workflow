@@ -13,7 +13,7 @@
  *    I think this should be an integration piece: that
  *    the 'reject to workflow' should go in an object management UI.
  *
- * This module treates the object owner as the creator for its purposes.
+ * This module treats the object owner as the creator for its purposes.
  */
 
 /**
@@ -146,8 +146,30 @@ function _islandora_workflow_actionable_by_manager($item) {
 function _islandora_workflow_actionable_by_editor($item) {
 
   global $user;
+  
+  if (('published' != $item['state'] && 'approved' != $item['state']) ||
+    ($item['owner'] == $user->name && 'published' != $item['state'])) {
+    
+    return TRUE;
+  }
 
-  if (('published' != $item['state'] && 'approved' != $item['state']) || ($item['owner'] == $user->name && 'published' != $item['state'])) {
+  return FALSE;
+}
+
+/**
+ * This function is used to check if a Fedora object
+ * can be show to a editor in the in_progress tab.
+ * It assumes that the user has permission on the collection.
+ *
+ * @param array $item
+ *   the returns from a SPARQL query that describe the Fedora object.
+ *
+ * @return boolean
+ *   True if the user should be seeing the object, false otherwise.
+ */
+function _islandora_workflow_in_progress_by_editor($item) {
+    
+  if (!$item['owner'] && ('rejected' != $item['state'] || 'created' != $item['state'])) {
     return TRUE;
   }
 
@@ -409,21 +431,28 @@ function islandora_workflow_edit_note_form() {
  * Access callback function.
  *
  * This function is the access callback used for access
- * to the workflow/perm section of this module
+ * to the workflow page and configuration section.
  *
  * @param array $permission_array
  *   those user roles to allow access
  *
  * @return boolean
- *   wheather or not to permit access
+ *   whether or not to permit access
  */
 function islandora_workflow_check_permissions($permission_array) {
   module_load_include('collection.inc', 'islandora_workflow');
   module_load_include('inc', 'islandora_workflow');
+  
+  // If the user is anonymous then return FALSE.
+  if (!user_is_logged_in()) {
+      return FALSE;
+  }
+  
   // Let the user into any page if they are a workflow admin.
   if (in_array('islandora_workflow_Administrator', $permission_array) && user_access('islandora_workflow_Administrator')) {
     return TRUE;
   }
+  
   // Loop through permissions allowed.
   foreach ($permission_array as $permission) {
     // Return true if the user has an allowed permission.
@@ -431,6 +460,7 @@ function islandora_workflow_check_permissions($permission_array) {
       return TRUE;
     }
   }
+  
   // If no permission matched then return false.
   return FALSE;
 }
@@ -826,6 +856,16 @@ function islandora_workflow_role_permissions_form(&$form_state) {
       if (in_array('islandora_workflow_Submitter', $current_module_permissions[$role_id][key($role_name)])) {
         $current_module_permissions[$role_id][key($role_name)][array_search('islandora_workflow_Submitter', $current_module_permissions[$role_id][key($role_name)])] = 'Submitter';
       }
+      
+      // Remove the editor and manager permissions from the anonymous role.
+      if ($role_id == 1) {
+          foreach ($current_module_permissions[$role_id][key($role_name)] as $key => $permission) {
+              if ($permission == 'Editor' || $permission == 'Manager') {
+                  unset($current_module_permissions[$role_id][key($role_name)][$key]);
+              }
+          }
+      }
+      
       $collection_id = $_SESSION['workflow_permissions_page']['active_collection'];
 
       /* Change the default permission
@@ -971,7 +1011,6 @@ function islandora_workflow_role_permissions_form_submit($form, &$form_state) {
     module_load_include('batch.inc', 'islandora_workflow');
     islandora_workflow_update_children($collection_pid);
 
-    // XXX: This dsm ever go through, what with the batch process?
     // Print out to user.
     drupal_set_message(t('Changes to role based permissions were processed.'));
 
