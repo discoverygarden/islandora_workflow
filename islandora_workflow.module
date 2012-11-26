@@ -533,25 +533,25 @@ function islandora_workflow_collections(&$form_state) {
     ),
   );
 
- if (count($collection_data) > 0) {
-   // Make the form.
-   // $form['#theme'] = 'workflow_collections';
-   foreach ($collection_data as $collection_pid => $collection_info) {
-     $form[$collection_pid] = array(
-       '#type' => 'checkbox',
-       '#title' => ($collection_info['label']) ? $collection_info['label'] : $collection_pid,
-       '#default_value' => ($collection_info['workflow_tracking']) ? 1 : 0,
-     );
-   }
- }
- else {
-   $form['no_collections'] = array(
+  if (count($collection_data) > 0) {
+    // Make the form.
+    // $form['#theme'] = 'workflow_collections';
+    foreach ($collection_data as $collection_pid => $collection_info) {
+      $form[$collection_pid] = array(
+        '#type' => 'checkbox',
+        '#title' => ($collection_info['label']) ? $collection_info['label'] : $collection_pid,
+        '#default_value' => ($collection_info['workflow_tracking']) ? 1 : 0,
+      );
+    }
+  }
+  else {
+    $form['no_collections'] = array(
       '#type' => 'item',
       '#value' =>  t('No %tracked collections found!',
-          array(
-            '%tracked' => $tracked_option,
-          )
+        array(
+          '%tracked' => $tracked_option,
         )
+      )
     );
   }
 
@@ -859,11 +859,11 @@ function islandora_workflow_role_permissions_form(&$form_state) {
       
       // Remove the editor and manager permissions from the anonymous role.
       if ($role_id == 1) {
-          foreach ($current_module_permissions[$role_id][key($role_name)] as $key => $permission) {
-              if ($permission == 'Editor' || $permission == 'Manager') {
-                  unset($current_module_permissions[$role_id][key($role_name)][$key]);
-              }
+        foreach ($current_module_permissions[$role_id][key($role_name)] as $key => $permission) {
+          if ($permission == 'Editor' || $permission == 'Manager') {
+            unset($current_module_permissions[$role_id][key($role_name)][$key]);
           }
+        }
       }
       
       $collection_id = $_SESSION['workflow_permissions_page']['active_collection'];
