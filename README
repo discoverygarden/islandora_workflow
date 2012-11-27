@@ -38,3 +38,9 @@ STATES
 -- INSTALLING WORKFLOW --
 Note when installing workflow you need to remove a global fedora XACML policy that prevents regular users from modifying objects in an inactive state. This policy is located here:
 $FEDORA_HOME/data/fedora-xacml-policies/repository-policies/default/deny-inactive-or-deleted-objects-or-datastreams-if-not-administrator.xml
+
+-- ANONYMOUS ROLE --
+If an anonymous user is a submitter they can only create items.
+Anonymous editors/managers are not suported.
+Anonymous users will not have access to the workflow page.
+
