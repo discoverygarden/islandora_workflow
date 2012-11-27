@@ -425,9 +425,8 @@ function islandora_workflow_set_object_workflow_state($object_id, $state) {
 
     $perms = islandora_workflow_get_permission_state($collection, $state);
 
-    // Only set this if the creator is in the FOXML.
-    // Anonymous will not be in the FOXML.
-    if ($creator) {
+    // Only set this if the creator is not anonymous.
+    if ($creator != 'anonymous') {
       $perms['users'][] = $creator;
     }
 
