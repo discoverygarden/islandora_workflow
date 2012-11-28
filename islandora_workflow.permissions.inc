@@ -240,7 +240,7 @@ function islandora_workflow_get_role_permissions(array $options = array()) {
  *   Workflow state.
  *
  * @return array()
- *   An associtiative array containing 'roles' and 'users'.
+ *   An associative array containing 'roles' and 'users'.
  *   Each of those is an indexed array containing the usernames and rolenames.
  */
 function islandora_workflow_get_permission_state($collection, $state) {

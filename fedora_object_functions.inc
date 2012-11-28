@@ -9,7 +9,7 @@
  * so it has been pulled out into a utility function.  It will send a
  * drupal_set_message with the object's label, PID and the message supplied.
  * This is more about insuring a consistent UI than clean code.
-
+ *
  * @TODO
  *   Provide a link to the object in the message.
  *

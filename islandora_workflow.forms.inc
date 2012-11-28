@@ -121,10 +121,18 @@ function islandora_workflow_work_form_main(&$form_state, $tab) {
 
       $submitter_objects_to_ommit = array();
 
+      // Assignees show things they own that are in created/rejected state only.
+      // Double use of array_diff_key on $collection_members_in_progress.
       foreach ($submitter_collections as $collection_pid => $attributes) {
         $collection_members = islandora_workflow_tracked_collection_members($collection_pid);
         $collection_members_in_progress = array_filter($collection_members, '_islandora_workflow_in_progress_by_submitter');
         $submitter_objects_to_ommit += array_diff_key($collection_members, $collection_members_in_progress);
+      }
+
+      // This lets editors see the objects created by anonymous users.
+      foreach ($editor_collections as $collection_pid => $attributes) {
+        $members = islandora_workflow_tracked_collection_members($collection_pid);
+        $elements += array_filter($members, '_islandora_workflow_in_progress_by_editor');
       }
 
       $elements = array_diff_key($elements, $submitter_objects_to_ommit);
