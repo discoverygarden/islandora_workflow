@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  *   This file holds form related functions for the islandora_workflow module.
@@ -60,7 +61,6 @@ function islandora_workflow_work_form(&$form_state, $tab) {
       exit;
   }
 }
-
 
 /**
  * Form definition.
@@ -252,7 +252,7 @@ function islandora_workflow_work_form_main(&$form_state, $tab) {
       ),
       'Assign' => array(
         '#type' => 'select',
-        '#default_value' => isset($attributes['assignee'])? $attributes['assignee'] : '',
+        '#default_value' => isset($attributes['assignee']) ? $attributes['assignee'] : '',
         '#options' => $possible_assignees[$attributes['state']] ? $possible_assignees[$attributes['state']] : array(),
       ),
       'table_info' => array('#value' => $attributes),
@@ -260,11 +260,13 @@ function islandora_workflow_work_form_main(&$form_state, $tab) {
   }
 
   // Perform additional processing (like filling in possible assignees).
-  $form['Submit'] = array(
-    '#type' => 'submit',
-    '#weight' => '1',
-    '#value' => t('Submit'),
-  );
+
+    $form['Submit'] = array(
+      '#type' => 'submit',
+      '#weight' => '1',
+      '#value' => t('Submit'),
+    );
+
   $form['Approve'] = array(
     '#type' => 'submit',
     '#weight' => '2',
@@ -354,7 +356,7 @@ function islandora_workflow_work_form_reject(&$form_state) {
 
     $form['assignees'][$object]['assignee'] = array(
       '#type' => 'select',
-      '#default_value' => isset($elements[$object]['assignee'])? $elements[$object]['assignee'] : '',
+      '#default_value' => isset($elements[$object]['assignee']) ? $elements[$object]['assignee'] : '',
       '#options' => $options ? $options : array(),
     );
   }
@@ -468,6 +470,7 @@ function islandora_workflow_work_form_reject_submit($form, &$form_state) {
  */
 function islandora_workflow_work_form_submit($form, &$form_state) {
   module_load_include('inc', 'islandora_workflow');
+  module_load_include('inc', 'islandora_workflow', 'normalize_assignees');
 
   $clicked_button = $form_state['clicked_button']['#value'];
   $selected_object_ids = array();
@@ -517,7 +520,7 @@ function islandora_workflow_work_form_submit($form, &$form_state) {
   elseif ($clicked_button == 'Assign') {
     foreach ($selected_object_ids as $object_id) {
       if (empty($assignees[$object_id])) {
-        islandora_workflow_assignment_remove($object_id);
+        islandora_workflow_remove_assignee($object_id);
       }
       else {
         islandora_workflow_assign_object($object_id, $assignees[$object_id]);
@@ -565,6 +568,5 @@ function islandora_workflow_work_form_validate($form, &$form_state) {
 
     default:
       break;
-
   }
 }
