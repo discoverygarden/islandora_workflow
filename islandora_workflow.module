@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  *   Implement an editorial workflow around Fedora objects.
@@ -113,7 +114,6 @@ function _islandora_workflow_get_created_items($account = NULL, $limit = -1, $of
     $processed_results[$index] = $result;
   }
   return $processed_results;
-
 }
 
 /**
@@ -146,10 +146,10 @@ function _islandora_workflow_actionable_by_manager($item) {
 function _islandora_workflow_actionable_by_editor($item) {
 
   global $user;
-  
+
   if (('published' != $item['state'] && 'approved' != $item['state']) ||
-    ($item['owner'] == $user->name && 'published' != $item['state'])) {
-    
+      ($item['owner'] == $user->name && 'published' != $item['state'])) {
+
     return TRUE;
   }
 
@@ -168,7 +168,7 @@ function _islandora_workflow_actionable_by_editor($item) {
  *   True if the user should be seeing the object, false otherwise.
  */
 function _islandora_workflow_in_progress_by_editor($item) {
-    
+
   if (!$item['owner'] && ('rejected' != $item['state'] || 'created' != $item['state'])) {
     return TRUE;
   }
@@ -442,17 +442,17 @@ function islandora_workflow_edit_note_form() {
 function islandora_workflow_check_permissions($permission_array) {
   module_load_include('collection.inc', 'islandora_workflow');
   module_load_include('inc', 'islandora_workflow');
-  
+
   // If the user is anonymous then return FALSE.
   if (!user_is_logged_in()) {
-      return FALSE;
+    return FALSE;
   }
-  
+
   // Let the user into any page if they are a workflow admin.
   if (in_array('islandora_workflow_Administrator', $permission_array) && user_access('islandora_workflow_Administrator')) {
     return TRUE;
   }
-  
+
   // Loop through permissions allowed.
   foreach ($permission_array as $permission) {
     // Return true if the user has an allowed permission.
@@ -460,7 +460,7 @@ function islandora_workflow_check_permissions($permission_array) {
       return TRUE;
     }
   }
-  
+
   // If no permission matched then return false.
   return FALSE;
 }
@@ -479,7 +479,7 @@ function islandora_workflow_check_permissions($permission_array) {
 function islandora_workflow_collections(&$form_state) {
   module_load_include('inc', 'islandora_workflow');
   module_load_include('collection.inc', 'islandora_workflow');
-  
+
   if (!$form_state['storage']['workflow_collections']['inactive'] && !$form_state['storage']['workflow_collections']['active']) {
     $collection_data = islandora_workflow_get_collections();
     $tracked_option = 'workflow tracked';
@@ -547,10 +547,10 @@ function islandora_workflow_collections(&$form_state) {
   else {
     $form['no_collections'] = array(
       '#type' => 'item',
-      '#value' =>  t('No %tracked collections found!',
-        array(
-          '%tracked' => $tracked_option,
-        )
+      '#value' => t('No %tracked collections found!',
+          array(
+            '%tracked' => $tracked_option,
+          )
       )
     );
   }
@@ -602,19 +602,19 @@ function islandora_workflow_collections_submit($form, &$form_state) {
       if ($form_state['values'][$collection_pid]) {
         islandora_workflow_track_collection_in_workflow($collection_pid);
         drupal_set_message(t('Collection <em>%label</em> (%pid) is now tracked in workflow.',
-            array(
-              '%label' => $collection_data['label'],
-              '%pid' => $collection_pid,
-            )
+                array(
+                  '%label' => $collection_data['label'],
+                  '%pid' => $collection_pid,
+                )
         ));
       }
       else {
         islandora_workflow_stop_tracking_collection_in_workflow($collection_pid);
         drupal_set_message(t('Collection <em>%label</em> (%pid) is no longer tracked in workflow.',
-            array(
-              '%label' => $collection_data['label'],
-              '%pid' => $collection_pid,
-            )
+                array(
+                  '%label' => $collection_data['label'],
+                  '%pid' => $collection_pid,
+                )
         ));
       }
     }
@@ -819,6 +819,7 @@ function islandora_workflow_role_permissions_form(&$form_state) {
     );
   }
   else {
+
   }
 
   // Submit button.
@@ -856,7 +857,7 @@ function islandora_workflow_role_permissions_form(&$form_state) {
       if (in_array('islandora_workflow_Submitter', $current_module_permissions[$role_id][key($role_name)])) {
         $current_module_permissions[$role_id][key($role_name)][array_search('islandora_workflow_Submitter', $current_module_permissions[$role_id][key($role_name)])] = 'Submitter';
       }
-      
+
       // Remove the editor and manager permissions from the anonymous role.
       if ($role_id == 1) {
         foreach ($current_module_permissions[$role_id][key($role_name)] as $key => $permission) {
@@ -865,11 +866,11 @@ function islandora_workflow_role_permissions_form(&$form_state) {
           }
         }
       }
-      
+
       $collection_id = $_SESSION['workflow_permissions_page']['active_collection'];
 
       /* Change the default permission
-       * string to be inline with the user friendly strings.*/
+       * string to be inline with the user friendly strings. */
       $default_value = '';
       if (array_key_exists($role_id, $current_collection_permissions)) {
         if (array_key_exists($collection_id, $current_collection_permissions[$role_id])) {
@@ -893,7 +894,7 @@ function islandora_workflow_role_permissions_form(&$form_state) {
          * default... navigating away does reset the value.
          * make this into whatever the current setting
          * is for that collection/role
-         * what are available to the current role*/
+         * what are available to the current role */
         '#default_value' => $default_value,
         '#options' => $current_module_permissions[$role_id][key($role_name)],
       );
@@ -946,7 +947,7 @@ function islandora_workflow_role_permissions_form_submit($form, &$form_state) {
           }
 
           /* Compare the form values against the
-           * database and record the changes necessary.*/
+           * database and record the changes necessary. */
           // If there is currently a DB rule.
           if (isset($current_permissions[$role_id][$collection_id])) {
             // If the DB and FORM disagree.
@@ -1013,7 +1014,6 @@ function islandora_workflow_role_permissions_form_submit($form, &$form_state) {
 
     // Print out to user.
     drupal_set_message(t('Changes to role based permissions were processed.'));
-
   }
   // Handle reset.
   elseif ($clicked_button == 'Restore') {
@@ -1144,7 +1144,7 @@ function islandora_workflow_user_permissions_form(&$form_state) {
       }
       $collection_id = $_SESSION['workflow_permissions_page']['active_collection'];
       /* Change the default permission string to be
-       * inline with the user friendly strings.*/
+       * inline with the user friendly strings. */
       $default_value = '';
       if (array_key_exists($user_id, $current_collection_permissions)) {
         if (array_key_exists($collection_id, $current_collection_permissions[$user_id])) {
@@ -1166,7 +1166,7 @@ function islandora_workflow_user_permissions_form(&$form_state) {
         /* Default value works, but if you hit refresh on the page the values
          * do not go back to the default... navigating away does reset the value
          * Make this into whatever the current setting
-         * is for that collection/user.*/
+         * is for that collection/user. */
         '#default_value' => $default_value,
         // What are available to the current user.
         '#options' => $current_module_permissions[$user_id][key($user_name)],
@@ -1221,7 +1221,7 @@ function islandora_workflow_user_permissions_form_submit($form, &$form_state) {
           }
 
           /* Compare the form values against the database
-           * and record the changes necessary.*/
+           * and record the changes necessary. */
           // If there is currently a DB rule.
           if (isset($current_permissions[$user_id][$collection_id])) {
             // If the DB and FORM disagree.
@@ -1288,7 +1288,6 @@ function islandora_workflow_user_permissions_form_submit($form, &$form_state) {
     islandora_workflow_update_children($collection_pid);
 
     drupal_set_message(t('Changes to user based permissions were processed.'));
-
   }
   // Handle reset.
   elseif ($clicked_button == 'Restore') {
@@ -1426,7 +1425,7 @@ function islandora_workflow_role_delete_batch($form, $form_state) {
   if ($form_state['clicked_button']['#id'] == 'edit-delete') {
     $collections = db_query('SELECT collection AS pid
       FROM {islandora_workflow_role_permissions} WHERE role = %d',
-      $form_state['values']['rid']);
+            $form_state['values']['rid']);
     islandora_workflow_clear_role_permissions($form_state['values']['rid']);
 
     while ($collection = db_fetch_array($collections)) {
@@ -1520,19 +1519,19 @@ function islandora_workflow_user_edit_batch($edit, $account, $category = NULL) {
   $collections = db_query('SELECT collection AS pid
     FROM {islandora_workflow_user_permissions}
     WHERE user = %d', $account->uid);
-  $collections = array_unique($collections);
+  $collections = @array_unique($collections);
 
   // Delete all rows in the table for the user/permission changes.
   islandora_workflow_normalize_users_permissions($account);
-
-  while ($collection = mysql_fetch_assoc($collections)) {
-    $members = islandora_workflow_get_all_members_of_collection($collection['pid']);
-    $operations[] = array(
-      'islandora_workflow_batch_function',
-      array($collection['pid'], $members, $delete = FALSE),
-    );
+  if (count($collections) > 0) {
+    while ($collection = mysql_fetch_assoc($collections)) {
+      $members = islandora_workflow_get_all_members_of_collection($collection['pid']);
+      $operations[] = array(
+        'islandora_workflow_batch_function',
+        array($collection['pid'], $members, $delete = FALSE),
+      );
+    }
   }
-
   return $operations;
 }
 
@@ -1585,7 +1584,7 @@ function islandora_workflow_islandora_tabs_alter(&$tabs, $params) {
       if (!isset($tabs['add_tab'])) {
         $members = $collection->getRelatedItems($pid, $collection->getCollectionQuery($pid));
         $members_view = $collection->renderCollection($members, $pid, NULL, NULL, $page_number = 1);
-        $current_form_id = isset($_POST['form_id'])? $_POST['form_id'] : '';
+        $current_form_id = isset($_POST['form_id']) ? $_POST['form_id'] : '';
         $is_ingest_form = ('fedora_repository_ingest_form' == $current_form_id);
         $tabs['add_tab'] = array(
           '#type' => 'tabpage',
@@ -1657,7 +1656,6 @@ function islandora_workflow_fedora_repository_can_ingest($collection_pid) {
 
   module_load_include('permissions.inc', 'islandora_workflow');
   return (islandora_workflow_user_collection_permission_check($collection_pid) !== FALSE);
-
 }
 
 /**
@@ -1679,7 +1677,6 @@ function islandora_workflow_islandora_content_model_forms_policy_alter(&$policy_
   if (islandora_workflow_is_collection_workflow_tracked($collection_ID)) {
     $policy_element = NULL;
   }
-
 }
 
 /**
